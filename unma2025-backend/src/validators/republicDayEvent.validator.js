@@ -51,6 +51,8 @@ export const republicDayEventRegistrationSchema = Joi.object({
   participateNationalSong: Joi.boolean().default(false),
   joinBoatRide: Joi.boolean().default(false),
   readyToVolunteer: Joi.boolean().default(false),
+  interestedInSponsorship: Joi.boolean().default(false),
+  familyMembersCount: Joi.number().min(0).allow(null).optional(),
 
   // Payment Details (all optional)
   paymentMethod: Joi.string()

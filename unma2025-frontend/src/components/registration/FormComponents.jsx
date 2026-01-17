@@ -65,11 +65,13 @@ export const FormField = ({
             type={type}
             id={name}
             {...field}
+            value={field.value || ""}
             disabled={disabled}
             min={min}
             max={max}
             onChange={(e) => {
-              field.onChange(e);
+              const value = e.target.value === "" ? "" : e.target.value;
+              field.onChange(value);
               if (onChange) {
                 onChange(e);
               }

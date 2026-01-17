@@ -41,15 +41,55 @@ export const republicDayEventFormSchema = z
     foodChoice: z.enum(["Veg", "Non-Veg"], {
       errorMap: () => ({ message: "Please select a food preference" }),
     }),
-    participateBloodDonation: z.boolean().default(false),
-    participateNationalSong: z.boolean().default(false),
-    joinBoatRide: z.boolean().default(false),
-    readyToVolunteer: z.boolean().default(false),
-    interestedInSponsorship: z.boolean().default(false),
+    participateBloodDonation: z.preprocess(
+      (val) => {
+        if (typeof val === "boolean") return val;
+        if (val === "true" || val === 1 || val === "1") return true;
+        return false;
+      },
+      z.boolean()
+    ),
+    participateNationalSong: z.preprocess(
+      (val) => {
+        if (typeof val === "boolean") return val;
+        if (val === "true" || val === 1 || val === "1") return true;
+        return false;
+      },
+      z.boolean()
+    ),
+    joinBoatRide: z.preprocess(
+      (val) => {
+        if (typeof val === "boolean") return val;
+        if (val === "true" || val === 1 || val === "1") return true;
+        return false;
+      },
+      z.boolean()
+    ),
+    readyToVolunteer: z.preprocess(
+      (val) => {
+        if (typeof val === "boolean") return val;
+        if (val === "true" || val === 1 || val === "1") return true;
+        return false;
+      },
+      z.boolean()
+    ),
+    interestedInSponsorship: z.preprocess(
+      (val) => {
+        if (typeof val === "boolean") return val;
+        if (val === "true" || val === 1 || val === "1") return true;
+        return false;
+      },
+      z.boolean()
+    ),
     familyMembersCount: z.preprocess(
       (val) => {
+        // Handle empty string, null, undefined, or whitespace-only strings
         if (val === "" || val === null || val === undefined) return null;
-        const num = Number(val);
+        const strVal = String(val).trim();
+        if (strVal === "") return null;
+        // Convert to number
+        const num = Number(strVal);
+        // Return null if NaN, otherwise return the number (including 0)
         return isNaN(num) ? null : num;
       },
       z.number().min(0, "Count cannot be negative").nullable().optional()

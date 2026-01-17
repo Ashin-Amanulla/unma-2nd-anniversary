@@ -77,12 +77,33 @@ const EventRegistrationForm = () => {
     setIsSubmitting(true);
 
     try {
+      // Convert familyMembersCount properly - handle empty string, null, undefined, and 0
+      let familyMembersCount = null;
+      const familyCountValue = data.familyMembersCount;
+      
+      // Check if value exists and is not empty string
+      if (familyCountValue !== "" && familyCountValue !== null && familyCountValue !== undefined) {
+        // Convert to number - handle both string and number inputs
+        const numValue = typeof familyCountValue === "string" 
+          ? Number(familyCountValue.trim()) 
+          : Number(familyCountValue);
+        
+        // Only set if it's a valid number (including 0)
+        if (!isNaN(numValue) && numValue >= 0) {
+          familyMembersCount = numValue;
+        }
+      }
+
       const submissionData = {
         ...data,
         paymentDate: data.paymentDate ? new Date(data.paymentDate) : null,
-        familyMembersCount: data.familyMembersCount === "" || data.familyMembersCount === null || data.familyMembersCount === undefined 
-          ? null 
-          : Number(data.familyMembersCount),
+        familyMembersCount: familyMembersCount,
+        // Ensure boolean values are explicitly set - use the actual values from form
+        participateBloodDonation: data.participateBloodDonation ?? false,
+        participateNationalSong: data.participateNationalSong ?? false,
+        joinBoatRide: data.joinBoatRide ?? false,
+        readyToVolunteer: data.readyToVolunteer ?? false,
+        interestedInSponsorship: data.interestedInSponsorship ?? false,
       };
 
       if (data.jnvSchool !== "JNV Other") {
