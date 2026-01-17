@@ -49,7 +49,7 @@ const Contact = () => {
         "@type": "Organization",
         name: "United Navodayan Malayalee Association",
         alternateName: "UNMA",
-        email: "summit2025@unma.in",
+        email: "info@unma.in",
         address: {
           "@type": "PostalAddress",
           streetAddress:
@@ -61,7 +61,7 @@ const Contact = () => {
         },
         contactPoint: {
           "@type": "ContactPoint",
-          email: "summit2025@unma.in",
+          email: "info@unma.in",
           contactType: "customer service",
           availableLanguage: ["English", "Malayalam"],
         },
@@ -486,10 +486,10 @@ ${data.message}
                       <p className="text-gray-600 mt-1">
                         For immediate assistance, please email us at{" "}
                         <a
-                          href="mailto:summit2025@unma.in"
+                          href="mailto:info@unma.in"
                           className="text-primary hover:text-primary-dark"
                         >
-                          summit2025@unma.in
+                          info@unma.in
                         </a>
                       </p>
                       <p className="text-gray-500 text-sm">
@@ -508,10 +508,10 @@ ${data.message}
                       </h3>
                       <p className="text-gray-600 mt-1">
                         <a
-                          href="mailto:summit2025@unma.in"
+                          href="mailto:info@unma.in"
                           className="hover:text-primary"
                         >
-                          summit2025@unma.in
+                          info@unma.in
                         </a>
                       </p>
                       <p className="text-gray-500 text-sm">
@@ -529,7 +529,7 @@ ${data.message}
                 </h3>
                 <div className="space-y-3 text-sm text-gray-600">
                   <p>
-                    <strong>First Level:</strong> Email us at summit2025@unma.in
+                    <strong>First Level:</strong> Email us at info@unma.in
                     for general inquiries
                   </p>
                   <p>

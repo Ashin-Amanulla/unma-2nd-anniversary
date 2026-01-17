@@ -63,7 +63,7 @@ const CancellationPolicy = () => {
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                   <p className="text-red-800 font-medium">
                     ⚠️ Important: Cancellations must be requested in writing via
-                    email to summit2025@unma.in. Phone or verbal cancellations
+                    email to info@unma.in. Phone or verbal cancellations
                     will not be accepted.
                   </p>
                 </div>
@@ -336,7 +336,7 @@ const CancellationPolicy = () => {
                   Step-by-Step Cancellation Process
                 </h3>
                 <ol className="list-decimal pl-6 text-gray-700 space-y-2 mb-4">
-                  <li>Send an email to summit2025@unma.in</li>
+                  <li>Send an email to info@unma.in</li>
                   <li>
                     Use subject line: "CANCELLATION REQUEST - [Your Registration
                     Number]"
@@ -424,7 +424,7 @@ const CancellationPolicy = () => {
                     Cancellation Support
                   </p>
                   <p className="text-blue-800">
-                    Email: summit2025@unma.in
+                    Email: info@unma.in
                     <br />
                     Subject: CANCELLATION REQUEST - [Your Registration Number]
                     <br />

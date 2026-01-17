@@ -117,10 +117,10 @@ const RegistrationPending = () => {
                         You can also reach out to your batch representative or
                         contact the UNMA support team at{" "}
                         <a
-                          href="mailto:summit2025@unma.in"
+                          href="mailto:info@unma.in"
                           className="font-medium underline"
                         >
-                          summit2025@unma.in
+                          info@unma.in
                         </a>
                       </p>
                     </div>

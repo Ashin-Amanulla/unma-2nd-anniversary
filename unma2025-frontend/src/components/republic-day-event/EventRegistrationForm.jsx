@@ -46,7 +46,7 @@ const EventRegistrationForm = () => {
       familyMembersCount: "",
       paymentMethod: "IDBI Bank",
       transactionId: "",
-      amountPaid: 0,
+      amountPaid: "",
       paymentDate: getTodayDate(),
     },
   });
@@ -418,9 +418,14 @@ const EventRegistrationForm = () => {
                 <span className="font-medium">Boat Ride Fee:</span> ₹100 per head
               </p>
             )}
+            <p className="pt-2 border-t border-blue-300">
+              <span className="font-bold text-red-600 text-lg">
+                Total: ₹{watchedBoatRide ? 300 : 200}
+              </span>
+            </p>
           </div>
           <p className="text-xs text-gray-600">
-            <strong>Note:</strong> Participants are expected to contribute responsibly.A lower amount is allowed only in exceptional circumstances, and those who can afford to pay should contribute extra to ensure inclusivity.
+            <strong>Note:</strong> Participants are expected to contribute responsibly.A lower amount is allowed only in exceptional circumstances, <span className="font-bold">  and those who can afford to pay should contribute extra to ensure inclusivity.</span>
           </p>
         </div>
 
@@ -556,11 +561,12 @@ const EventRegistrationForm = () => {
             />
 
             <FormField
-              label="Amount Paid (₹)"
+              label="Amount Paid (₹) - Enter lower amount if facing financial difficulty"
               name="amountPaid"
               type="number"
               control={control}
               errors={errors}
+              required
               min={0}
               placeholder="Enter amount paid (0 if facing difficulty)"
             />

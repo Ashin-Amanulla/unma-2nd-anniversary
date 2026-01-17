@@ -5,12 +5,12 @@ import { logger } from "../../utils/logger.js";
  * Send payment confirmation email
  */
 export const sendPaymentConfirmationEmail = async (
-  registration,
-  transactionId,
-  amount
+    registration,
+    transactionId,
+    amount
 ) => {
-  try {
-    const emailTemplate = `
+    try {
+        const emailTemplate = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -150,15 +150,15 @@ export const sendPaymentConfirmationEmail = async (
                     <div class="info-value">${transactionId}</div>
                     <div class="info-label">Payment Date:</div>
                     <div class="info-value">${new Date().toLocaleDateString(
-                      "en-IN",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}</div>
+            "en-IN",
+            {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+            }
+        )}</div>
                     <div class="info-label">Amount:</div>
                     <div class="info-value">₹${amount}</div>
                     <div class="info-label">Status:</div>
@@ -182,11 +182,11 @@ export const sendPaymentConfirmationEmail = async (
                 <strong>Note:</strong> Please keep this email for your records. This serves as your payment receipt for UNMA Summit 2025.
             </div>
             
-            <p>If you have any questions regarding your payment, please contact us at summit2025@unma.in</p>
+            <p>If you have any questions regarding your payment, please contact us at info@unma.in</p>
             
             <div class="footer">
                 <p><strong>TEAM UNMA</strong></p>
-                <p>summit2025@unma.in</p>
+                <p>info@unma.in</p>
                 <p style="font-size: 12px; color: #999;">This is an automated payment confirmation email.</p>
             </div>
         </div>
@@ -194,24 +194,24 @@ export const sendPaymentConfirmationEmail = async (
     </html>
     `;
 
-    await sendEmail(
-      registration.email,
-      "UNMA Summit 2025 - Payment Confirmation",
-      emailTemplate
-    );
+        await sendEmail(
+            registration.email,
+            "UNMA Summit 2025 - Payment Confirmation",
+            emailTemplate
+        );
 
-    logger.info(
-      `Payment confirmation email sent to ${registration.email} for transaction ${transactionId}`
-    );
+        logger.info(
+            `Payment confirmation email sent to ${registration.email} for transaction ${transactionId}`
+        );
 
-    return {
-      success: true,
-      recipient: registration.email,
-      transactionId: transactionId,
-      amount: amount,
-    };
-  } catch (error) {
-    logger.error(`Failed to send payment confirmation email: ${error.message}`);
-    throw error;
-  }
+        return {
+            success: true,
+            recipient: registration.email,
+            transactionId: transactionId,
+            amount: amount,
+        };
+    } catch (error) {
+        logger.error(`Failed to send payment confirmation email: ${error.message}`);
+        throw error;
+    }
 };

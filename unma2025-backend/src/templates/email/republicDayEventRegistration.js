@@ -323,7 +323,7 @@ export const sendRepublicDayEventRegistrationEmail = async (registration) => {
                 <p><strong>TEAM UNMA</strong></p>
                 <p>United Navodayan Malayalee Association</p>
                 <p style="margin-top: 10px;">
-                    <a href="mailto:summit2025@unma.in" style="color: #FF6B35; text-decoration: none;">summit2025@unma.in</a>
+                    <a href="mailto:info@unma.in" style="color: #FF6B35; text-decoration: none;">info@unma.in</a>
                 </p>
                 <p style="font-size: 12px; color: #999; margin-top: 15px;">
                     This is an automated confirmation email. Please do not reply to this email.

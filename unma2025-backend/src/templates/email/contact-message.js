@@ -5,64 +5,64 @@ import { logger } from "../../utils/logger.js";
  * Parse contact message string to extract individual fields
  */
 const parseContactMessage = (messageString) => {
-  try {
-    const lines = messageString
-      .split("\n")
-      .filter((line) => line.trim() !== "");
+    try {
+        const lines = messageString
+            .split("\n")
+            .filter((line) => line.trim() !== "");
 
-    let parsedData = {
-      name: null,
-      email: null,
-      phone: null,
-      message: null,
-    };
+        let parsedData = {
+            name: null,
+            email: null,
+            phone: null,
+            message: null,
+        };
 
-    let messageStartIndex = -1;
+        let messageStartIndex = -1;
 
-    // Parse each line to extract fields
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+        // Parse each line to extract fields
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
 
-      if (line.startsWith("Name:")) {
-        parsedData.name = line.replace("Name:", "").trim();
-      } else if (line.startsWith("Email:")) {
-        parsedData.email = line.replace("Email:", "").trim();
-      } else if (line.startsWith("Phone:")) {
-        parsedData.phone = line.replace("Phone:", "").trim();
-      } else if (line === "Message:") {
-        messageStartIndex = i + 1;
-        break;
-      }
+            if (line.startsWith("Name:")) {
+                parsedData.name = line.replace("Name:", "").trim();
+            } else if (line.startsWith("Email:")) {
+                parsedData.email = line.replace("Email:", "").trim();
+            } else if (line.startsWith("Phone:")) {
+                parsedData.phone = line.replace("Phone:", "").trim();
+            } else if (line === "Message:") {
+                messageStartIndex = i + 1;
+                break;
+            }
+        }
+
+        // Extract the actual message content
+        if (messageStartIndex >= 0 && messageStartIndex < lines.length) {
+            parsedData.message = lines.slice(messageStartIndex).join("\n").trim();
+        }
+
+        return parsedData;
+    } catch (error) {
+        logger.error(`Error parsing contact message: ${error.message}`);
+        return {
+            name: null,
+            email: null,
+            phone: null,
+            message: messageString, // fallback to original message
+        };
     }
-
-    // Extract the actual message content
-    if (messageStartIndex >= 0 && messageStartIndex < lines.length) {
-      parsedData.message = lines.slice(messageStartIndex).join("\n").trim();
-    }
-
-    return parsedData;
-  } catch (error) {
-    logger.error(`Error parsing contact message: ${error.message}`);
-    return {
-      name: null,
-      email: null,
-      phone: null,
-      message: messageString, // fallback to original message
-    };
-  }
 };
 
 /**
  * Send contact message response email
  */
 export const sendContactMessageEmail = async (contactData) => {
-  try {
-    const { email, subject, message, name } = contactData;
+    try {
+        const { email, subject, message, name } = contactData;
 
-    // Parse the message string to extract individual fields
-    const parsedMessage = parseContactMessage(message);
+        // Parse the message string to extract individual fields
+        const parsedMessage = parseContactMessage(message);
 
-    const emailTemplate = `
+        const emailTemplate = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -199,35 +199,31 @@ export const sendContactMessageEmail = async (contactData) => {
                 <div class="section-title">Message Details</div>
                 <div class="info-grid">
                     <div class="info-label">From:</div>
-                    <div class="info-value">${
-                      parsedMessage.name || name || "Not provided"
-                    }</div>
+                    <div class="info-value">${parsedMessage.name || name || "Not provided"
+            }</div>
                     <div class="info-label">Email:</div>
-                    <div class="info-value">${
-                      parsedMessage.email || email || "Not provided"
-                    }</div>
+                    <div class="info-value">${parsedMessage.email || email || "Not provided"
+            }</div>
                     <div class="info-label">Phone:</div>
-                    <div class="info-value">${
-                      parsedMessage.phone || "Not provided"
-                    }</div>
+                    <div class="info-value">${parsedMessage.phone || "Not provided"
+            }</div>
                     <div class="info-label">Received Date:</div>
                     <div class="info-value">${new Date().toLocaleDateString(
-                      "en-IN",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}</div>
+                "en-IN",
+                {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }
+            )}</div>
                 </div>
                 
                 <div style="margin-top: 15px;">
                     <div class="info-label">Your Message:</div>
-                    <div class="message-box">${
-                      parsedMessage.message || message
-                    }</div>
+                    <div class="message-box">${parsedMessage.message || message
+            }</div>
                 </div>
             </div>
             
@@ -251,7 +247,7 @@ export const sendContactMessageEmail = async (contactData) => {
                 <div class="section-title">Quick Contact Information</div>
                 <div class="info-grid">
                     <div class="info-label">Primary Email:</div>
-                    <div class="info-value">summit2025@unma.in</div>
+                    <div class="info-value">info@unma.in</div>
                     <div class="info-label">Website:</div>
                     <div class="info-value">www.unma.in</div>
                     <div class="info-label">Response Hours:</div>
@@ -268,7 +264,7 @@ export const sendContactMessageEmail = async (contactData) => {
             <div class="footer">
                 <p><strong>TEAM UNMA</strong></p>
                 <p>United Navodaya Alumni</p>
-                <p>summit2025@unma.in | www.unma.in</p>
+                <p>info@unma.in | www.unma.in</p>
                 <p style="font-size: 12px; color: #999;">This is an automated confirmation email. Please do not reply to this email.</p>
             </div>
         </div>
@@ -276,39 +272,39 @@ export const sendContactMessageEmail = async (contactData) => {
     </html>
     `;
 
-    // Send the email to the parsed email address (prioritize parsed email over original)
-    const recipientEmail = parsedMessage.email || email;
+        // Send the email to the parsed email address (prioritize parsed email over original)
+        const recipientEmail = parsedMessage.email || email;
 
-    await sendEmail(
-      recipientEmail,
-      `UNMA - Message Received: ${subject}`,
-      emailTemplate
-    );
+        await sendEmail(
+            recipientEmail,
+            `UNMA - Message Received: ${subject}`,
+            emailTemplate
+        );
 
-    logger.info(`Contact message confirmation email sent to ${recipientEmail}`);
+        logger.info(`Contact message confirmation email sent to ${recipientEmail}`);
 
-    return {
-      success: true,
-      recipient: recipientEmail,
-      subject: subject,
-    };
-  } catch (error) {
-    logger.error(
-      `Failed to send contact message confirmation email: ${error.message}`
-    );
-    throw error;
-  }
+        return {
+            success: true,
+            recipient: recipientEmail,
+            subject: subject,
+        };
+    } catch (error) {
+        logger.error(
+            `Failed to send contact message confirmation email: ${error.message}`
+        );
+        throw error;
+    }
 };
 
 /**
  * Send contact confirmation email to user
  */
 export const sendContactConfirmationEmail = async (contactMessage) => {
-  try {
-    const { name, email, subject, message, category, priority, createdAt } =
-      contactMessage;
+    try {
+        const { name, email, subject, message, category, priority, createdAt } =
+            contactMessage;
 
-    const emailTemplate = `
+        const emailTemplate = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -452,14 +448,14 @@ export const sendContactConfirmationEmail = async (contactMessage) => {
                     <div class="info-value">${priority}</div>
                     <div class="info-label">Received Date:</div>
                     <div class="info-value">${new Date(
-                      createdAt
-                    ).toLocaleDateString("en-IN", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}</div>
+            createdAt
+        ).toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        })}</div>
                 </div>
                 
                 <div style="margin-top: 15px;">
@@ -488,7 +484,7 @@ export const sendContactConfirmationEmail = async (contactMessage) => {
                 <div class="section-title">Quick Contact Information</div>
                 <div class="info-grid">
                     <div class="info-label">Primary Email:</div>
-                    <div class="info-value">summit2025@unma.in</div>
+                    <div class="info-value">info@unma.in</div>
                     <div class="info-label">Website:</div>
                     <div class="info-value">www.unma.in</div>
                     <div class="info-label">Response Hours:</div>
@@ -503,7 +499,7 @@ export const sendContactConfirmationEmail = async (contactMessage) => {
             <div class="footer">
                 <p><strong>TEAM UNMA</strong></p>
                 <p>United Navodaya Alumni</p>
-                <p>summit2025@unma.in | www.unma.in</p>
+                <p>info@unma.in | www.unma.in</p>
                 <p style="font-size: 12px; color: #999;">This is an automated confirmation email. Please do not reply to this email.</p>
             </div>
         </div>
@@ -511,36 +507,36 @@ export const sendContactConfirmationEmail = async (contactMessage) => {
     </html>
     `;
 
-    await sendEmail(
-      email,
-      `UNMA - Message Received: ${subject}`,
-      emailTemplate
-    );
+        await sendEmail(
+            email,
+            `UNMA - Message Received: ${subject}`,
+            emailTemplate
+        );
 
-    logger.info(`Contact confirmation email sent to ${email}`);
+        logger.info(`Contact confirmation email sent to ${email}`);
 
-    return {
-      success: true,
-      recipient: email,
-      subject: subject,
-    };
-  } catch (error) {
-    logger.error(`Failed to send contact confirmation email: ${error.message}`);
-    throw error;
-  }
+        return {
+            success: true,
+            recipient: email,
+            subject: subject,
+        };
+    } catch (error) {
+        logger.error(`Failed to send contact confirmation email: ${error.message}`);
+        throw error;
+    }
 };
 
 /**
  * Send response email to user
  */
 export const sendContactResponseEmail = async (
-  contactMessage,
-  responseMessage
+    contactMessage,
+    responseMessage
 ) => {
-  try {
-    const { name, email, subject } = contactMessage;
+    try {
+        const { name, email, subject } = contactMessage;
 
-    const emailTemplate = `
+        const emailTemplate = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -645,7 +641,7 @@ export const sendContactResponseEmail = async (
                 <strong>Need further assistance?</strong>
                 <br>• Feel free to reply to this email if you have follow-up questions
                 <br>• Visit our website at www.unma.in for more information
-                <br>• Contact us at summit2025@unma.in for additional support
+                <br>• Contact us at info@unma.in for additional support
             </div>
             
             <p>We appreciate your interest in UNMA and look forward to continuing our conversation.</p>
@@ -653,7 +649,7 @@ export const sendContactResponseEmail = async (
             <div class="footer">
                 <p><strong>TEAM UNMA</strong></p>
                 <p>United Navodaya Alumni</p>
-                <p>summit2025@unma.in | www.unma.in</p>
+                <p>info@unma.in | www.unma.in</p>
                 <p style="font-size: 12px; color: #999;">You can reply to this email to continue the conversation.</p>
             </div>
         </div>
@@ -661,17 +657,17 @@ export const sendContactResponseEmail = async (
     </html>
     `;
 
-    await sendEmail(email, `UNMA - Re: ${subject}`, emailTemplate);
+        await sendEmail(email, `UNMA - Re: ${subject}`, emailTemplate);
 
-    logger.info(`Contact response email sent to ${email}`);
+        logger.info(`Contact response email sent to ${email}`);
 
-    return {
-      success: true,
-      recipient: email,
-      subject: `Re: ${subject}`,
-    };
-  } catch (error) {
-    logger.error(`Failed to send contact response email: ${error.message}`);
-    throw error;
-  }
+        return {
+            success: true,
+            recipient: email,
+            subject: `Re: ${subject}`,
+        };
+    } catch (error) {
+        logger.error(`Failed to send contact response email: ${error.message}`);
+        throw error;
+    }
 };

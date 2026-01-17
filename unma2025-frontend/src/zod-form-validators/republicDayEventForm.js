@@ -102,10 +102,16 @@ export const republicDayEventFormSchema = z
     transactionId: z.string().optional(),
     amountPaid: z.preprocess(
       (val) => {
-        if (val === "" || val === null || val === undefined) return 0;
-        return Number(val);
+        // Allow empty string, null, undefined to be treated as missing (required)
+        if (val === "" || val === null || val === undefined) return undefined;
+        const num = Number(val);
+        // Return undefined if NaN, otherwise return the number (including 0)
+        return isNaN(num) ? undefined : num;
       },
-      z.number().min(0, "Amount cannot be negative").default(0)
+      z.number({
+        required_error: "Amount paid is required. Please enter 0 if facing financial difficulty.",
+      })
+        .min(0, "Amount cannot be negative")
     ),
     paymentDate: z.string().optional().or(z.date().optional()),
   })

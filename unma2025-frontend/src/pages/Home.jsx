@@ -241,7 +241,7 @@ const Home = () => {
                         <span className="font-bold text-yellow-300">UNMA Blood Donation Drive</span>
                         <br />
                         <span className="text-white/95">
-                          in collaboration with the Kerala Police Officers Association and Indian Medical Association
+                          in collaboration with  Kerala Police Officers Association and Indian Medical Association
                         </span>
                         <br />
                         <span className="text-yellow-200 font-bold mt-2 inline-block">

@@ -200,7 +200,7 @@ const sendIssueConfirmationEmail = async (issueData) => {
                 <strong>What happens next?</strong>
                 <br>• Our technical team will review your issue within 24-48 hours
                 <br>• You will receive updates via email on the progress
-                <br>• For urgent issues, you can contact us at summit2025@unma.in
+                <br>• For urgent issues, you can contact us at info@unma.in
                 <br>• Please save your Issue ID (#${_id}) for future reference
             </div>
             
@@ -211,7 +211,7 @@ const sendIssueConfirmationEmail = async (issueData) => {
             <div class="footer">
                 <p><strong>TEAM UNMA</strong></p>
                 <p>Technical Support Team</p>
-                <p>summit2025@unma.in</p>
+                <p>info@unma.in</p>
                 <p style="font-size: 12px; color: #999;">This is an automated confirmation email. Please do not reply to this email.</p>
             </div>
         </div>
@@ -276,7 +276,7 @@ const sendIssueClosedEmail = async (issueData) => {
                     Dear ${reportedBy.name || reportedBy.email},
                 </div>
                 <p><strong>Your issue has been closed.</strong> Thank you for your patience and understanding.</p>
-                <p>If you have any further questions or need assistance, please feel free to contact us at summit2025@unma.in</p>
+                <p>If you have any further questions or need assistance, please feel free to contact us at info@unma.in</p>
                 <p>Best regards,</p>
                 <p>TEAM UNMA</p>
             </div>

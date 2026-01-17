@@ -12,7 +12,7 @@ const swaggerOptions = {
             description: 'API documentation for UNMA 2026 Event Registration System',
             contact: {
                 name: 'API Support',
-                email: 'summit2025@unma.in'
+                email: 'info@unma.in'
             }
         },
         servers: [

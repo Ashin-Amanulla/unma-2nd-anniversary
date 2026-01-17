@@ -266,7 +266,7 @@ const PrivacyPolicy = () => {
                   If you have any questions about this privacy policy or wish to
                   exercise your rights, please contact us at:
                   <br />
-                  Email: summit2025@unma.in
+                  Email: info@unma.in
                   <br />
                   Subject: Privacy Policy Inquiry
                   <br />

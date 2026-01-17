@@ -217,7 +217,7 @@ const TermsAndConditions = () => {
                   For any questions regarding these terms and conditions, please
                   contact us at:
                   <br />
-                  Email: summit2025@unma.in
+                  Email: info@unma.in
                   <br />
                   Website:{" "}
                   <a href="/" className="text-primary hover:text-primary-dark">

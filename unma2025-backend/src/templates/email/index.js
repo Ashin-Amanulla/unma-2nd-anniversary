@@ -174,7 +174,7 @@ const getPaymentDetailsSection = (registration) => {
             <strong>International Payment Notice:</strong> 
             <br>• Our team will contact you within 2-3 business days
             <br>• Your registration is under review, but will be confirmed once payment is confirmed by the team     
-            <br>• For immediate assistance, contact us at summit2025@unma.in
+            <br>• For immediate assistance, contact us at info@unma.in
         </div>
         <div class="highlight" style="background-color: #e7f3ff; color: #2c5aa0; border: 1px solid #bee5eb;">
             🌟 Thank you for your international participation! We'll facilitate your payment process.
@@ -197,7 +197,7 @@ const getPaymentDetailsSection = (registration) => {
         </div>
         <div class="note" style="background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404;">
             <strong>Payment Pending:</strong> Your registration will be confirmed once payment is completed. 
-            You can complete the payment at your convenience or contact us at summit2025@unma.in for assistance.
+            You can complete the payment at your convenience or contact us at info@unma.in for assistance.
         </div>
     </div>`;
   }
@@ -468,7 +468,7 @@ export const sendRegistrationConfirmationEmail = async (registration) => {
             
             <div class="footer">
                 <p><strong>TEAM UNMA</strong></p>
-                <p>Summit2025@unma.in</p>
+                <p>info@unma.in</p>
                 <p style="font-size: 12px; color: #999;">This is an automated confirmation email. Please do not reply to this email.</p>
             </div>
         </div>

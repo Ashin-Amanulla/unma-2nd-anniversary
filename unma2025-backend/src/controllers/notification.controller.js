@@ -14,7 +14,7 @@ export const generateNotificationQR = async (registrationData) => {
   try {
     // Create unique URL for registration desk entry
     const baseUrl = process.env.FRONTEND_URL || "https://summit2025.unma.in";
-    const entryUrl = `${baseUrl}/admin/entry?registrationId=${registrationData.serialNumber}`;  
+    const entryUrl = `${baseUrl}/admin/entry?registrationId=${registrationData.serialNumber}`;
 
     // Generate QR code with URL
     const qrCodeBuffer = await QRCode.toBuffer(entryUrl, {
@@ -539,7 +539,7 @@ const generateEmailContent = (registration, qrData) => {
         
         <div class="footer">
           <p>UNMA Summit 2025 | United Navodayan Malayalee Association </p>
-          <p>🌐 <a href="https://summit2025.unma.in " style="color: #60a5fa;">summit2025.unma.in</a> | 📧 Contact: summit2025@unma.in</p>
+          <p>🌐 <a href="https://summit2025.unma.in " style="color: #60a5fa;">summit2025.unma.in</a> | 📧 Contact: info@unma.in</p>
         </div>
       </div>
     </body>
@@ -586,7 +586,7 @@ Your registration QR code is attached. Please:
 
 🎊 We're excited to see you at UNMA Summit 2025!
 
-🌐 unma.in | 📧 summit2025@unma.in`;
+🌐 unma.in | 📧 info@unma.in`;
 };
 
 /**
