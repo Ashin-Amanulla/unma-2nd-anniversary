@@ -5,33 +5,33 @@ import { logger } from "../../utils/logger.js";
  * Send Republic Day Event registration confirmation email
  */
 export const sendRepublicDayEventRegistrationEmail = async (registration) => {
-  try {
-    // Format payment date if available
-    const formatPaymentDate = (date) => {
-      if (!date) return "Not provided";
-      try {
-        const paymentDate = new Date(date);
-        return paymentDate.toLocaleDateString("en-IN", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
+    try {
+        // Format payment date if available
+        const formatPaymentDate = (date) => {
+            if (!date) return "Not provided";
+            try {
+                const paymentDate = new Date(date);
+                return paymentDate.toLocaleDateString("en-IN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                });
+            } catch (error) {
+                return "Not provided";
+            }
+        };
+
+        // Format registration date
+        const registrationDate = new Date(registration.registrationDate || Date.now());
+        const formattedRegDate = registrationDate.toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
         });
-      } catch (error) {
-        return "Not provided";
-      }
-    };
 
-    // Format registration date
-    const registrationDate = new Date(registration.registrationDate || Date.now());
-    const formattedRegDate = registrationDate.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    const emailTemplate = `
+        const emailTemplate = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -262,10 +262,10 @@ export const sendRepublicDayEventRegistrationEmail = async (registration) => {
                 </div>
             </div>
             
-            ${(registration.participateBloodDonation || 
-               registration.participateNationalSong || 
-               registration.joinBoatRide || 
-               registration.readyToVolunteer) ? `
+            ${(registration.participateBloodDonation ||
+                registration.participateNationalSong ||
+                registration.joinBoatRide ||
+                registration.readyToVolunteer) ? `
             <div class="section">
                 <div class="section-title">🎯 Your Participation</div>
                 <div class="participation-badges">
@@ -334,25 +334,25 @@ export const sendRepublicDayEventRegistrationEmail = async (registration) => {
     </html>
     `;
 
-    await sendEmail(
-      registration.email,
-      "UNMA Republic Day Event - Registration Confirmed! 🎉",
-      emailTemplate
-    );
+        await sendEmail(
+            registration.email,
+            "UNMA Republic Day Event - Registration Confirmed! 🎉",
+            emailTemplate
+        );
 
-    logger.info(
-      `Republic Day Event registration confirmation email sent to ${registration.email}`
-    );
+        logger.info(
+            `Republic Day Event registration confirmation email sent to ${registration.email}`
+        );
 
-    return {
-      success: true,
-      recipient: registration.email,
-      subject: "UNMA Republic Day Event - Registration Confirmed! 🎉",
-    };
-  } catch (error) {
-    logger.error(
-      `Failed to send Republic Day Event registration email: ${error.message}`
-    );
-    throw error;
-  }
+        return {
+            success: true,
+            recipient: registration.email,
+            subject: "UNMA Republic Day Event - Registration Confirmed! 🎉",
+        };
+    } catch (error) {
+        logger.error(
+            `Failed to send Republic Day Event registration email: ${error.message}`
+        );
+        throw error;
+    }
 };
