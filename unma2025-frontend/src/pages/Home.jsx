@@ -70,18 +70,18 @@ const Home = () => {
       { time: "9:00 AM – 9:30 AM", event: "Walkathon from venue singing patriotic songs" },
       { time: "9:30 AM – 10:30 AM", event: "Light snacks and assembling at venue" },
       { time: "10:30 AM – 11:30 AM", event: "Public Function" },
-      { time: "11:30 AM", event: "Lucky Draw - Morning Session 🎁" },
+      { time: "11:30 AM", event: "Lucky Draw - Morning Session 🎁", isLuckyDraw: true },
       { time: "11:30 AM – 12:30 PM", event: "BLS and Health Awareness Sessions" },
       { time: "12:30 PM", event: "Group Photo Session" },
       { time: "1:00 PM – 2:00 PM", event: "Lunch" },
     ],
     afternoon: [
       { time: "2:00 PM – 3:00 PM", event: "Fun Time" },
-      { time: "3:00 PM", event: "Lucky Draw - Afternoon Session 🎁" },
+      { time: "3:00 PM", event: "Lucky Draw - Afternoon Session 🎁", isLuckyDraw: true },
       { time: "3:00 PM – 4:00 PM", event: "Ask Our Doctors (interactive session)" },
       { time: "4:00 PM", event: "Tea & Snacks" },
       { time: "4:00 PM – 6:30 PM", event: "Boat Ride" },
-      { time: "6:30 PM", event: "Lucky Draw - Evening Session 🎁" },
+      { time: "6:30 PM", event: "Lucky Draw - Evening Session 🎁", isLuckyDraw: true },
     ],
   };
 
@@ -422,14 +422,36 @@ const Home = () => {
                   {scheduleData.morning.map((item, index) => (
                     <div
                       key={index}
-                      className="flex flex-col md:flex-row md:items-center gap-2 p-4 bg-gray-50 rounded-lg"
+                      className={`flex flex-col md:flex-row md:items-center gap-2 p-4 rounded-lg transition-colors ${
+                        item.isLuckyDraw
+                          ? "bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-2 border-yellow-300"
+                          : item.event.includes("Boat Ride")
+                          ? "bg-blue-50 hover:bg-blue-100 border-2 border-blue-200"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }`}
                     >
                       <div className="font-semibold text-primary min-w-[200px]">
                         {item.time}
                         </div>
                       <div className="flex items-center gap-2">
                         <ArrowRightIcon className="w-4 h-4 text-gray-400 hidden md:block" />
-                        <span className="text-gray-700">{item.event}</span>
+                        <span className={`font-medium ${
+                          item.isLuckyDraw ? "text-orange-700 font-bold" : "text-gray-700"
+                        }`}>
+                          {item.event}
+                          {item.event.includes("Boat Ride") && (
+                            <span className="ml-2 text-blue-600">🚤</span>
+                          )}
+                          {item.isLuckyDraw && (
+                            <motion.span
+                              className="ml-2"
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            >
+                              ✨
+                            </motion.span>
+                          )}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -451,14 +473,36 @@ const Home = () => {
                   {scheduleData.afternoon.map((item, index) => (
                     <div
                       key={index}
-                      className="flex flex-col md:flex-row md:items-center gap-2 p-4 bg-gray-50 rounded-lg"
+                      className={`flex flex-col md:flex-row md:items-center gap-2 p-4 rounded-lg transition-colors ${
+                        item.isLuckyDraw
+                          ? "bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-2 border-yellow-300"
+                          : item.event.includes("Boat Ride")
+                          ? "bg-blue-50 hover:bg-blue-100 border-2 border-blue-200"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }`}
                     >
                       <div className="font-semibold text-primary min-w-[200px]">
                         {item.time}
                                   </div>
                       <div className="flex items-center gap-2">
                         <ArrowRightIcon className="w-4 h-4 text-gray-400 hidden md:block" />
-                        <span className="text-gray-700">{item.event}</span>
+                        <span className={`font-medium ${
+                          item.isLuckyDraw ? "text-orange-700 font-bold" : "text-gray-700"
+                        }`}>
+                          {item.event}
+                          {item.event.includes("Boat Ride") && (
+                            <span className="ml-2 text-blue-600">🚤</span>
+                          )}
+                          {item.isLuckyDraw && (
+                            <motion.span
+                              className="ml-2"
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            >
+                              ✨
+                            </motion.span>
+                          )}
+                        </span>
                                   </div>
                                   </div>
                   ))}
