@@ -286,7 +286,7 @@ const EventRegistrationForm = () => {
                       className="h-5 w-5 rounded focus:ring-blue-500 border-gray-300"
                     />
                     <label htmlFor="participateBloodDonation" className="ml-2 text-gray-700">
-                      Be a Hero, Save Lives — <strong>I'll donate</strong> blood at the UNMA Blood Donation Drive
+                      Be a Hero, Save Lives — <strong>I'll donate blood at the UNMA Blood Donation Drive</strong>
                     </label>
                   </div>
                 )}
@@ -312,7 +312,7 @@ const EventRegistrationForm = () => {
                       className="h-5 w-5 rounded focus:ring-blue-500 border-gray-300"
                     />
                     <label htmlFor="participateNationalSong" className="ml-2 text-gray-700">
-                      Unite Through Music — <strong>Ready to practice and participate</strong> in the National Integration Song
+                      Unite Through Music — <strong>Ready to practice and participate in the National Integration Song</strong>
                     </label>
                   </div>
                 )}
@@ -338,7 +338,7 @@ const EventRegistrationForm = () => {
                       className="h-5 w-5 rounded focus:ring-blue-500 border-gray-300"
                     />
                     <label htmlFor="joinBoatRide" className="ml-2 text-gray-700">
-                      Experience the Thrill — <strong>Join</strong> the UNMA Family Boat Ride to Deepen Our Friendship
+                      Experience the Thrill — <strong>Join the UNMA Family Boat Ride </strong> to Deepen Our Friendship
                     </label>
                   </div>
                 )}
@@ -424,158 +424,155 @@ const EventRegistrationForm = () => {
           </p>
         </div>
 
-        {/* Payment Details - 2 Column Design */}
+        {/* Payment Details */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-4 text-gray-800">
             Payment Information
           </h3>
           
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Left Column - Bank Selection */}
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-3 text-sm font-medium text-gray-700">
-                  Select Payment Method <span className="text-red-500">*</span>
-                </label>
-                <Controller
-                  name="paymentMethod"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="space-y-3">
-                      <label className="flex items-center p-4 border-2 border-blue-500 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
-                        <input
-                          type="radio"
-                          {...field}
-                          value="IDBI Bank"
-                          checked={field.value === "IDBI Bank"}
-                          className="mr-3 w-4 h-4 text-blue-600"
-                        />
-                        <span className="font-medium text-gray-800">IDBI Bank</span>
-                      </label>
-                      
-                      <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <input
-                          type="radio"
-                          {...field}
-                          value="Federal Bank"
-                          checked={field.value === "Federal Bank"}
-                          className="mr-3 w-4 h-4 text-blue-600"
-                        />
-                        <span className="font-medium text-gray-800">Federal Bank</span>
-                      </label>
-                    </div>
-                  )}
-                />
-                {errors.paymentMethod && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.paymentMethod.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-4 pt-4 border-t border-gray-200">
-                <FormField
-                  label="Transaction ID"
-                  name="transactionId"
-                  type="text"
-                  control={control}
-                  errors={errors}
-                  placeholder="Enter transaction ID (if available)"
-                />
-
-                <FormField
-                  label="Amount Paid (₹)"
-                  name="amountPaid"
-                  type="number"
-                  control={control}
-                  errors={errors}
-                  min={0}
-                  placeholder="Enter amount paid (0 if facing difficulty)"
-                />
-
-                <FormField
-                  label="Date of Payment"
-                  name="paymentDate"
-                  type="date"
-                  control={control}
-                  errors={errors}
-                  placeholder="Select payment date"
-                />
-              </div>
-            </div>
-
-            {/* Right Column - QR Code and Bank Details */}
-            <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-6 border border-gray-200">
-              {watchedPaymentMethod === "IDBI Bank" && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      IDBI Bank Payment Details
-                    </h4>
-                    <div className="bg-white rounded-lg p-4 inline-block shadow-md">
-                      <img
-                        src={idbiQR}
-                        alt="IDBI Bank QR Code"
-                        className="w-64 h-64 mx-auto"
-                      />
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">Account Name:</span>
-                      <span className="text-gray-800">United Navodayan Malayalee Association UNMA</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">Account No:</span>
-                      <span className="text-gray-800 font-mono">0084104000299671</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">IFSC:</span>
-                      <span className="text-gray-800 font-mono">IBKL0000084</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">UPI ID:</span>
-                      <span className="text-gray-800 font-mono">unma@idbi</span>
-                    </div>
-                  </div>
+          {/* Payment Method Selection - 2 columns in a row */}
+          <div className="mb-6">
+            <label className="block mb-3 text-sm font-medium text-gray-700">
+              Select Payment Method <span className="text-red-500">*</span>
+            </label>
+            <Controller
+              name="paymentMethod"
+              control={control}
+              render={({ field }) => (
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex items-center p-4 border-2 border-blue-500 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
+                    <input
+                      type="radio"
+                      {...field}
+                      value="IDBI Bank"
+                      checked={field.value === "IDBI Bank"}
+                      className="mr-3 w-4 h-4 text-blue-600"
+                    />
+                    <span className="font-medium text-gray-800">IDBI Bank</span>
+                  </label>
+                  
+                  <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      {...field}
+                      value="Federal Bank"
+                      checked={field.value === "Federal Bank"}
+                      className="mr-3 w-4 h-4 text-blue-600"
+                    />
+                    <span className="font-medium text-gray-800">Federal Bank</span>
+                  </label>
                 </div>
               )}
+            />
+            {errors.paymentMethod && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.paymentMethod.message}
+              </p>
+            )}
+          </div>
 
-              {watchedPaymentMethod === "Federal Bank" && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      Federal Bank Payment Details
-                    </h4>
-                    <div className="bg-white rounded-lg p-4 inline-block shadow-md">
-                      <img
-                        src={fedQR}
-                        alt="Federal Bank QR Code"
-                        className="w-64 h-64 mx-auto"
-                      />
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">Account Name:</span>
-                      <span className="text-gray-800">United Navodayan Malayalee Association</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">Account No:</span>
-                      <span className="text-gray-800 font-mono">10290200017783</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">IFSC:</span>
-                      <span className="text-gray-800 font-mono">FDRL0001029</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">UPI ID:</span>
-                      <span className="text-gray-800 font-mono">unma4747@fbl</span>
-                    </div>
+          {/* QR Code and Bank Details - Full Width */}
+          <div className="mb-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-6 border border-gray-200">
+            {watchedPaymentMethod === "IDBI Bank" && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                    IDBI Bank Payment Details
+                  </h4>
+                  <div className="bg-white rounded-lg p-4 inline-block shadow-md">
+                    <img
+                      src={idbiQR}
+                      alt="IDBI Bank QR Code"
+                      className="w-80 h-56 mx-auto object-cover"
+                    />
                   </div>
                 </div>
-              )}
-            </div>
+                <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">Account Name:</span>
+                    <span className="text-gray-800">United Navodayan Malayalee Association UNMA</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">Account No:</span>
+                    <span className="text-gray-800 font-mono">0084104000299671</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">IFSC:</span>
+                    <span className="text-gray-800 font-mono">IBKL0000084</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">UPI ID:</span>
+                    <span className="text-gray-800 font-mono">unma@idbi</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {watchedPaymentMethod === "Federal Bank" && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                    Federal Bank Payment Details
+                  </h4>
+                  <div className="bg-white rounded-lg p-4 inline-block shadow-md">
+                    <img
+                      src={fedQR}
+                      alt="Federal Bank QR Code"
+                      className="w-80 h-56 mx-auto object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">Account Name:</span>
+                    <span className="text-gray-800">United Navodayan Malayalee Association</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">Account No:</span>
+                    <span className="text-gray-800 font-mono">10290200017783</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">IFSC:</span>
+                    <span className="text-gray-800 font-mono">FDRL0001029</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">UPI ID:</span>
+                    <span className="text-gray-800 font-mono">unma4747@fbl</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Transaction Details - Full Width */}
+          <div className="space-y-4">
+            <FormField
+              label="Transaction ID"
+              name="transactionId"
+              type="text"
+              control={control}
+              errors={errors}
+              placeholder="Enter transaction ID (if available)"
+            />
+
+            <FormField
+              label="Amount Paid (₹)"
+              name="amountPaid"
+              type="number"
+              control={control}
+              errors={errors}
+              min={0}
+              placeholder="Enter amount paid (0 if facing difficulty)"
+            />
+
+            <FormField
+              label="Date of Payment"
+              name="paymentDate"
+              type="date"
+              control={control}
+              errors={errors}
+              placeholder="Select payment date"
+            />
           </div>
         </div>
 

@@ -259,14 +259,36 @@ const Program = () => {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
-                  className="flex flex-col md:flex-row md:items-center gap-2 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className={`flex flex-col md:flex-row md:items-center gap-2 p-4 rounded-lg transition-colors ${
+                    item.isLuckyDraw
+                      ? "bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-2 border-yellow-300"
+                      : item.event.includes("Boat Ride")
+                      ? "bg-blue-50 hover:bg-blue-100 border-2 border-blue-200"
+                      : "bg-gray-50 hover:bg-gray-100"
+                  }`}
                 >
                   <div className="font-semibold text-primary min-w-[200px]">
                     {item.time}
                   </div>
                   <div className="flex items-center gap-2">
                     <ArrowRightIcon className="w-4 h-4 text-gray-400 hidden md:block" />
-                    <span className="text-gray-700">{item.event}</span>
+                    <span className={`font-medium ${
+                      item.isLuckyDraw ? "text-orange-700 font-bold" : "text-gray-700"
+                    }`}>
+                      {item.event}
+                      {item.event.includes("Boat Ride") && (
+                        <span className="ml-2 text-blue-600">🚤</span>
+                      )}
+                      {item.isLuckyDraw && (
+                        <motion.span
+                          className="ml-2"
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        >
+                          ✨
+                        </motion.span>
+                      )}
+                    </span>
                   </div>
                 </motion.div>
               ))}
