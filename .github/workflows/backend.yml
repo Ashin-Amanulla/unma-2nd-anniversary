@@ -47,11 +47,19 @@ jobs:
         working-directory: ./unma2025-backend
         run: docker build -t unma2025-backend:latest .
 
-      - name: Stop existing container
+      - name: Stop and remove existing containers
         run: |
+          # Stop and remove container by name
           if docker ps -a --format '{{.Names}}' | grep -q unma2025-backend; then
-            docker stop unma2025-backend
-            docker rm unma2025-backend
+            docker stop unma2025-backend || true
+            docker rm unma2025-backend || true
+          fi
+          # Stop any container using port 5454
+          CONTAINER_ID=$(docker ps -q -f publish=5454)
+          if [ ! -z "$CONTAINER_ID" ]; then
+            echo "Stopping container using port 5454: $CONTAINER_ID"
+            docker stop $CONTAINER_ID || true
+            docker rm $CONTAINER_ID || true
           fi
 
       - name: Run new container
@@ -60,7 +68,7 @@ jobs:
           docker run -d \
             --name unma2025-backend \
             --env-file .env \
-            -p 5454:5454 \
+            -p 5454:3001 \
             --restart unless-stopped \
             unma2025-backend:latest
 
