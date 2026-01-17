@@ -423,7 +423,7 @@ const EventRegistrationForm = () => {
                 Total: ₹{watchedBoatRide ? 300 : 200} per head
               </span>
               <br />
-              <span className="font-bold text-green-600 text-sm">Those who can afford to pay should contribute extra to ensure inclusivity.</span>
+              <span className="font-bold text-green-600 text-sm">Those who can afford to pay  may please contribute extra to ensure inclusivity.</span>
             </p>
           </div>
           <p className="text-xs text-gray-600">
@@ -495,19 +495,19 @@ const EventRegistrationForm = () => {
                   </div>
                 </div>
                 <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">Account Name:</span>
                     <span className="text-gray-800">United Navodayan Malayalee Association UNMA</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">Account No:</span>
                     <span className="text-gray-800 font-mono">0084104000299671</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">IFSC:</span>
                     <span className="text-gray-800 font-mono">IBKL0000084</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">UPI ID:</span>
                     <span className="text-gray-800 font-mono">unma@idbi</span>
                   </div>
@@ -530,19 +530,19 @@ const EventRegistrationForm = () => {
                   </div>
                 </div>
                 <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">Account Name:</span>
                     <span className="text-gray-800">United Navodayan Malayalee Association</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">Account No:</span>
                     <span className="text-gray-800 font-mono">10290200017783</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">IFSC:</span>
                     <span className="text-gray-800 font-mono">FDRL0001029</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-1 md:gap-0">
                     <span className="font-medium text-gray-600">UPI ID:</span>
                     <span className="text-gray-800 font-mono">unma4747@fbl</span>
                   </div>
