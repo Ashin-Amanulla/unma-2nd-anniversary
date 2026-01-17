@@ -70,15 +70,18 @@ const Home = () => {
       { time: "9:00 AM – 9:30 AM", event: "Walkathon from venue singing patriotic songs" },
       { time: "9:30 AM – 10:30 AM", event: "Light snacks and assembling at venue" },
       { time: "10:30 AM – 11:30 AM", event: "Public Function" },
+      { time: "11:30 AM", event: "Lucky Draw - Morning Session 🎁" },
       { time: "11:30 AM – 12:30 PM", event: "BLS and Health Awareness Sessions" },
       { time: "12:30 PM", event: "Group Photo Session" },
       { time: "1:00 PM – 2:00 PM", event: "Lunch" },
     ],
     afternoon: [
       { time: "2:00 PM – 3:00 PM", event: "Fun Time" },
+      { time: "3:00 PM", event: "Lucky Draw - Afternoon Session 🎁" },
       { time: "3:00 PM – 4:00 PM", event: "Ask Our Doctors (interactive session)" },
       { time: "4:00 PM", event: "Tea & Snacks" },
       { time: "4:00 PM – 6:30 PM", event: "Boat Ride" },
+      { time: "6:30 PM", event: "Lucky Draw - Evening Session 🎁" },
     ],
   };
 

@@ -80,7 +80,7 @@ const RepublicDayEventSuccess = () => {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            to="/republic-day-event"
+            to="/program"
             className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 text-center"
           >
             View Event Details
