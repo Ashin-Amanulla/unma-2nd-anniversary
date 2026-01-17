@@ -28,13 +28,13 @@ const Contact = () => {
     if (metaDescription) {
       metaDescription.setAttribute(
         "content",
-        "Contact UNMA 2026 for alumni reunion inquiries. Get in touch with United Navodayan Malayalee Association for event information, registration support, and general assistance."
+        "Contact UNMA for alumni reunion inquiries. Get in touch with United Navodayan Malayalee Association for event information, registration support, and general assistance."
       );
     } else {
       const meta = document.createElement("meta");
       meta.name = "description";
       meta.content =
-        "Contact UNMA 2026 for alumni reunion inquiries. Get in touch with United Navodayan Malayalee Association for event information, registration support, and general assistance.";
+        "Contact UNMA for alumni reunion inquiries. Get in touch with United Navodayan Malayalee Association for event information, registration support, and general assistance.";
       document.getElementsByTagName("head")[0].appendChild(meta);
     }
 
@@ -42,8 +42,8 @@ const Contact = () => {
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "ContactPage",
-      name: "Contact Us - UNMA 2026",
-      description: "Contact page for UNMA 2026 2nd Anniversary Celebration ",
+      name: "Contact Us - UNMA",
+      description: "Contact page for UNMA",
       url: "https://summit2025.unma.in/contact",
       mainEntity: {
         "@type": "Organization",
@@ -134,7 +134,7 @@ ${data.message}
       // Send the email
       await sendMail(
         data.email,
-        `UNMA 2026 Reunion-Message from ${data.name}`,
+        `UNMA from ${data.name}`,
         messageContent
       );
 
@@ -167,7 +167,7 @@ ${data.message}
                 Contact Us
               </h1>
               <p className="text-lg text-white/90 max-w-2xl mx-auto">
-                Have questions about the UNMA 2026 reunion? We're here to help!
+                Have questions about the UNMA ? We're here to help!
                 Feel free to reach out using any of the methods below.
               </p>
               <div className="mt-6">
@@ -344,7 +344,7 @@ ${data.message}
                 <p className="text-sm text-blue-800">
                   <strong>Privacy Notice:</strong> The information you provide
                   will be used solely for responding to your inquiry about the
-                  UNMA 2026 reunion. We respect your privacy and will not share
+                  UNMA . We respect your privacy and will not share
                   your personal information with third parties. For more
                   details, please see our{" "}
                   <a
@@ -372,7 +372,7 @@ ${data.message}
                     Jawahar Navodaya Vidyalaya graduates
                   </p>
                   <p>
-                    <strong>Event:</strong> UNMA 2026 Alumni Reunion - Kerala,
+                    <strong>Event:</strong> UNMA  - Kerala,
                     Mahe & Lakshadweep
                   </p>
                   <p>
@@ -415,7 +415,7 @@ ${data.message}
                   Get in Touch
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  If you have any questions about the UNMA 2026 reunion or need
+                  If you have any questions about the UNMA or need
                   additional information, please don't hesitate to contact us.
                   We're looking forward to hearing from you!
                 </p>

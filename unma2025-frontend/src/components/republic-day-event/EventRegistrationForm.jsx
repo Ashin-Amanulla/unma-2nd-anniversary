@@ -559,6 +559,7 @@ const EventRegistrationForm = () => {
               type="text"
               control={control}
               errors={errors}
+              required
               placeholder="Enter transaction ID "
             />
 

@@ -54,11 +54,11 @@ export const republicDayEventRegistrationSchema = Joi.object({
   interestedInSponsorship: Joi.boolean().default(false),
   familyMembersCount: Joi.number().min(0).allow(null).optional(),
 
-  // Payment Details (all optional)
+  // Payment Details
   paymentMethod: Joi.string()
     .valid("IDBI Bank", "Federal Bank")
     .required(),
-  transactionId: Joi.string().allow("").optional().trim(),
+  transactionId: Joi.string().required().trim().min(1),
   amountPaid: Joi.number().min(0).default(0),
   paymentDate: Joi.date().allow(null).optional(),
 });
