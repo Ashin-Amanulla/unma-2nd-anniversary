@@ -1,0 +1,23 @@
+{
+  "name": "unma-id-card-generator-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for generating UNMA Summit 2025 ID cards",
+  "type": "module",
+  "main": "generate-id-card-cli.js",
+  "scripts": {
+    "generate": "node generate-id-card-cli.js",
+    "start": "node generate-id-card-cli.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "qrcode": "^1.5.3",
+    "inquirer": "^9.2.12"
+  },
+  "devDependencies": {},
+  "keywords": ["id-card", "unma", "summit", "canvas", "qrcode", "cli"],
+  "author": "UNMA Team",
+  "license": "MIT"
+}
+
+
+

@@ -1,0 +1,68 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "unma2025-backend/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  deploy:
+    name: Build & Deploy Backend (Docker)
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        working-directory: ./unma2025-backend
+        run: |
+          echo "NODE_ENV=production" > .env
+          echo "PORT=3001" >> .env
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}" >> .env
+          echo "API_URL=${{ secrets.API_URL }}" >> .env
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+          echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> .env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+          echo "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
+          echo "RATE_LIMIT_MAX_REQUESTS=${{ secrets.RATE_LIMIT_MAX_REQUESTS }}" >> .env
+          echo "RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }}" >> .env
+          echo "RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}" >> .env
+          echo "RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}" >> .env
+          echo "WHATSAPP_API_TOKEN=${{ secrets.WHATSAPP_API_TOKEN }}" >> .env
+          echo "WHATSAPP_BUSINESS_ACCOUNT_ID=${{ secrets.WHATSAPP_BUSINESS_ACCOUNT_ID }}" >> .env
+          echo "WHATSAPP_PHONE_NUMBER=${{ secrets.WHATSAPP_PHONE_NUMBER }}" >> .env
+          echo "WHATSAPP_PHONE_NUMBER_ID=${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}" >> .env
+
+      - name: Build Docker image
+        working-directory: ./unma2025-backend
+        run: docker build -t jnvtaa-backend:latest .
+
+      - name: Stop existing container
+        run: |
+          if docker ps -a --format '{{.Names}}' | grep -q jnvtaa-backend; then
+            docker stop jnvtaa-backend
+            docker rm jnvtaa-backend
+          fi
+
+      - name: Run new container
+        working-directory: ./unma2025-backend
+        run: |
+          docker run -d \
+            --name jnvtaa-backend \
+            --env-file .env \
+            -p 5454:5454 \
+            --restart unless-stopped \
+            jnvtaa-backend:latest
+
+      - name: Verify container
+        run: docker ps | grep jnvtaa-backend
