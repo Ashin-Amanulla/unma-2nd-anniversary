@@ -43,7 +43,7 @@ const Contact = () => {
       "@context": "https://schema.org",
       "@type": "ContactPage",
       name: "Contact Us - UNMA 2026",
-      description: "Contact page for UNMA 2026 Alumni Reunion",
+      description: "Contact page for UNMA 2026 2nd Anniversary Celebration ",
       url: "https://summit2025.unma.in/contact",
       mainEntity: {
         "@type": "Organization",

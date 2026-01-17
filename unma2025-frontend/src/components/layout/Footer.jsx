@@ -6,13 +6,13 @@ const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white pt-12 pb-6">
       <div className="container">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* About Section */}
           <div>
             <h3 className="text-xl font-bold mb-4">UNMA 2026</h3>
             <p className="text-gray-300 mb-4">
-              Join us for the JNV Kerala, Mahe and Lakshadweep Alumni Meet, a
-              celebration of memories, connections, and the Navodaya spirit.
+              Join us for the JNV Kerala, Mahe and Lakshadweep 2nd Anniversary Celebration, a
+              celebration of memories, connections, and the Navodaya spirit.    
             </p>
             <div className="flex space-x-4">
               <a
@@ -79,10 +79,18 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/register"
+                  to="/republic-day-event"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Register
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/program"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Program
                 </Link>
               </li>
               <li>
@@ -114,7 +122,7 @@ const Footer = () => {
           </div>
 
           {/* Policies */}
-          <div>
+          {/* <div>
             <h3 className="text-xl font-bold mb-4">Policies</h3>
             <ul className="space-y-2">
               <li>
@@ -150,7 +158,7 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Contact Info */}
           <div>

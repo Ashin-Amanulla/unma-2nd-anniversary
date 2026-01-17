@@ -267,7 +267,7 @@ const EventRegistrationForm = () => {
               Join the Celebration! 🎉
             </h3>
             <p className="text-gray-600 text-sm">
-              Be a part of these exciting activities and make UNMA 2026 memorable
+              Be a part of these exciting activities and make UNMA 2nd anniversary memorable
             </p>
           </div>
           
@@ -420,12 +420,14 @@ const EventRegistrationForm = () => {
             )}
             <p className="pt-2 border-t border-blue-300">
               <span className="font-bold text-red-600 text-lg">
-                Total: ₹{watchedBoatRide ? 300 : 200}
+                Total: ₹{watchedBoatRide ? 300 : 200} per head
               </span>
+              <br />
+              <span className="font-bold text-green-600 text-sm">Those who can afford to pay should contribute extra to ensure inclusivity.</span>
             </p>
           </div>
           <p className="text-xs text-gray-600">
-            <strong>Note:</strong> Participants are expected to contribute responsibly.A lower amount is allowed only in exceptional circumstances, <span className="font-bold">  and those who can afford to pay should contribute extra to ensure inclusivity.</span>
+            <strong>Note:</strong> Participants are expected to contribute responsibly.A lower amount is allowed only in exceptional circumstances
           </p>
         </div>
 
@@ -557,7 +559,7 @@ const EventRegistrationForm = () => {
               type="text"
               control={control}
               errors={errors}
-              placeholder="Enter transaction ID (if available)"
+              placeholder="Enter transaction ID "
             />
 
             <FormField
@@ -568,7 +570,7 @@ const EventRegistrationForm = () => {
               errors={errors}
               required
               min={0}
-              placeholder="Enter amount paid (0 if facing difficulty)"
+              placeholder="Enter amount paid "
             />
 
             <FormField
