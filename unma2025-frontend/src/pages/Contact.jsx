@@ -44,7 +44,7 @@ const Contact = () => {
       "@type": "ContactPage",
       name: "Contact Us - UNMA",
       description: "Contact page for UNMA",
-      url: "https://summit2025.unma.in/contact",
+      url: "https://unma.in/contact",
       mainEntity: {
         "@type": "Organization",
         name: "United Navodayan Malayalee Association",
