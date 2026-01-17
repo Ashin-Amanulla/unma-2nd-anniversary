@@ -99,7 +99,7 @@ export const republicDayEventFormSchema = z
     paymentMethod: z.enum(["IDBI Bank", "Federal Bank"], {
       errorMap: () => ({ message: "Please select a payment method" }),
     }),
-    transactionId: z.string().min(1, "Transaction ID is required"),
+    transactionId: z.string().optional(),
     amountPaid: z.preprocess(
       (val) => {
         // Allow empty string, null, undefined to be treated as missing (required)
