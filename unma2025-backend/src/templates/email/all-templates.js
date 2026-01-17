@@ -7,6 +7,7 @@ export {
   sendContactConfirmationEmail,
   sendContactResponseEmail,
 } from "./contact-message.js";
+export { sendRepublicDayEventRegistrationEmail } from "./republicDayEventRegistration.js";
 
 // You can add more email templates here in the future:
 // export { sendWelcomeEmail } from "./welcome.js";

@@ -14,6 +14,15 @@ const EventRegistrationForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get today's date in YYYY-MM-DD format for default payment date
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const {
     control,
     handleSubmit,
@@ -38,13 +47,27 @@ const EventRegistrationForm = () => {
       paymentMethod: "IDBI Bank",
       transactionId: "",
       amountPaid: 0,
-      paymentDate: "",
+      paymentDate: getTodayDate(),
     },
   });
 
   const watchedJnvSchool = watch("jnvSchool");
   const watchedBoatRide = watch("joinBoatRide");
   const watchedPaymentMethod = watch("paymentMethod");
+
+  // Handle validation errors and show toast notifications
+  const onInvalid = (errors) => {
+    // Get the first error message to show in toast
+    const errorEntries = Object.entries(errors);
+    
+    if (errorEntries.length > 0) {
+      const [, firstError] = errorEntries[0];
+      const errorMessage = firstError?.message || "Please check the form for errors";
+      toast.error(errorMessage);
+    } else {
+      toast.error("Please fill in all required fields correctly");
+    }
+  };
 
   const onSubmit = async (data) => {
     if (isSubmitting) {
@@ -92,7 +115,7 @@ const EventRegistrationForm = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-gray-800">
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 text-gray-800">
         {/* Personal Information */}
         <div className="grid md:grid-cols-2 gap-4">
           <FormField

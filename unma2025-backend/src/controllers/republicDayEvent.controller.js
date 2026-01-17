@@ -1,5 +1,6 @@
 import EventRegistration from "../models/EventRegistration.js";
 import { logger } from "../utils/logger.js";
+import { sendRepublicDayEventRegistrationEmail } from "../templates/email/republicDayEventRegistration.js";
 
 /**
  * Create new Republic Day Event registration
@@ -35,6 +36,20 @@ export const createRegistration = async (req, res) => {
     logger.info(
       `Republic Day Event registration created: ${registration.email} - ${registration.name}`
     );
+
+    // Send confirmation email (don't fail the request if email fails)
+    try {
+      await sendRepublicDayEventRegistrationEmail(registration);
+      logger.info(
+        `Confirmation email sent successfully to ${registration.email}`
+      );
+    } catch (emailError) {
+      // Log email error but don't fail the registration
+      logger.error(
+        `Failed to send confirmation email to ${registration.email}:`,
+        emailError
+      );
+    }
 
     res.status(201).json({
       status: "success",

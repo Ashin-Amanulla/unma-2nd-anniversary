@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const EventRegistrationSchema = new mongoose.Schema(
+const EventJan26RegistrationSchema = new mongoose.Schema(
   {
     // Personal Information
     name: {
@@ -108,12 +108,12 @@ const EventRegistrationSchema = new mongoose.Schema(
 );
 
 // Indexes for duplicate prevention and queries
-EventRegistrationSchema.index({ email: 1 });
-EventRegistrationSchema.index({ phoneNumber: 1 });
-EventRegistrationSchema.index({ registrationDate: -1 });
+EventJan26RegistrationSchema.index({ email: 1 }, { unique: true });
+EventJan26RegistrationSchema.index({ phoneNumber: 1 }, { unique: true });
+EventJan26RegistrationSchema.index({ registrationDate: -1 });
 
 // Text index for search
-EventRegistrationSchema.index({
+EventJan26RegistrationSchema.index({
   name: "text",
   email: "text",
   phoneNumber: "text",
@@ -121,7 +121,7 @@ EventRegistrationSchema.index({
 });
 
 // Pre-save middleware to update lastUpdated
-EventRegistrationSchema.pre("save", function (next) {
+EventJan26RegistrationSchema.pre("save", function (next) {
   this.lastUpdated = new Date();
   if (this.isNew) {
     this.submitted = true;
@@ -129,9 +129,9 @@ EventRegistrationSchema.pre("save", function (next) {
   next();
 });
 
-const EventRegistration = mongoose.model(
-  "EventRegistration",
-  EventRegistrationSchema
+const EventJan26Registration = mongoose.model(
+  "EventJan26Registration",
+  EventJan26RegistrationSchema
 );
 
-export default EventRegistration;
+export default EventJan26Registration;

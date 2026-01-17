@@ -1,8 +1,9 @@
 import axios from "axios";
 
+
 // Create a separate axios instance for public event registration without admin redirect
 const eventRegistrationAxios = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api/v1",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -32,7 +33,7 @@ const republicDayEventApi = {
   createRegistration: async (payload) => {
     try {
       const response = await eventRegistrationAxios.post(
-        `/v1/republic-day-event/register`,
+        `/republic-day-event/register`,
         payload
       );
       return response.data;
