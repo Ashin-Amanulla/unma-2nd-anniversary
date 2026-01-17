@@ -45,24 +45,24 @@ jobs:
 
       - name: Build Docker image
         working-directory: ./unma2025-backend
-        run: docker build -t jnvtaa-backend:latest .
+        run: docker build -t unma2025-backend:latest .
 
       - name: Stop existing container
         run: |
-          if docker ps -a --format '{{.Names}}' | grep -q jnvtaa-backend; then
-            docker stop jnvtaa-backend
-            docker rm jnvtaa-backend
+          if docker ps -a --format '{{.Names}}' | grep -q unma2025-backend; then
+            docker stop unma2025-backend
+            docker rm unma2025-backend
           fi
 
       - name: Run new container
         working-directory: ./unma2025-backend
         run: |
           docker run -d \
-            --name jnvtaa-backend \
+            --name unma2025-backend \
             --env-file .env \
             -p 5454:5454 \
             --restart unless-stopped \
-            jnvtaa-backend:latest
+            unma2025-backend:latest
 
       - name: Verify container
-        run: docker ps | grep jnvtaa-backend
+        run: docker ps | grep unma2025-backend
