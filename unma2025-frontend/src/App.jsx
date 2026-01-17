@@ -58,6 +58,7 @@ const RepublicDayEvent = lazy(() => import("./pages/RepublicDayEvent"));
 const RepublicDayEventSuccess = lazy(() =>
   import("./pages/RepublicDayEventSuccess")
 );
+const Program = lazy(() => import("./pages/Program"));
 
 function App() {
   const { logout, user, isSuperAdmin, isRegistrationDesk } = useAuthStore();
@@ -80,6 +81,7 @@ function App() {
                   element={<QuickRegistration />}
                 /> */}
                 <Route path="/gallery" element={<Gallery />} />
+                <Route path="/program" element={<Program />} />
                 {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
                 {/* <Route
                   path="/registration-success"

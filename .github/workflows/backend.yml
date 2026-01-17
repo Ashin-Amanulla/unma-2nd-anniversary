@@ -54,10 +54,10 @@ jobs:
             docker stop unma2025-backend || true
             docker rm unma2025-backend || true
           fi
-          # Stop any container using port 5454
-          CONTAINER_ID=$(docker ps -q -f publish=5454)
+          # Stop any container using port 3001
+          CONTAINER_ID=$(docker ps -q -f publish=3001)
           if [ ! -z "$CONTAINER_ID" ]; then
-            echo "Stopping container using port 5454: $CONTAINER_ID"
+            echo "Stopping container using port 3001: $CONTAINER_ID"
             docker stop $CONTAINER_ID || true
             docker rm $CONTAINER_ID || true
           fi
@@ -68,7 +68,7 @@ jobs:
           docker run -d \
             --name unma2025-backend \
             --env-file .env \
-            -p 5454:3001 \
+            -p 3001:3001 \
             --restart unless-stopped \
             unma2025-backend:latest
 
