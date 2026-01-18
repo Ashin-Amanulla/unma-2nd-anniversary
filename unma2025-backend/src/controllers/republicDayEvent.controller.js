@@ -216,6 +216,9 @@ export const getRegistrationStats = async (req, res) => {
           volunteerCount: {
             $sum: { $cond: [{ $eq: ["$readyToVolunteer", true] }, 1, 0] },
           },
+          whatsAppGroupCount: {
+            $sum: { $cond: [{ $eq: ["$partOfWhatsAppGroup", true] }, 1, 0] },
+          },
           totalAmountPaid: { $sum: "$amountPaid" },
           avgAmountPaid: { $avg: "$amountPaid" },
         },
@@ -256,6 +259,7 @@ export const getRegistrationStats = async (req, res) => {
           nationalSongCount: 0,
           boatRideCount: 0,
           volunteerCount: 0,
+          whatsAppGroupCount: 0,
           totalAmountPaid: 0,
           avgAmountPaid: 0,
         }),

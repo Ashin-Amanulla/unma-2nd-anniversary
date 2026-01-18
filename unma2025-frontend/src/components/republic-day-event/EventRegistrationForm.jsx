@@ -38,6 +38,7 @@ const EventRegistrationForm = () => {
       jnvOther: "",
       batchYear: "",
       foodChoice: "",
+      partOfWhatsAppGroup: undefined,
       participateBloodDonation: false,
       participateNationalSong: false,
       joinBoatRide: false,
@@ -99,6 +100,7 @@ const EventRegistrationForm = () => {
         paymentDate: data.paymentDate ? new Date(data.paymentDate) : null,
         familyMembersCount: familyMembersCount,
         // Ensure boolean values are explicitly set - use the actual values from form
+        partOfWhatsAppGroup: data.partOfWhatsAppGroup ?? false,
         participateBloodDonation: data.participateBloodDonation ?? false,
         participateNationalSong: data.participateNationalSong ?? false,
         joinBoatRide: data.joinBoatRide ?? false,
@@ -138,6 +140,9 @@ const EventRegistrationForm = () => {
     <div className="w-full max-w-3xl mx-auto">
       <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 text-gray-800">
         {/* Personal Information */}
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Personal Information</h2>
+        </div>
         <div className="grid md:grid-cols-2 gap-4">
           <FormField
             label="Full Name"
@@ -245,6 +250,44 @@ const EventRegistrationForm = () => {
           {errors.foodChoice && (
             <p className="mt-1 text-sm text-red-600">
               {errors.foodChoice.message}
+            </p>
+          )}
+        </div>
+
+        {/* WhatsApp Group Question */}
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Are you part of any of our UNMA OneFamily WhatsApp group? <span className="text-red-500">*</span>
+          </label>
+          <Controller
+            name="partOfWhatsAppGroup"
+            control={control}
+            render={({ field }) => (
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    checked={field.value === true}
+                    onChange={() => field.onChange(true)}
+                    className="mr-2"
+                  />
+                  <span>Yes</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    checked={field.value === false}
+                    onChange={() => field.onChange(false)}
+                    className="mr-2"
+                  />
+                  <span>No</span>
+                </label>
+              </div>
+            )}
+          />
+          {errors.partOfWhatsAppGroup && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.partOfWhatsAppGroup.message}
             </p>
           )}
         </div>

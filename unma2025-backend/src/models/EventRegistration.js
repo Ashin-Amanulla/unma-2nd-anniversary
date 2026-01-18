@@ -43,6 +43,10 @@ const EventJan26RegistrationSchema = new mongoose.Schema(
       enum: ["Veg", "Non-Veg"],
       required: true,
     },
+    partOfWhatsAppGroup: {
+      type: Boolean,
+      required: true,
+    },
     participateBloodDonation: {
       type: Boolean,
       default: false,

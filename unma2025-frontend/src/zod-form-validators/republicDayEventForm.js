@@ -41,6 +41,20 @@ export const republicDayEventFormSchema = z
     foodChoice: z.enum(["Veg", "Non-Veg"], {
       errorMap: () => ({ message: "Please select a food preference" }),
     }),
+    partOfWhatsAppGroup: z.preprocess(
+      (val) => {
+        if (typeof val === "boolean") return val;
+        if (val === "true" || val === 1 || val === "1") return true;
+        if (val === "false" || val === 0 || val === "0") return false;
+        return undefined;
+      },
+      z.union([z.boolean(), z.undefined()]).refine(
+        (val) => typeof val === "boolean",
+        {
+          message: "Please select whether you are part of the UNMA OneFamily WhatsApp group",
+        }
+      )
+    ),
     participateBloodDonation: z.preprocess(
       (val) => {
         if (typeof val === "boolean") return val;

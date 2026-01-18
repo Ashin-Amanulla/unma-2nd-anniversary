@@ -47,6 +47,7 @@ export const republicDayEventRegistrationSchema = Joi.object({
 
   // Preferences
   foodChoice: Joi.string().required().valid("Veg", "Non-Veg"),
+  partOfWhatsAppGroup: Joi.boolean().required(),
   participateBloodDonation: Joi.boolean().default(false),
   participateNationalSong: Joi.boolean().default(false),
   joinBoatRide: Joi.boolean().default(false),
