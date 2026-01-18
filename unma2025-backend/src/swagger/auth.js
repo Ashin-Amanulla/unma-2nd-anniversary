@@ -18,7 +18,7 @@
  *           description: User password
  *       example:
  *         email: user@example.com
- *         password: password123
+ *         password: your_secure_password
  *
  *     LoginResponse:
  *       type: object

@@ -59,6 +59,15 @@ const RepublicDayEventSuccess = lazy(() =>
   import("./pages/RepublicDayEventSuccess")
 );
 const Program = lazy(() => import("./pages/Program"));
+const RepublicDayEventDashboard = lazy(() =>
+  import("./pages/admin/RepublicDayEventDashboard")
+);
+const RepublicDayEventRegistrations = lazy(() =>
+  import("./pages/admin/RepublicDayEventRegistrations")
+);
+const Careers = lazy(() => import("./pages/Careers"));
+const JobDetail = lazy(() => import("./pages/JobDetail"));
+const JobManagement = lazy(() => import("./pages/admin/JobManagement"));
 
 function App() {
   const { logout, user, isSuperAdmin, isRegistrationDesk } = useAuthStore();
@@ -82,7 +91,7 @@ function App() {
                 /> */}
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/program" element={<Program />} />
-                {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
+                <Route path="/admin/login" element={<AdminLogin />} />
                 {/* <Route
                   path="/registration-success"
                   element={<RegistrationSuccess />}
@@ -117,6 +126,8 @@ function App() {
                   path="/republic-day-event/success"
                   element={<RepublicDayEventSuccess />}
                 />
+                <Route path="/careers" element={<Careers />} />
+                <Route path="/careers/:id" element={<JobDetail />} />
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}
@@ -162,6 +173,15 @@ function App() {
                   <Route path="settings" element={<Settings />} />
                   <Route path="feedback" element={<FeedbackManagement />} />
                   <Route path="entry" element={<RegistrationEntry />} />
+                  <Route
+                    path="republic-day-event/dashboard"
+                    element={<RepublicDayEventDashboard />}
+                  />
+                  <Route
+                    path="republic-day-event/registrations"
+                    element={<RepublicDayEventRegistrations />}
+                  />
+                  <Route path="jobs" element={<JobManagement />} />
                 </>
               </Route>
 

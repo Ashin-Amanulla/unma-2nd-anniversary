@@ -17,6 +17,7 @@ const useAuthStore = create(
             isSuperAdmin: false,
             isLoading: false,
             isRegistrationDesk: false,
+            isCareerAdmin: false,
             error: null,
 
             // Actions
@@ -40,6 +41,7 @@ const useAuthStore = create(
                         isAuthenticated: true,
                         isSuperAdmin: user.role === 'super_admin',
                         isRegistrationDesk: user.role === 'registration_desk',
+                        isCareerAdmin: user.role === 'career_admin' || user.role === 'super_admin',
                         isLoading: false,
                         error: null
                     }));
@@ -47,13 +49,13 @@ const useAuthStore = create(
                     localStorage.setItem('adminToken', token);
                     localStorage.setItem('userRole', user.role);
                     // Debug check
-                    console.log('user role',user.role);
+                    console.log('user role', user.role);
 
                     return { user, token };
                 } catch (error) {
-                                       
 
-                    
+
+
                     localStorage.removeItem('adminToken');
                     set({
                         user: null,
@@ -148,7 +150,7 @@ const useAuthStore = create(
                     return false;
                 }
             },
-          
+
 
             getUser: async () => {
                 try {

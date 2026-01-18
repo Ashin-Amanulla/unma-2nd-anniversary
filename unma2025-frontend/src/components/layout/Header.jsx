@@ -141,6 +141,25 @@ const Header = () => {
                 </>
               )}
             </NavLink>
+            <NavLink
+              to="/careers"
+              className={({ isActive }) =>
+                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
+                  isActive
+                    ? "text-primary font-medium"
+                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  Careers
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
+                  )}
+                </>
+              )}
+            </NavLink>
 
             <NavLink
               to="/contact"
@@ -269,6 +288,19 @@ const Header = () => {
                 }
               >
                 Gallery
+              </NavLink>
+              <NavLink
+                to="/careers"
+                onClick={closeMenu}
+                className={({ isActive }) =>
+                  `block px-4 py-2 rounded-md text-base ${
+                    isActive
+                      ? "text-primary font-medium bg-blue-50"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
+                  }`
+                }
+              >
+                Careers
               </NavLink>
               <NavLink
                 to="/contact"

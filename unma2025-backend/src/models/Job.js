@@ -1,0 +1,110 @@
+import mongoose from "mongoose";
+
+const JobSchema = new mongoose.Schema(
+    {
+        // Basic Job Information
+        title: {
+            type: String,
+            required: [true, "Job title is required"],
+            trim: true,
+            maxlength: 200,
+        },
+        company: {
+            type: String,
+            required: [true, "Company name is required"],
+            trim: true,
+            maxlength: 200,
+        },
+        description: {
+            type: String,
+            required: [true, "Job description is required"],
+            trim: true,
+        },
+        type: {
+            type: String,
+            enum: ["Full-time", "Part-time", "Internship", "Contract", "Freelance"],
+            required: [true, "Job type is required"],
+        },
+        location: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        salary: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        // Image/Logo
+        image: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        // Job Details
+        requirements: {
+            type: [String],
+            default: [],
+        },
+        responsibilities: {
+            type: [String],
+            default: [],
+        },
+
+        // Application Details
+        applicationUrl: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        applicationEmail: {
+            type: String,
+            trim: true,
+            lowercase: true,
+            default: "",
+        },
+        contactPerson: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        contactPhone: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        // Deadline
+        deadline: {
+            type: Date,
+            default: null,
+        },
+
+        // Status
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
+
+        // Posted By (Admin reference)
+        postedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Admin",
+            default: null,
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
+
+// Indexes for efficient queries
+JobSchema.index({ isActive: 1, createdAt: -1 });
+JobSchema.index({ type: 1, isActive: 1 });
+JobSchema.index({ title: "text", company: "text", description: "text" });
+
+const Job = mongoose.model("Job", JobSchema);
+
+export default Job;

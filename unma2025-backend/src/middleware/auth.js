@@ -29,9 +29,9 @@ export const verifyToken = async (req, res, next) => {
 
         // Verify token
         try {
-            const decoded =  jwt.verify(token, JWT_SECRET);
+            const decoded = jwt.verify(token, JWT_SECRET);
             const admin = await Admin.findById(decoded.id);
-            if (!decoded ||!admin) {
+            if (!decoded || !admin) {
                 logger.warn(`Authentication failed: Invalid token - ${err.message}`);
                 return res.status(401).json({
                     status: 'error',
@@ -83,9 +83,22 @@ export const verifySuperAdmin = (req, res, next) => {
             message: 'Internal server error during authorization'
         });
     }
-}; 
+};
+
+export const verifyCareerAccess = (req, res, next) => {
+    // Assuming verifyToken has already run and populated req.admin
+    if (req.admin && (req.admin.role === 'super_admin' || req.admin.role === 'career_admin')) {
+        next();
+    } else {
+        logger.warn(`Career access denied for user ${req.admin ? req.admin.email : 'unknown'}`);
+        return res.status(403).json({
+            status: 'error',
+            message: 'Access denied: Career management privileges required'
+        });
+    }
+};
 
 export const authenticateToken = (req, res, next) => {
-           next();
-   
+    next();
+
 };

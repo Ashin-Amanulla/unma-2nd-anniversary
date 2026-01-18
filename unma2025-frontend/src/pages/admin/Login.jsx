@@ -11,7 +11,7 @@ import useAuthStore from "../../store/authStore";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated, user } = useAuthStore();
 
   // Get the return path from state, default to dashboard
   const returnPath = location.state?.from || "/admin/dashboard";
@@ -32,17 +32,26 @@ const Login = () => {
 
   // Check if already logged in
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(returnPath, { replace: true });
+    if (isAuthenticated && user) {
+        if (user.role === 'career_admin') {
+            navigate("/admin/jobs", { replace: true });
+        } else {
+            navigate(returnPath, { replace: true });
+        }
     }
-  }, [isAuthenticated, navigate, returnPath]);
+  }, [isAuthenticated, user, navigate, returnPath]);
 
   const onSubmit = async (data) => {
     try {
-      const response = await login(data);
+      const { user: loggedInUser } = await login(data);
 
       toast.success("Login successful!");
-      navigate(returnPath, { replace: true });
+      
+      if (loggedInUser.role === 'career_admin') {
+        navigate("/admin/jobs", { replace: true });
+      } else {
+        navigate(returnPath, { replace: true });
+      }
     } catch (error) {
       toast.error(error.message || "Login failed. Please try again.");
       console.error("Login error:", error);

@@ -28,7 +28,7 @@ const adminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["super_admin", "school_admin", "registration_desk"],
+      enum: ["super_admin", "school_admin", "registration_desk", "career_admin"],
       default: "school_admin",
     },
     assignedSchools: [

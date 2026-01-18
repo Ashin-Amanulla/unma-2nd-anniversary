@@ -64,65 +64,7 @@ export const login = async (req, res) => {
 
     logger.info(`Login attempt for user: ${email}`);
 
-    // Check if we're using hardcoded credentials for development/testing
-    if (process.env.NODE_ENV !== "production") {
-      // For demo purposes, we'll accept these hardcoded credentials
-      if (email === "admin@example.com" && password === "password123") {
-        // Generate token
-        const token = jwt.sign(
-          {
-            id: 1,
-            email,
-            name: "Admin User",
-            role: "admin",
-          },
-          JWT_SECRET,
-          { expiresIn: JWT_EXPIRES_IN }
-        );
 
-        logger.info(`User ${email} logged in successfully`);
-
-        return res.status(200).json({
-          status: "success",
-          message: "Login successful",
-          data: {
-            token,
-            user: {
-              email,
-              name: "Admin User",
-              role: "admin",
-            },
-          },
-        });
-      } else if (email === "user@example.com" && password === "password123") {
-        // Generate token
-        const token = jwt.sign(
-          {
-            id: 2,
-            email,
-            name: "Regular User",
-            role: "user",
-          },
-          JWT_SECRET,
-          { expiresIn: JWT_EXPIRES_IN }
-        );
-
-        logger.info(`User ${email} logged in successfully`);
-
-        return res.status(200).json({
-          status: "success",
-          message: "Login successful",
-          data: {
-            token,
-            user: {
-              email,
-              name: "Regular User",
-              role: "user",
-            },
-          },
-        });
-      }
-    }
 
     // For production, check against database
     const user = await User.findOne({ email });

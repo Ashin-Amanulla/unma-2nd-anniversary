@@ -26,6 +26,7 @@ import registrationDeskRoutes from "./routes/registrationDesk.js";
 import feedbackRoutes from "./routes/feedback.js";
 import reportRoutes from "./routes/report.js";
 import republicDayEventRoutes from "./routes/republicDayEvent.js";
+import jobRoutes from "./routes/job.js";
 // Import middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 
@@ -42,7 +43,7 @@ const PORT = process.env.PORT || 5000;
 // Connect to database
 connectDB();
 
-// Seed data
+// Seed data (admin already created)
 // loginSeedData();
 
 // Setup security middlewares
@@ -111,6 +112,7 @@ app.use(`${baseRoutes}/registration-desk`, registrationDeskRoutes);
 app.use(`${baseRoutes}/feedback`, feedbackRoutes);
 app.use(`${baseRoutes}/report`, reportRoutes);
 app.use(`${baseRoutes}/republic-day-event`, republicDayEventRoutes);
+app.use(`${baseRoutes}/jobs`, jobRoutes);
 
 // Setup Swagger documentation
 // setupSwagger(app);

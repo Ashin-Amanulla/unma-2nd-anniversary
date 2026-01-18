@@ -1,0 +1,243 @@
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  BriefcaseIcon,
+  MapPinIcon,
+  CurrencyRupeeIcon,
+  BuildingOfficeIcon,
+  ClockIcon,
+  ArrowLeftIcon,
+  CalendarIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
+import jobApi from "../api/jobApi";
+import Loading from "../components/ui/Loading";
+
+const JobDetail = () => {
+  const { id } = useParams();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        setLoading(true);
+        const data = await jobApi.getJobById(id);
+        setJob(data.data);
+        // SEO Title Update
+        document.title = `${data.data.title} at ${data.data.company} | UNMA Careers`;
+      } catch (err) {
+        setError("Failed to load job details. The job may no longer be available.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchJob();
+    }
+    
+    // Cleanup title on unmount
+    return () => {
+        document.title = "UNMA 2026";
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 pb-12 flex justify-center items-center">
+        <Loading />
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="min-h-screen pt-24 pb-12 px-4">
+        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4">
+             <BriefcaseIcon className="h-8 w-8 text-red-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Job Not Found</h3>
+          <p className="text-gray-500 mb-6">{error || "The link you followed may be broken or the job has been removed."}</p>
+          <Link
+            to="/careers"
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark"
+          >
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+            Back to Careers
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+        <Link
+          to="/careers"
+          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary mb-6 transition-colors"
+        >
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Back to all jobs
+        </Link>
+        
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="p-6 md:p-8 border-b border-gray-100">
+             <div className="flex flex-col md:flex-row md:items-start gap-6">
+                <div className="h-24 w-24 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 flex-shrink-0">
+                  {job.image ? (
+                    <img src={job.image} alt={job.company} className="h-full w-full object-cover" />
+                  ) : (
+                    <BuildingOfficeIcon className="h-12 w-12 text-gray-400" />
+                  )}
+                </div>
+                <div className="flex-1">
+                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                     <div>
+                       <h1 className="text-3xl font-bold text-gray-900 text-wrap mb-2">{job.title}</h1>
+                       <div className="text-xl text-primary font-medium mb-4">{job.company}</div>
+                     </div>
+                     <div className="flex flex-col gap-2 min-w-40">
+                       {job.applicationUrl && (
+                         <a
+                           href={job.applicationUrl}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary-dark shadow-sm transition-all transform hover:-translate-y-0.5"
+                         >
+                           Apply Now
+                         </a>
+                       )}
+                     </div>
+                   </div>
+
+                   <div className="flex flex-wrap gap-3 mt-2">
+                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <BriefcaseIcon className="w-4 h-4 mr-2" />
+                        {job.type}
+                     </span>
+                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                        <MapPinIcon className="w-4 h-4 mr-2" />
+                        {job.location || "Remote"}
+                     </span>
+                     {job.salary && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                          <CurrencyRupeeIcon className="w-4 h-4 mr-2" />
+                          {job.salary}
+                        </span>
+                     )}
+                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                        <ClockIcon className="w-4 h-4 mr-2" />
+                        Posted {new Date(job.createdAt).toLocaleDateString()}
+                     </span>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          {/* Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:divide-x divide-gray-100">
+            {/* Main Info */}
+            <div className="p-6 md:p-8 lg:col-span-2 space-y-8">
+               <section>
+                 <h2 className="text-xl font-bold text-gray-900 mb-4">Job Description</h2>
+                 <p className="whitespace-pre-line text-gray-600 leading-relaxed text-lg">
+                   {job.description}
+                 </p>
+               </section>
+
+               {job.requirements?.length > 0 && (
+                 <section>
+                   <h2 className="text-xl font-bold text-gray-900 mb-4">Requirements</h2>
+                   <ul className="space-y-3">
+                     {job.requirements.map((req, idx) => (
+                       <li key={idx} className="flex items-start text-gray-600">
+                         <span className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                         <span>{req}</span>
+                       </li>
+                     ))}
+                   </ul>
+                 </section>
+               )}
+
+               {job.responsibilities?.length > 0 && (
+                 <section>
+                   <h2 className="text-xl font-bold text-gray-900 mb-4">Responsibilities</h2>
+                   <ul className="space-y-3">
+                     {job.responsibilities.map((res, idx) => (
+                       <li key={idx} className="flex items-start text-gray-600">
+                         <span className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                         <span>{res}</span>
+                       </li>
+                     ))}
+                   </ul>
+                 </section>
+               )}
+            </div>
+
+            {/* Sidebar info */}
+            <div className="bg-gray-50/50 p-6 md:p-8">
+              <h3 className="font-bold text-gray-900 mb-6 text-lg">Contact & Application</h3>
+              
+              <div className="space-y-6">
+                {job.deadline && (
+                  <div className="flex items-start">
+                    <div className="bg-red-100 p-2 rounded-lg mr-4">
+                      <CalendarIcon className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">Deadline</p>
+                      <p className="text-gray-900 font-semibold">{new Date(job.deadline).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                )}
+
+                {(job.contactPerson || job.contactPhone || job.applicationEmail) && (
+                   <div className="border-t border-gray-200 pt-6">
+                     <p className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Contact Details</p>
+                     
+                     {job.contactPerson && (
+                       <div className="flex items-center mb-3 text-gray-700">
+                         <UserIcon className="w-5 h-5 text-gray-400 mr-3" />
+                         <span>{job.contactPerson}</span>
+                       </div>
+                     )}
+                     
+                     {job.contactPhone && (
+                       <div className="flex items-center mb-3">
+                         <PhoneIcon className="w-5 h-5 text-gray-400 mr-3" />
+                         <a href={`tel:${job.contactPhone}`} className="text-primary hover:underline font-medium">
+                           {job.contactPhone}
+                         </a>
+                       </div>
+                     )}
+
+                     {job.applicationEmail && (
+                       <div className="flex items-center">
+                         <EnvelopeIcon className="w-5 h-5 text-gray-400 mr-3" />
+                         <a href={`mailto:${job.applicationEmail}`} className="text-primary hover:underline font-medium break-all">
+                           {job.applicationEmail}
+                         </a>
+                       </div>
+                     )}
+                   </div>
+                )}
+                
+             
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default JobDetail;

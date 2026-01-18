@@ -10,6 +10,7 @@ import {
   DocumentTextIcon,
   CurrencyDollarIcon,
   ChatBubbleBottomCenterTextIcon,
+  BriefcaseIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 import { useAdminStore } from "../../store";
@@ -19,7 +20,7 @@ const AdminLayout = () => {
   const navigate = useNavigate();
 
   // Use our custom hooks
-  const { logout, user, isSuperAdmin } = useAuthStore();
+  const { logout, user, isSuperAdmin, isCareerAdmin } = useAuthStore();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useAdminStore();
 
   // Handle logout
@@ -81,7 +82,7 @@ const AdminLayout = () => {
 
         <nav className="p-4">
           <ul className="space-y-2">
-            <li>
+            {/* <li>
               <Link
                 to="/admin/dashboard"
                 className="flex items-center p-2 rounded-md hover:bg-primary-dark"
@@ -89,8 +90,8 @@ const AdminLayout = () => {
                 <HomeIcon className="w-5 h-5 mr-3" />
                 <span>Dashboard</span>
               </Link>
-            </li>
-            <li>
+            </li> */}
+            {/* <li>
               <Link
                 to="/admin/registrations"
                 className="flex items-center p-2 rounded-md hover:bg-primary-dark"
@@ -107,8 +108,51 @@ const AdminLayout = () => {
                 <DocumentTextIcon className="w-5 h-5 mr-3" />
                 <span>Entry</span>
               </Link>
-            </li>
-            {isSuperAdmin && (
+            </li> */}
+            
+            {/* Republic Day Event Section */}
+            {user?.role !== "career_admin" && (
+              <>
+                <li className="pt-2">
+                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
+                    Republic Day Event
+                  </div>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/republic-day-event/dashboard"
+                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5 mr-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                      />
+                    </svg>
+                    <span>Event Dashboard</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/republic-day-event/registrations"
+                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                  >
+                    <UserGroupIcon className="w-5 h-5 mr-3" />
+                    <span>Event Registrations</span>
+                  </Link>
+                </li>
+              </>
+            )}
+            
+            {/* {isSuperAdmin && (
               <>
                 <li>
                   <Link
@@ -155,8 +199,8 @@ const AdminLayout = () => {
                   </Link>
                 </li>
               </>
-            )}
-            {canViewAnalytics && (
+            )} */}
+            {/* {canViewAnalytics && (
               <li>
                 <Link
                   to="/admin/analytics"
@@ -164,6 +208,18 @@ const AdminLayout = () => {
                 >
                   <ChartBarIcon className="w-5 h-5 mr-3" />
                   <span>Analytics</span>
+                </Link>
+              </li>
+            )} */}
+
+            {(isCareerAdmin || isSuperAdmin) && (
+              <li>
+                <Link
+                  to="/admin/jobs"
+                  className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                >
+                  <BriefcaseIcon className="w-5 h-5 mr-3" />
+                  <span>Careers / Jobs</span>
                 </Link>
               </li>
             )}
@@ -180,7 +236,7 @@ const AdminLayout = () => {
               </li>
             )}
 
-            {isSuperAdmin && (
+            {/* {isSuperAdmin && (
               <li>
                 <Link
                   to="/admin/payment-history"
@@ -190,7 +246,7 @@ const AdminLayout = () => {
                   <span>Payment History</span>
                 </Link>
               </li>
-            )}
+            )} */}
 
             {canManageSettings && (
               <>
