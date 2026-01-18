@@ -1,4 +1,5 @@
 export const jnvSchools = [
+  { value: "JNV Alappuzha", label: "JNV Alappuzha" },
   { value: "JNV Ernakulam", label: "JNV Ernakulam" },
   { value: "JNV Idukki", label: "JNV Idukki" },
   { value: "JNV Kannur", label: "JNV Kannur" },
@@ -8,6 +9,7 @@ export const jnvSchools = [
   { value: "JNV Kozhikode", label: "JNV Kozhikode" },
   { value: "JNV Lakshadweep", label: "JNV Lakshadweep" },
   { value: "JNV Mahe", label: "JNV Mahe" },
+  { value: "JNV Malappuram", label: "JNV Malappuram" },
   { value: "JNV Palakkad", label: "JNV Palakkad" },
   { value: "JNV Pathanamthitta", label: "JNV Pathanamthitta" },
   { value: "JNV Thiruvananthapuram", label: "JNV Thiruvananthapuram" },
