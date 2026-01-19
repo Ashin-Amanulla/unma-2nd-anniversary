@@ -214,40 +214,85 @@ const Home = () => {
                 </div>
               </motion.div>
 
-              {/* Special Highlight Notice - Blood Donation Drive */}
+              {/* Special Highlights Section */}
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="mb-12 relative overflow-hidden"
               >
-                <div className="bg-gradient-to-r from-red-600 via-red-500 to-pink-600 rounded-2xl shadow-2xl border-2 border-red-400/50 p-6 md:p-8 relative z-10">
-                  {/* Animated background pattern */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-white/20 p-6 md:p-8 relative z-10">
+                  {/* Section Title */}
+                  <div className="flex items-center justify-center gap-3 mb-6">
+                    <span className="text-3xl">✨</span>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white text-center">
+                      Special Highlights
+                    </h3>
+                    <span className="text-3xl">✨</span>
                   </div>
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                      <span className="text-3xl animate-pulse">🩸</span>
-                      <h3 className="text-2xl md:text-3xl font-bold text-white text-center">
-                        Special Highlight of the Day
-                      </h3>
-                      <span className="text-3xl animate-pulse">🩸</span>
+
+                  {/* Two Column Layout */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    {/* Blood Donation Drive Column */}
+                    <div className="bg-gradient-to-br from-red-600 via-red-500 to-pink-600 rounded-xl shadow-xl border-2 border-red-400/50 p-5 md:p-6 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+                      {/* Animated background pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                        <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
+                      </div>
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <span className="text-3xl animate-pulse">🩸</span>
+                          <h4 className="text-xl md:text-2xl font-bold text-white text-center">
+                            Blood Donation Drive
+                          </h4>
+                        </div>
+                        <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                          <p className="text-base md:text-lg text-white font-semibold text-center leading-relaxed">
+                            <span className="font-bold text-yellow-300">UNMA Blood Donation Drive</span>
+                            <br />
+                            <span className="text-white/95 text-sm md:text-base">
+                              in collaboration with Kerala Police Officers Association and Indian Medical Association
+                            </span>
+                            <br />
+                            <span className="text-yellow-200 font-bold mt-2 inline-block text-sm md:text-base">
+                              from 8:30 AM to 5:30 PM
+                            </span>
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-white/30">
-                      <p className="text-lg md:text-xl text-white font-semibold text-center leading-relaxed">
-                        <span className="font-bold text-yellow-300">UNMA Blood Donation Drive</span>
-                        <br />
-                        <span className="text-white/95">
-                          in collaboration with  Kerala Police Officers Association and Indian Medical Association
-                        </span>
-                        <br />
-                        <span className="text-yellow-200 font-bold mt-2 inline-block">
-                          from 8:30 AM to 5:30 PM
-                        </span>
-                      </p>
+
+                    {/* UNMA Career Page Launch Column */}
+                    <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 rounded-xl shadow-xl border-2 border-emerald-400/50 p-5 md:p-6 relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+                      {/* Animated background pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-1/2 translate-y-1/2"></div>
+                      </div>
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <span className="text-3xl">💼</span>
+                          <h4 className="text-xl md:text-2xl font-bold text-white text-center">
+                            UNMA Career Page Launch
+                          </h4>
+                        </div>
+                        <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                          <p className="text-base md:text-lg text-white font-semibold text-center leading-relaxed">
+                            <span className="font-bold text-yellow-300">Career Page Launch</span>
+                            <br />
+                            <span className="text-white/95 text-sm md:text-base">
+                              We're excited to announce the launch of our new career portal for Navodayans
+                            </span>
+                            <br />
+                            <span className="text-yellow-200 font-bold mt-2 inline-block text-sm md:text-base">
+                              Coming Soon on Event Day
+                            </span>
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

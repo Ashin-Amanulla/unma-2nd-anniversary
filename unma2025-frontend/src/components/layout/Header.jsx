@@ -141,7 +141,7 @@ const Header = () => {
                 </>
               )}
             </NavLink>
-            <NavLink
+            {/* <NavLink
               to="/careers"
               className={({ isActive }) =>
                 `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
@@ -159,7 +159,7 @@ const Header = () => {
                   )}
                 </>
               )}
-            </NavLink>
+            </NavLink> */}
 
             <NavLink
               to="/contact"
