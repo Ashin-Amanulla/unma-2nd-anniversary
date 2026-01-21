@@ -2,6 +2,8 @@ import Joi from "joi";
 
 // List of valid JNV schools
 const jnvSchools = [
+  "JNV Alappuzha",
+  "JNV Malappuram",
   "JNV Ernakulam",
   "JNV Idukki",
   "JNV Kannur",
