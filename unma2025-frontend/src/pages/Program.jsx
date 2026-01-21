@@ -61,7 +61,7 @@ const Program = () => {
             UNMA 2nd Anniversary & 77th Republic Day Celebration
           </p>
           <p className="text-md text-gray-500 mt-2">
-            Sunday, January 26, 2026 | T. K. Ramakrishnan Samskarika Kendram, Ernakulam
+            Monday, January 26, 2026 | T. K. Ramakrishnan Samskarika Kendram, Ernakulam
           </p>
         </motion.div>
 

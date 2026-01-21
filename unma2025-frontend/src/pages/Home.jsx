@@ -313,7 +313,7 @@ const Home = () => {
                   <div>
                     <h3 className="text-white text-lg font-semibold">When</h3>
                     <p className="text-white text-xl font-bold">
-                      Sunday, January 26, 2026
+                      Monday, January 26, 2026
                     </p>
                     <p className="text-white/80">8:30 AM - 6:30 PM</p>
                   </div>

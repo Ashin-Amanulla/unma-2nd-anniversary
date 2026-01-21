@@ -218,7 +218,7 @@ export const sendRepublicDayEventRegistrationEmail = async (registration) => {
                         <strong>Event:</strong> UNMA 2nd Anniversary & 77th Republic Day Celebration
                     </div>
                     <div class="event-item">
-                        <strong>Date:</strong> Sunday, January 26, 2026
+                        <strong>Date:</strong> Monday, January 26, 2026
                     </div>
                     <div class="event-item">
                         <strong>Time:</strong> 8:30 AM - 6:30 PM
