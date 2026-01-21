@@ -37,6 +37,91 @@ router.post("/single", upload.single("file"), async (req, res) => {
   }
 });
 
+// List all galleries (subfolders) from S3 bucket root
+router.get("/galleries", async (req, res) => {
+  try {
+    const bucketName = process.env.S3_BUCKET_NAME;
+    const basePrefix = "";
+
+    const params = {
+      Bucket: bucketName,
+      Prefix: basePrefix,
+      Delimiter: "/",
+    };
+
+    const command = new ListObjectsV2Command(params);
+    const response = await s3Client.send(command);
+
+    if (!response.CommonPrefixes || response.CommonPrefixes.length === 0) {
+      return res.json({
+        success: true,
+        galleries: [],
+        message: "No galleries found"
+      });
+    }
+
+    // Process each folder to get image count and thumbnail
+    const galleries = await Promise.all(
+      response.CommonPrefixes.map(async (prefix) => {
+        const folderPath = prefix.Prefix;
+        // Extract folder name by removing base prefix and trailing slash
+        const folderName = folderPath.replace(basePrefix, "").replace(/\/$/, "");
+
+        // Get images from this folder
+        const imageParams = {
+          Bucket: bucketName,
+          Prefix: folderPath,
+        };
+
+        const imageCommand = new ListObjectsV2Command(imageParams);
+        const imageResponse = await s3Client.send(imageCommand);
+
+        const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+        const images = (imageResponse.Contents || []).filter((object) => {
+          const key = object.Key.toLowerCase();
+          return imageExtensions.some((ext) => key.endsWith(ext));
+        });
+
+        // Get thumbnail (first image or most recent)
+        let thumbnail = null;
+        if (images.length > 0) {
+          const thumbnailKey = images[0].Key;
+          thumbnail = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbnailKey}`;
+        }
+
+        // Generate display name from folder name
+        const displayName = folderName
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
+
+        return {
+          name: folderName,
+          displayName: displayName,
+          imageCount: images.length,
+          thumbnail: thumbnail,
+        };
+      })
+    );
+
+    // Sort by image count (descending) or alphabetically
+    galleries.sort((a, b) => {
+      if (b.imageCount !== a.imageCount) {
+        return b.imageCount - a.imageCount;
+      }
+      return a.displayName.localeCompare(b.displayName);
+    });
+
+    res.json({
+      success: true,
+      galleries,
+      count: galleries.length
+    });
+  } catch (error) {
+    console.error("Galleries list error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Gallery photo upload to S3 bucket (unma folder)
 router.post("/gallery", upload.single("file"), async (req, res) => {
   try {
@@ -54,7 +139,10 @@ router.post("/gallery", upload.single("file"), async (req, res) => {
     }
 
     const bucketName = process.env.S3_BUCKET_NAME;
-    const folderPrefix = "unma-summit-2025/";
+    // Get folder from request body, default to "unma-summit-2025" if not provided
+    const folderName = req.body.folder || "unma-summit-2025";
+    const folderPrefix = `${folderName}/`;
+    
     const params = {
       Bucket: bucketName,
       Key: `${folderPrefix}${Date.now()}-${req.file.originalname}`,
@@ -73,11 +161,12 @@ router.post("/gallery", upload.single("file"), async (req, res) => {
   }
 });
 
-// List gallery images from S3 bucket (unma folder)
-router.get("/gallery", async (req, res) => {
+// List gallery images from S3 bucket (specific folder)
+router.get("/gallery/:folder", async (req, res) => {
   try {
     const bucketName = process.env.S3_BUCKET_NAME;
-    const folderPrefix = "";
+    const folderName = req.params.folder;
+    const folderPrefix = `${folderName}/`;
 
     const params = {
       Bucket: bucketName,

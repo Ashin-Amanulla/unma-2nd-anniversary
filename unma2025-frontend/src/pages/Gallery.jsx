@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeftIcon,
@@ -12,6 +13,7 @@ import {
   XMarkIcon,
   PhotoIcon,
   CloudArrowUpIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import galleryApi from "../api/galleryApi";
@@ -210,6 +212,8 @@ const GalleryItem = ({ image, index, onLoad, onClick, observe, entries }) => {
 };
 
 const Gallery = () => {
+  const { folder } = useParams();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -220,15 +224,47 @@ const Gallery = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [allImages, setAllImages] = useState([]);
   const [error, setError] = useState(null);
+  const [galleries, setGalleries] = useState([]);
+  const [selectedFolder, setSelectedFolder] = useState(folder || "summit-2025");
+  const [galleryDisplayName, setGalleryDisplayName] = useState("");
   const fileInputRef = useRef(null);
+
+  // Fetch available galleries for dropdown
+  useEffect(() => {
+    const fetchGalleries = async () => {
+      try {
+        const response = await galleryApi.getGalleries();
+        if (response.success && response.galleries) {
+          setGalleries(response.galleries);
+          // Set display name for current folder
+          const currentGallery = response.galleries.find(
+            (g) => g.name === folder
+          );
+          if (currentGallery) {
+            setGalleryDisplayName(currentGallery.displayName);
+            setSelectedFolder(folder);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching galleries:", err);
+      }
+    };
+    fetchGalleries();
+  }, [folder]);
 
   // Fetch gallery images from S3 on component mount
   useEffect(() => {
+    if (!folder) {
+      // If no folder param, redirect to landing page
+      navigate("/gallery");
+      return;
+    }
+
     const fetchImages = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await galleryApi.getImages();
+        const response = await galleryApi.getGalleryImages(folder);
         if (response.success && response.images) {
           setAllImages(response.images);
         } else {
@@ -246,7 +282,7 @@ const Gallery = () => {
     };
 
     fetchImages();
-  }, []);
+  }, [folder, navigate]);
 
   // Filter images based on search
   const filteredImages = useMemo(() => {
@@ -360,16 +396,20 @@ const Gallery = () => {
     }
 
     uploadFile(file);
-  }, []);
+  }, [selectedFolder]);
 
   const uploadFile = useCallback(async (file) => {
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
-      const response = await galleryApi.uploadPhoto(file, (progress) => {
-        setUploadProgress(progress);
-      });
+      const response = await galleryApi.uploadPhoto(
+        file,
+        selectedFolder,
+        (progress) => {
+          setUploadProgress(progress);
+        }
+      );
 
       if (response.success) {
         toast.success("Photo uploaded successfully!");
@@ -380,7 +420,7 @@ const Gallery = () => {
           fileInputRef.current.value = "";
         }
         // Refresh gallery images
-        const refreshResponse = await galleryApi.getImages();
+        const refreshResponse = await galleryApi.getGalleryImages(folder);
         if (refreshResponse.success && refreshResponse.images) {
           setAllImages(refreshResponse.images);
         }
@@ -392,7 +432,7 @@ const Gallery = () => {
     } finally {
       setIsUploading(false);
     }
-  }, []);
+  }, [selectedFolder, folder]);
 
   if (isLoading) {
     return (
@@ -427,6 +467,21 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Back Navigation */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="px-4 pt-6 max-w-7xl mx-auto"
+      >
+        <button
+          onClick={() => navigate("/gallery")}
+          className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 transition-colors"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          <span className="font-medium">Back to Galleries</span>
+        </button>
+      </motion.div>
+
       {/* Hero Section */}
       <motion.section
         initial={{ opacity: 0, y: -50 }}
@@ -454,7 +509,7 @@ const Gallery = () => {
             transition={{ delay: 0.2, duration: 0.8 }}
             className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6"
           >
-            UNMA Gallery
+            {galleryDisplayName || "UNMA Gallery"}
           </motion.h1>
 
           <motion.p
@@ -486,11 +541,14 @@ const Gallery = () => {
             className="max-w-md mx-auto"
           >
             <button
-              onClick={() => setShowUploadModal(true)}
+              onClick={() => {
+                setSelectedFolder(folder);
+                setShowUploadModal(true);
+              }}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <CloudArrowUpIcon className="w-5 h-5" />
-              Want to upload Summit 2025 photos?
+              Upload Photos
             </button>
           </motion.div>
         </div>
@@ -729,7 +787,7 @@ const Gallery = () => {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-bold text-gray-800">
-                  Upload Summit 2025 Photo
+                  Upload Photo
                 </h3>
                 <button
                   onClick={() => !isUploading && setShowUploadModal(false)}
@@ -741,6 +799,27 @@ const Gallery = () => {
               </div>
 
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Gallery Folder
+                  </label>
+                  <select
+                    value={selectedFolder}
+                    onChange={(e) => setSelectedFolder(e.target.value)}
+                    disabled={isUploading}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    {galleries.map((gallery) => (
+                      <option key={gallery.name} value={gallery.name}>
+                        {gallery.displayName} ({gallery.imageCount} photos)
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Choose which gallery to upload to
+                  </p>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Photo

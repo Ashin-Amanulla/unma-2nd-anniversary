@@ -12,6 +12,7 @@ const Registration = lazy(() => import("./pages/Registration"));
 const QuickRegistration = lazy(() =>
   import("./components/registration/QuickRegistration")
 );
+const GalleryLanding = lazy(() => import("./pages/GalleryLanding"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 // const Success = lazy(() => import("./pages/Success"));
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
@@ -89,7 +90,8 @@ function App() {
                   path="/quick-registration"
                   element={<QuickRegistration />}
                 /> */}
-                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/gallery" element={<GalleryLanding />} />
+                <Route path="/gallery/:folder" element={<Gallery />} />
                 <Route path="/program" element={<Program />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 {/* <Route
