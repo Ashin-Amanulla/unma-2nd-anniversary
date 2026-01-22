@@ -1172,6 +1172,7 @@ export const exportAllRegistrations = async (req, res) => {
       return {
         // Basic Information
         id: registration._id,
+        serialNumber: registration.serialNumber || "",
         name: registration.name || "",
         email: registration.email || "",
         contactNumber: registration.contactNumber || "",
@@ -1193,7 +1194,7 @@ export const exportAllRegistrations = async (req, res) => {
         bloodGroup:
           registration.formDataStructured?.personalInfo?.bloodGroup || "",
 
-        // Staff Specific Fields
+        // Staff Specific Fields (root level)
         schoolsWorked: registration.schoolsWorked || "",
         yearsOfWorking: registration.yearsOfWorking || "",
         currentPosition: registration.currentPosition || "",
@@ -1264,6 +1265,25 @@ export const exportAllRegistrations = async (req, res) => {
           registration.formDataStructured?.professional?.areaOfExpertise || "",
         keySkills:
           registration.formDataStructured?.professional?.keySkills || "",
+        yearsOfWorking:
+          registration.formDataStructured?.professional?.yearsOfWorking ||
+          registration.yearsOfWorking ||
+          "",
+        currentPosition:
+          registration.formDataStructured?.professional?.currentPosition ||
+          registration.currentPosition ||
+          "",
+        otherPosition:
+          registration.formDataStructured?.professional?.otherPosition || "",
+        schoolsWorked:
+          registration.formDataStructured?.professional?.schoolsWorked ||
+          registration.schoolsWorked ||
+          "",
+        subject:
+          registration.formDataStructured?.professional?.subject || "",
+        additionalDetails:
+          registration.formDataStructured?.professional?.additionalDetails ||
+          "",
 
         // Accommodation
         planAccommodation: registration.formDataStructured?.accommodation
@@ -1292,6 +1312,28 @@ export const exportAllRegistrations = async (req, res) => {
             ?.other || 0,
         accommodationGender:
           registration.formDataStructured?.accommodation?.accommodationGender ||
+          "",
+        // Accommodation Pincode Fields
+        accommodationPincode:
+          registration.formDataStructured?.accommodation?.accommodationPincode ||
+          "",
+        accommodationDistrict:
+          registration.formDataStructured?.accommodation
+            ?.accommodationDistrict || "",
+        accommodationState:
+          registration.formDataStructured?.accommodation?.accommodationState ||
+          "",
+        accommodationTaluk:
+          registration.formDataStructured?.accommodation?.accommodationTaluk ||
+          "",
+        accommodationLandmark:
+          registration.formDataStructured?.accommodation
+            ?.accommodationLandmark || "",
+        accommodationSubPostOffice:
+          registration.formDataStructured?.accommodation
+            ?.accommodationSubPostOffice || "",
+        accommodationArea:
+          registration.formDataStructured?.accommodation?.accommodationArea ||
           "",
 
         // Hotel Requirements
@@ -1347,6 +1389,34 @@ export const exportAllRegistrations = async (req, res) => {
         travelSpecialRequirements:
           registration.formDataStructured?.transportation
             ?.travelSpecialRequirements || "",
+        // Transportation First Segment Fields
+        travelConsistsTwoSegments:
+          registration.formDataStructured?.transportation
+            ?.travelConsistsTwoSegments || "",
+        connectWithNavodayansFirstSegment:
+          registration.formDataStructured?.transportation
+            ?.connectWithNavodayansFirstSegment || "",
+        firstSegmentStartingLocation:
+          registration.formDataStructured?.transportation
+            ?.firstSegmentStartingLocation || "",
+        firstSegmentTravelDate:
+          registration.formDataStructured?.transportation
+            ?.firstSegmentTravelDate || "",
+        // Transportation Pincode Fields
+        startPincode:
+          registration.formDataStructured?.transportation?.startPincode || "",
+        pinDistrict:
+          registration.formDataStructured?.transportation?.pinDistrict || "",
+        pinState:
+          registration.formDataStructured?.transportation?.pinState || "",
+        pinTaluk:
+          registration.formDataStructured?.transportation?.pinTaluk || "",
+        subPostOffice:
+          registration.formDataStructured?.transportation?.subPostOffice || "",
+        originArea:
+          registration.formDataStructured?.transportation?.originArea || "",
+        nearestLandmark:
+          registration.formDataStructured?.transportation?.nearestLandmark || "",
 
         // Sponsorship
         interestedInSponsorship: registration.formDataStructured?.sponsorship
@@ -1388,6 +1458,13 @@ export const exportAllRegistrations = async (req, res) => {
         tshirtInterest:
           registration.formDataStructured?.optional?.tshirtInterest || "",
 
+        // Entry Tracking
+        markedEntered: registration.markedEntered ? "Yes" : "No",
+        enteredAt: registration.enteredAt
+          ? new Date(registration.enteredAt).toISOString().split("T")[0]
+          : "",
+        enteredBy: registration.enteredBy || "",
+
         // Metadata
         registrationDate: registration.registrationDate
           ? new Date(registration.registrationDate).toISOString().split("T")[0]
@@ -1396,6 +1473,7 @@ export const exportAllRegistrations = async (req, res) => {
           ? new Date(registration.lastUpdated).toISOString().split("T")[0]
           : "",
         emailVerified: registration.emailVerified ? "Yes" : "No",
+        lastUpdatedBy: registration.lastUpdatedBy || "",
       };
     });
 

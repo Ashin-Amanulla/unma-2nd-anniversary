@@ -34,6 +34,7 @@ const RepublicDayEventRegistrations = () => {
   const [searchInput, setSearchInput] = useState("");
   const [jnvSchoolFilter, setJnvSchoolFilter] = useState("");
   const [foodChoiceFilter, setFoodChoiceFilter] = useState("");
+  const [sponsorFilter, setSponsorFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   
   // Modal
@@ -56,6 +57,7 @@ const RepublicDayEventRegistrations = () => {
         ...(search && { search }),
         ...(jnvSchoolFilter && { jnvSchool: jnvSchoolFilter }),
         ...(foodChoiceFilter && { foodChoice: foodChoiceFilter }),
+        ...(sponsorFilter && { interestedInSponsorship: sponsorFilter === "yes" }),
       };
       
       const response = await republicDayEventApi.getAllRegistrations(params);
@@ -79,7 +81,7 @@ const RepublicDayEventRegistrations = () => {
     if (isAuthenticated) {
       fetchRegistrations();
     }
-  }, [isAuthenticated, pagination.page, search, jnvSchoolFilter, foodChoiceFilter]);
+  }, [isAuthenticated, pagination.page, search, jnvSchoolFilter, foodChoiceFilter, sponsorFilter]);
 
   // Handle search
   const handleSearch = (e) => {
@@ -94,6 +96,7 @@ const RepublicDayEventRegistrations = () => {
     setSearchInput("");
     setJnvSchoolFilter("");
     setFoodChoiceFilter("");
+    setSponsorFilter("");
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
@@ -106,17 +109,23 @@ const RepublicDayEventRegistrations = () => {
       "Email",
       "Phone",
       "JNV School",
+      "JNV Other",
       "Batch Year",
       "Food Choice",
+      "Family Members Count",
       "Blood Donation",
       "National Song",
       "Boat Ride",
       "Volunteer",
       "WhatsApp Group",
+      "Interested in Sponsorship",
       "Payment Method",
       "Amount Paid",
       "Transaction ID",
+      "Payment Date",
+      "Submitted",
       "Registration Date",
+      "Last Updated",
     ];
 
     const rows = registrations.map((reg) => [
@@ -124,17 +133,23 @@ const RepublicDayEventRegistrations = () => {
       reg.email,
       reg.phoneNumber,
       reg.jnvSchool,
+      reg.jnvOther || "",
       reg.batchYear || "",
       reg.foodChoice,
+      reg.familyMembersCount ?? "",
       reg.participateBloodDonation ? "Yes" : "No",
       reg.participateNationalSong ? "Yes" : "No",
       reg.joinBoatRide ? "Yes" : "No",
       reg.readyToVolunteer ? "Yes" : "No",
       reg.partOfWhatsAppGroup ? "Yes" : "No",
+      reg.interestedInSponsorship ? "Yes" : "No",
       reg.paymentMethod || "",
       reg.amountPaid || 0,
       reg.transactionId || "",
+      reg.paymentDate ? new Date(reg.paymentDate).toLocaleDateString() : "",
+      reg.submitted ? "Yes" : "No",
       new Date(reg.registrationDate).toLocaleDateString(),
+      new Date(reg.lastUpdated).toLocaleDateString(),
     ]);
 
     const csvContent = [
@@ -225,7 +240,7 @@ const RepublicDayEventRegistrations = () => {
           </button>
           
           {/* Clear Filters */}
-          {(search || jnvSchoolFilter || foodChoiceFilter) && (
+          {(search || jnvSchoolFilter || foodChoiceFilter || sponsorFilter) && (
             <button
               onClick={clearFilters}
               className="px-4 py-2 text-red-600 hover:text-red-700 flex items-center gap-2"
@@ -271,6 +286,23 @@ const RepublicDayEventRegistrations = () => {
                 <option value="Non-Veg">Non-Vegetarian</option>
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sponsor Ticket
+              </label>
+              <select
+                value={sponsorFilter}
+                onChange={(e) => {
+                  setSponsorFilter(e.target.value);
+                  setPagination((prev) => ({ ...prev, page: 1 }));
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All</option>
+                <option value="yes">Interested in Sponsorship</option>
+                <option value="no">Not Interested</option>
+              </select>
+            </div>
           </div>
         )}
       </div>
@@ -293,6 +325,9 @@ const RepublicDayEventRegistrations = () => {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   School / Batch
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Count
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Food
@@ -330,6 +365,9 @@ const RepublicDayEventRegistrations = () => {
                       <div className="h-4 bg-gray-200 rounded w-28"></div>
                     </td>
                     <td className="px-4 py-4">
+                      <div className="h-8 w-8 bg-gray-200 rounded-full mx-auto"></div>
+                    </td>
+                    <td className="px-4 py-4">
                       <div className="h-5 bg-gray-200 rounded w-12 mx-auto"></div>
                     </td>
                     <td className="px-4 py-4">
@@ -354,7 +392,7 @@ const RepublicDayEventRegistrations = () => {
                 ))
               ) : registrations.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan="10" className="px-4 py-8 text-center text-gray-500">
                     No registrations found
                   </td>
                 </tr>
@@ -371,6 +409,18 @@ const RepublicDayEventRegistrations = () => {
                       {reg.batchYear && (
                         <div className="text-sm text-gray-500">Batch: {reg.batchYear}</div>
                       )}
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="inline-flex items-center justify-center w-8 h-8 text-sm font-semibold text-blue-800 bg-blue-100 rounded-full">
+                          {1 + (reg.familyMembersCount || 0)}
+                        </span>
+                        {reg.familyMembersCount > 0 && (
+                          <span className="text-xs text-gray-500 mt-1">
+                            +{reg.familyMembersCount} guest{reg.familyMembersCount > 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-4 text-center">
                       <span

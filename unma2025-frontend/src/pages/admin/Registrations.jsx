@@ -30,6 +30,7 @@ const Registrations = () => {
     formSubmissionComplete: "",
     isAttending: "",
     school: "",
+    sponsorTicket: "",
     fromDate: "",
     toDate: "",
     page: 1,
@@ -274,6 +275,20 @@ const Registrations = () => {
                 <option value="complete">Complete</option>
                 <option value="review">Review</option>
                 <option value="incomplete">Incomplete</option>
+              </select>
+            </div>
+
+            <div>
+              <select
+                name="sponsorTicket"
+                value={filters.sponsorTicket}
+                onChange={handleFilterChange}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="">All Sponsors</option>
+                <option value="interested">Interested in Sponsorship</option>
+                <option value="canRefer">Can Refer Sponsorship</option>
+                <option value="hasTier">Has Sponsorship Tier</option>
               </select>
             </div>
 

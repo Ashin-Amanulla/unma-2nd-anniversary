@@ -336,6 +336,7 @@ export const getAllRegistrations = async (req, res) => {
       isAttending,
       paymentStatus,
       school,
+      sponsorTicket,
       search,
       sortBy = "registrationDate",
       sortOrder = "desc",
@@ -391,6 +392,21 @@ export const getAllRegistrations = async (req, res) => {
       } else if (paymentStatus === "review") {
         query["paymentStatus"] = "pending";
         query["formSubmissionComplete"] = true;
+      }
+    }
+
+    // Add sponsor ticket filter
+    if (sponsorTicket && sponsorTicket.trim() !== "") {
+      if (sponsorTicket === "interested") {
+        query["formDataStructured.sponsorship.interestedInSponsorship"] = true;
+      } else if (sponsorTicket === "canRefer") {
+        query["formDataStructured.sponsorship.canReferSponsorship"] = true;
+      } else if (sponsorTicket === "hasTier") {
+        query["formDataStructured.sponsorship.sponsorshipTier"] = {
+          $exists: true,
+          $ne: "",
+          $ne: null,
+        };
       }
     }
 

@@ -9,6 +9,8 @@ import {
   MusicalNoteIcon,
   HandRaisedIcon,
   SparklesIcon,
+  GiftIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import {
   Chart as ChartJS,
@@ -93,6 +95,20 @@ const RepublicDayEventDashboard = () => {
         icon: UserGroupIcon,
         color: "bg-blue-500",
         subtext: "Republic Day Event",
+      },
+      {
+        title: "Total Attendees",
+        value: stats.totalAttendees || 0,
+        icon: UsersIcon,
+        color: "bg-teal-500",
+        subtext: `${stats.totalFamilyMembers || 0} family members`,
+      },
+      {
+        title: "Sponsors",
+        value: stats.sponsorCount || 0,
+        icon: GiftIcon,
+        color: "bg-yellow-500",
+        subtext: "Interested in Sponsorship",
       },
       {
         title: "Vegetarian",
@@ -263,7 +279,7 @@ const RepublicDayEventDashboard = () => {
       {isLoading ? (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <div
                 key={i}
                 className="bg-white p-6 rounded-lg shadow-sm animate-pulse"
@@ -335,6 +351,18 @@ const RepublicDayEventDashboard = () => {
                   <span className="text-gray-700">Total Registrations</span>
                   <span className="font-semibold text-blue-600">
                     {stats?.totalRegistrations || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-teal-50 rounded-lg">
+                  <span className="text-gray-700">Total Attendees (incl. guests)</span>
+                  <span className="font-semibold text-teal-600">
+                    {stats?.totalAttendees || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                  <span className="text-gray-700">Interested in Sponsorship</span>
+                  <span className="font-semibold text-yellow-600">
+                    {stats?.sponsorCount || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">

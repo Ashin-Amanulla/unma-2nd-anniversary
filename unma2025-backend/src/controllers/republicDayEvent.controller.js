@@ -94,6 +94,7 @@ export const getAllRegistrations = async (req, res) => {
       jnvSchool,
       foodChoice,
       paymentMethod,
+      interestedInSponsorship,
     } = req.query;
 
     const query = {};
@@ -120,6 +121,11 @@ export const getAllRegistrations = async (req, res) => {
     // Filter by payment method
     if (paymentMethod) {
       query.paymentMethod = paymentMethod;
+    }
+
+    // Filter by sponsorship interest
+    if (interestedInSponsorship !== undefined && interestedInSponsorship !== "") {
+      query.interestedInSponsorship = interestedInSponsorship === "true" || interestedInSponsorship === true;
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -194,6 +200,14 @@ export const getRegistrationStats = async (req, res) => {
         $group: {
           _id: null,
           totalRegistrations: { $sum: 1 },
+          totalAttendees: {
+            $sum: {
+              $add: [1, { $ifNull: ["$familyMembersCount", 0] }],
+            },
+          },
+          totalFamilyMembers: {
+            $sum: { $ifNull: ["$familyMembersCount", 0] },
+          },
           vegCount: {
             $sum: { $cond: [{ $eq: ["$foodChoice", "Veg"] }, 1, 0] },
           },
@@ -218,6 +232,9 @@ export const getRegistrationStats = async (req, res) => {
           },
           whatsAppGroupCount: {
             $sum: { $cond: [{ $eq: ["$partOfWhatsAppGroup", true] }, 1, 0] },
+          },
+          sponsorCount: {
+            $sum: { $cond: [{ $eq: ["$interestedInSponsorship", true] }, 1, 0] },
           },
           totalAmountPaid: { $sum: "$amountPaid" },
           avgAmountPaid: { $avg: "$amountPaid" },
@@ -253,6 +270,8 @@ export const getRegistrationStats = async (req, res) => {
       data: {
         ...(stats[0] || {
           totalRegistrations: 0,
+          totalAttendees: 0,
+          totalFamilyMembers: 0,
           vegCount: 0,
           nonVegCount: 0,
           bloodDonationCount: 0,
@@ -260,6 +279,7 @@ export const getRegistrationStats = async (req, res) => {
           boatRideCount: 0,
           volunteerCount: 0,
           whatsAppGroupCount: 0,
+          sponsorCount: 0,
           totalAmountPaid: 0,
           avgAmountPaid: 0,
         }),
