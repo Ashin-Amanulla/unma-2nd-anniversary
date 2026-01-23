@@ -28,6 +28,7 @@ const RepublicDayEventRegistrations = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
   
   // Filters
   const [search, setSearch] = useState("");
@@ -101,67 +102,95 @@ const RepublicDayEventRegistrations = () => {
   };
 
   // Export to CSV
-  const exportToCSV = () => {
-    if (registrations.length === 0) return;
+  const exportToCSV = async () => {
+    try {
+      setIsExporting(true);
+      
+      // Fetch all registrations with current filters applied
+      const params = {
+        page: 1,
+        limit: 10000, // Large limit to fetch all records
+        ...(search && { search }),
+        ...(jnvSchoolFilter && { jnvSchool: jnvSchoolFilter }),
+        ...(foodChoiceFilter && { foodChoice: foodChoiceFilter }),
+        ...(sponsorFilter && { interestedInSponsorship: sponsorFilter === "yes" }),
+      };
+      
+      const response = await republicDayEventApi.getAllRegistrations(params);
+      const allRegistrations = response.data || [];
+      
+      if (allRegistrations.length === 0) {
+        alert("No registrations found to export");
+        return;
+      }
 
-    const headers = [
-      "Name",
-      "Email",
-      "Phone",
-      "JNV School",
-      "JNV Other",
-      "Batch Year",
-      "Food Choice",
-      "Family Members Count",
-      "Blood Donation",
-      "National Song",
-      "Boat Ride",
-      "Volunteer",
-      "WhatsApp Group",
-      "Interested in Sponsorship",
-      "Payment Method",
-      "Amount Paid",
-      "Transaction ID",
-      "Payment Date",
-      "Submitted",
-      "Registration Date",
-      "Last Updated",
-    ];
+      const headers = [
+        "Name",
+        "Email",
+        "Phone",
+        "JNV School",
+        "JNV Other",
+        "Batch Year",
+        "Food Choice",
+        "Family Members Count",
+        "Blood Donation",
+        "National Song",
+        "Boat Ride",
+        "Volunteer",
+        "WhatsApp Group",
+        "Interested in Sponsorship",
+        "Payment Method",
+        "Amount Paid",
+        "Transaction ID",
+        "Payment Date",
+        "Submitted",
+        "Registration Date",
+        "Last Updated",
+      ];
 
-    const rows = registrations.map((reg) => [
-      reg.name,
-      reg.email,
-      reg.phoneNumber,
-      reg.jnvSchool,
-      reg.jnvOther || "",
-      reg.batchYear || "",
-      reg.foodChoice,
-      reg.familyMembersCount ?? "",
-      reg.participateBloodDonation ? "Yes" : "No",
-      reg.participateNationalSong ? "Yes" : "No",
-      reg.joinBoatRide ? "Yes" : "No",
-      reg.readyToVolunteer ? "Yes" : "No",
-      reg.partOfWhatsAppGroup ? "Yes" : "No",
-      reg.interestedInSponsorship ? "Yes" : "No",
-      reg.paymentMethod || "",
-      reg.amountPaid || 0,
-      reg.transactionId || "",
-      reg.paymentDate ? new Date(reg.paymentDate).toLocaleDateString() : "",
-      reg.submitted ? "Yes" : "No",
-      new Date(reg.registrationDate).toLocaleDateString(),
-      new Date(reg.lastUpdated).toLocaleDateString(),
-    ]);
+      const rows = allRegistrations.map((reg) => [
+        reg.name,
+        reg.email,
+        reg.phoneNumber,
+        reg.jnvSchool,
+        reg.jnvOther || "",
+        reg.batchYear || "",
+        reg.foodChoice,
+        reg.familyMembersCount ?? "",
+        reg.participateBloodDonation ? "Yes" : "No",
+        reg.participateNationalSong ? "Yes" : "No",
+        reg.joinBoatRide ? "Yes" : "No",
+        reg.readyToVolunteer ? "Yes" : "No",
+        reg.partOfWhatsAppGroup ? "Yes" : "No",
+        reg.interestedInSponsorship ? "Yes" : "No",
+        reg.paymentMethod || "",
+        reg.amountPaid || 0,
+        reg.transactionId || "",
+        reg.paymentDate ? new Date(reg.paymentDate).toLocaleDateString() : "",
+        reg.submitted ? "Yes" : "No",
+        new Date(reg.registrationDate).toLocaleDateString(),
+        new Date(reg.lastUpdated).toLocaleDateString(),
+      ]);
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
-    ].join("\n");
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ].join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `republic_day_registrations_${new Date().toISOString().split("T")[0]}.csv`;
-    link.click();
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `republic_day_registrations_${new Date().toISOString().split("T")[0]}.csv`;
+      link.click();
+      
+      // Clean up the object URL
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      console.error("Failed to export CSV:", err);
+      alert("Failed to export CSV. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Boolean indicator component
@@ -202,11 +231,11 @@ const RepublicDayEventRegistrations = () => {
           </Link>
           <button
             onClick={exportToCSV}
-            disabled={registrations.length === 0}
+            disabled={isExporting || pagination.total === 0}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <ArrowDownTrayIcon className="h-5 w-5" />
-            Export CSV
+            {isExporting ? "Exporting..." : "Export CSV"}
           </button>
         </div>
       </div>
