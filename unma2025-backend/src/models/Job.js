@@ -22,7 +22,7 @@ const JobSchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["Full-time", "Part-time", "Internship", "Contract", "Freelance"],
+            enum: ["Full-time", "Part-time", "Internship", "Contract", "Freelance", "Apprenticeship", "Trainee"],
             required: [true, "Job type is required"],
         },
         location: {
@@ -145,6 +145,58 @@ const JobSchema = new mongoose.Schema(
             ref: "Admin",
             default: null,
         },
+
+        // Approval Status (for public submissions)
+        approvalStatus: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "approved", // Admin-created jobs are auto-approved
+        },
+
+        // Submitter Info (for public submissions)
+        submitterInfo: {
+            name: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            email: {
+                type: String,
+                trim: true,
+                lowercase: true,
+                default: "",
+            },
+            phone: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            organization: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+        },
+
+        // Rejection reason (if rejected)
+        rejectionReason: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        // Approved By (Admin who approved the job)
+        approvedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Admin",
+            default: null,
+        },
+
+        // Approved At timestamp
+        approvedAt: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps: true,
@@ -158,6 +210,7 @@ JobSchema.index({ qualification: 1, isActive: 1 });
 JobSchema.index({ selectionCriteria: 1, isActive: 1 });
 JobSchema.index({ "ageLimit.minAge": 1, "ageLimit.maxAge": 1 });
 JobSchema.index({ title: "text", company: "text", description: "text" });
+JobSchema.index({ approvalStatus: 1, createdAt: -1 }); // For pending jobs queries
 
 const Job = mongoose.model("Job", JobSchema);
 

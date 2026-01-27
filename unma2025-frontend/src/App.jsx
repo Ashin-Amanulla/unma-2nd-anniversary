@@ -69,6 +69,7 @@ const RepublicDayEventRegistrations = lazy(() =>
 const Careers = lazy(() => import("./pages/Careers"));
 const JobDetail = lazy(() => import("./pages/JobDetail"));
 const JobManagement = lazy(() => import("./pages/admin/JobManagement"));
+const PendingJobs = lazy(() => import("./pages/admin/PendingJobs"));
 const TeamManagement = lazy(() => import("./pages/admin/TeamManagement"));
 const UpdatesManagement = lazy(() => import("./pages/admin/UpdatesManagement"));
 const EventManagement = lazy(() => import("./pages/admin/EventManagement"));
@@ -200,6 +201,7 @@ function App() {
                     element={<RepublicDayEventRegistrations />}
                   />
                   <Route path="jobs" element={<JobManagement />} />
+                  <Route path="pending-jobs" element={<PendingJobs />} />
                   <Route path="team" element={<TeamManagement />} />
                   <Route path="updates" element={<UpdatesManagement />} />
                   {isSuperAdmin && (

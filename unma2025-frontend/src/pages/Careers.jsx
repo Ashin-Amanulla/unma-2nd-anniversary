@@ -13,6 +13,8 @@ import {
   FunnelIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  PlusIcon,
+  CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import jobApi from "../api/jobApi";
 import Loading from "../components/ui/Loading";
@@ -23,6 +25,9 @@ const Careers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [filters, setFilters] = useState({
     type: "All",
     search: "",
@@ -36,6 +41,29 @@ const Careers = () => {
     total: 0,
     pages: 0,
   });
+  const [jobFormData, setJobFormData] = useState({
+    title: "",
+    company: "",
+    description: "",
+    type: "Full-time",
+    location: "",
+    salary: "",
+    requirements: "",
+    responsibilities: "",
+    applicationUrl: "",
+    applicationEmail: "",
+    contactPerson: "",
+    contactPhone: "",
+    deadline: "",
+    ageLimit: { minAge: "", maxAge: "" },
+    qualification: "Any",
+    careerGrowth: "",
+    selectionCriteria: "Other",
+    submitterName: "",
+    submitterEmail: "",
+    submitterPhone: "",
+    submitterOrganization: "",
+  });
 
   const jobTypes = [
     "All",
@@ -44,6 +72,8 @@ const Careers = () => {
     "Internship",
     "Contract",
     "Freelance",
+    "Apprenticeship",
+    "Trainee",
   ];
 
   const fetchJobs = async () => {
@@ -174,6 +204,10 @@ const Careers = () => {
                         ? "bg-green-100 text-green-700"
                         : job.type === "Internship"
                         ? "bg-purple-100 text-purple-700"
+                        : job.type === "Apprenticeship"
+                        ? "bg-orange-100 text-orange-700"
+                        : job.type === "Trainee"
+                        ? "bg-pink-100 text-pink-700"
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >
@@ -242,6 +276,60 @@ const Careers = () => {
     </div>
   );
 
+  const handleJobFormSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const submitData = {
+        ...jobFormData,
+        submitterName: jobFormData.submitterName,
+        submitterEmail: jobFormData.submitterEmail,
+        submitterPhone: jobFormData.submitterPhone,
+        submitterOrganization: jobFormData.submitterOrganization,
+        ageLimit: {
+          minAge: jobFormData.ageLimit.minAge ? Number(jobFormData.ageLimit.minAge) : null,
+          maxAge: jobFormData.ageLimit.maxAge ? Number(jobFormData.ageLimit.maxAge) : null,
+        },
+      };
+
+      await jobApi.submitPublicJob(submitData);
+      setSubmitSuccess(true);
+      setJobFormData({
+        title: "",
+        company: "",
+        description: "",
+        type: "Full-time",
+        location: "",
+        salary: "",
+        requirements: "",
+        responsibilities: "",
+        applicationUrl: "",
+        applicationEmail: "",
+        contactPerson: "",
+        contactPhone: "",
+        deadline: "",
+        ageLimit: { minAge: "", maxAge: "" },
+        qualification: "Any",
+        careerGrowth: "",
+        selectionCriteria: "Other",
+        submitterName: "",
+        submitterEmail: "",
+        submitterPhone: "",
+        submitterOrganization: "",
+      });
+      setTimeout(() => {
+        setShowJobForm(false);
+        setSubmitSuccess(false);
+      }, 3000);
+    } catch (err) {
+      setError(err.message || "Failed to submit job. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -249,9 +337,16 @@ const Careers = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Available Opportunities
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
             Explore active career opportunities, internships, and job openings.
           </p>
+          <button
+            onClick={() => setShowJobForm(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors shadow-md hover:shadow-lg"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Post a Job
+          </button>
         </div>
 
         {/* Search Bar - Above sidebar and content */}
@@ -520,6 +615,290 @@ const Careers = () => {
           </div>
         )}
       </div>
+
+      {/* Job Submission Modal */}
+      {showJobForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Post a Job</h2>
+              <button
+                onClick={() => {
+                  setShowJobForm(false);
+                  setSubmitSuccess(false);
+                  setError(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleJobFormSubmit} className="p-6 space-y-6">
+              {submitSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                  <p className="text-green-800 font-medium">
+                    Job submitted successfully! It will be reviewed by an administrator before being published.
+                  </p>
+                </div>
+              )}
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800">{error}</p>
+                </div>
+              )}
+
+              {/* Submitter Information */}
+              <div className="border-b border-gray-200 pb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Contact Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={jobFormData.submitterName}
+                      onChange={(e) => setJobFormData({ ...jobFormData, submitterName: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={jobFormData.submitterEmail}
+                      onChange={(e) => setJobFormData({ ...jobFormData, submitterEmail: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Phone</label>
+                    <input
+                      type="tel"
+                      value={jobFormData.submitterPhone}
+                      onChange={(e) => setJobFormData({ ...jobFormData, submitterPhone: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                    <input
+                      type="text"
+                      value={jobFormData.submitterOrganization}
+                      onChange={(e) => setJobFormData({ ...jobFormData, submitterOrganization: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Job Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+                    <input
+                      type="text"
+                      required
+                      value={jobFormData.title}
+                      onChange={(e) => setJobFormData({ ...jobFormData, title: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={jobFormData.company}
+                      onChange={(e) => setJobFormData({ ...jobFormData, company: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Type *</label>
+                    <select
+                      required
+                      value={jobFormData.type}
+                      onChange={(e) => setJobFormData({ ...jobFormData, type: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    >
+                      <option value="Full-time">Full-time</option>
+                      <option value="Part-time">Part-time</option>
+                      <option value="Internship">Internship</option>
+                      <option value="Contract">Contract</option>
+                      <option value="Freelance">Freelance</option>
+                      <option value="Apprenticeship">Apprenticeship</option>
+                      <option value="Trainee">Trainee</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input
+                      type="text"
+                      value={jobFormData.location}
+                      onChange={(e) => setJobFormData({ ...jobFormData, location: e.target.value })}
+                      placeholder="e.g. Remote, Bangalore"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range</label>
+                    <input
+                      type="text"
+                      value={jobFormData.salary}
+                      onChange={(e) => setJobFormData({ ...jobFormData, salary: e.target.value })}
+                      placeholder="e.g. ₹5,00,000 - ₹8,00,000 PA"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+                    <input
+                      type="date"
+                      value={jobFormData.deadline}
+                      onChange={(e) => setJobFormData({ ...jobFormData, deadline: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Job Description *</label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={jobFormData.description}
+                    onChange={(e) => setJobFormData({ ...jobFormData, description: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Requirements (one per line)</label>
+                    <textarea
+                      rows={3}
+                      value={jobFormData.requirements}
+                      onChange={(e) => setJobFormData({ ...jobFormData, requirements: e.target.value })}
+                      placeholder="- React.js experience&#10;- 3+ years coding"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Responsibilities (one per line)</label>
+                    <textarea
+                      rows={3}
+                      value={jobFormData.responsibilities}
+                      onChange={(e) => setJobFormData({ ...jobFormData, responsibilities: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Application URL</label>
+                    <input
+                      type="url"
+                      value={jobFormData.applicationUrl}
+                      onChange={(e) => setJobFormData({ ...jobFormData, applicationUrl: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Application Email</label>
+                    <input
+                      type="email"
+                      value={jobFormData.applicationEmail}
+                      onChange={(e) => setJobFormData({ ...jobFormData, applicationEmail: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Age</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={jobFormData.ageLimit.minAge}
+                      onChange={(e) => setJobFormData({ ...jobFormData, ageLimit: { ...jobFormData.ageLimit, minAge: e.target.value } })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Age</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={jobFormData.ageLimit.maxAge}
+                      onChange={(e) => setJobFormData({ ...jobFormData, ageLimit: { ...jobFormData.ageLimit, maxAge: e.target.value } })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Educational Qualification</label>
+                    <select
+                      value={jobFormData.qualification}
+                      onChange={(e) => setJobFormData({ ...jobFormData, qualification: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    >
+                      <option value="Any">Any</option>
+                      <option value="10th Pass">10th Pass</option>
+                      <option value="12th Pass">12th Pass</option>
+                      <option value="Diploma">Diploma</option>
+                      <option value="Graduate">Graduate</option>
+                      <option value="Post Graduate">Post Graduate</option>
+                      <option value="PhD">PhD</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Selection Criteria</label>
+                    <select
+                      value={jobFormData.selectionCriteria}
+                      onChange={(e) => setJobFormData({ ...jobFormData, selectionCriteria: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                    >
+                      <option value="Written Exam">Written Exam</option>
+                      <option value="Interview">Interview</option>
+                      <option value="Both">Both</option>
+                      <option value="Degree Marks">Degree Marks</option>
+                      <option value="Walk-in">Walk-in</option>
+                      <option value="Online Assessment">Online Assessment</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-4 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowJobForm(false);
+                    setSubmitSuccess(false);
+                    setError(null);
+                  }}
+                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? "Submitting..." : "Submit for Review"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

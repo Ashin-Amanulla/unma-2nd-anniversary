@@ -18,7 +18,7 @@ const userLogSchema = new mongoose.Schema(
     },
     userRole: {
       type: String,
-      enum: ["super_admin", "school_admin", "registration_desk"],
+      enum: ["super_admin", "school_admin", "registration_desk", "career_admin"],
       required: true,
     },
 

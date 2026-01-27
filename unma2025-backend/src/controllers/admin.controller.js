@@ -48,31 +48,40 @@ export const createAdmin = async (req, res) => {
 // New function to create sub-admin
 export const createSubAdmin = async (req, res) => {
   try {
-    const { name, email, password, assignedSchools, permissions } = req.body;
+    const { name, email, password, assignedSchools, permissions, sidebarAccess, role } = req.body;
 
-  
+    logger.info("Creating sub-admin with data:", {
+      name,
+      email,
+      role,
+      sidebarAccess,
+      hasSidebarAccess: !!sidebarAccess,
+      sidebarAccessLength: sidebarAccess?.length || 0,
+    });
 
     // Validate required fields
     if (
       !name ||
       !email ||
-      !password ||
-      !assignedSchools ||
-      assignedSchools.length === 0
+      !password
     ) {
       return res.status(400).json({
         status: "error",
         message:
-          "Name, email, password, and at least one assigned school are required",
+          "Name, email, and password are required",
       });
     }
+
+    // Validate role
+    const validRoles = ["school_admin", "career_admin", "registration_desk"];
+    const adminRole = validRoles.includes(role) ? role : "school_admin";
 
     const subAdminData = {
       name,
       email,
       password,
-      role: "school_admin",
-      assignedSchools,
+      role: adminRole,
+      assignedSchools: assignedSchools || [],
       permissions: {
         canViewAllSchools: false,
         canManageAdmins: false,
@@ -80,8 +89,14 @@ export const createSubAdmin = async (req, res) => {
         canExportData: permissions?.canExportData || false,
         canManageSettings: false,
       },
+      sidebarAccess: sidebarAccess || [],
       createdBy: req.admin._id,
     };
+
+    logger.info("Sub-admin data to be created:", {
+      ...subAdminData,
+      password: "[REDACTED]",
+    });
 
     const subAdmin = await Admin.create(subAdminData);
 
@@ -137,7 +152,7 @@ export const updateSubAdmin = async (req, res) => {
   try {
     
     const { id } = req.params;
-    const { assignedSchools, permissions, isActive } = req.body;
+    const { assignedSchools, permissions, isActive, sidebarAccess, role } = req.body;
 
     
 
@@ -150,6 +165,13 @@ export const updateSubAdmin = async (req, res) => {
         canManageAdmins: false,
       };
     if (typeof isActive === "boolean") updateData.isActive = isActive;
+    if (sidebarAccess !== undefined) updateData.sidebarAccess = sidebarAccess;
+    if (role) {
+      const validRoles = ["school_admin", "career_admin", "registration_desk"];
+      if (validRoles.includes(role)) {
+        updateData.role = role;
+      }
+    }
 
     const subAdmin = await Admin.findByIdAndUpdate(id, updateData, {
       new: true,

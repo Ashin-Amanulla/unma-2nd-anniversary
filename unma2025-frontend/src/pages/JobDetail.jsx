@@ -125,7 +125,19 @@ const JobDetail = () => {
                    </div>
 
                    <div className="flex flex-wrap gap-3 mt-2">
-                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                       job.type === "Full-time"
+                         ? "bg-blue-100 text-blue-800"
+                         : job.type === "Part-time"
+                         ? "bg-green-100 text-green-800"
+                         : job.type === "Internship"
+                         ? "bg-purple-100 text-purple-800"
+                         : job.type === "Apprenticeship"
+                         ? "bg-orange-100 text-orange-800"
+                         : job.type === "Trainee"
+                         ? "bg-pink-100 text-pink-800"
+                         : "bg-gray-100 text-gray-800"
+                     }`}>
                         <BriefcaseIcon className="w-4 h-4 mr-2" />
                         {job.type}
                      </span>

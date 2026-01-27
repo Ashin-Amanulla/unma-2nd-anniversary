@@ -144,6 +144,59 @@ const jobApi = {
             throw error.response?.data || { message: "Failed to upload PDF" };
         }
     },
+
+    /**
+     * Submit public job for approval (Public - no auth required)
+     * @param {Object} data - Job data with submitter info
+     */
+    submitPublicJob: async (data) => {
+        try {
+            const response = await api.post("/jobs/public/submit", data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to submit job" };
+        }
+    },
+
+    /**
+     * Get pending jobs (Admin)
+     * @param {Object} params - Query parameters (page, limit)
+     */
+    getPendingJobs: async (params = {}) => {
+        try {
+            const response = await api.get("/jobs/admin/pending", { params });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to fetch pending jobs" };
+        }
+    },
+
+    /**
+     * Approve a job (Admin)
+     * @param {string} id - Job ID
+     */
+    approveJob: async (id) => {
+        try {
+            const response = await api.patch(`/jobs/${id}/approve`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to approve job" };
+        }
+    },
+
+    /**
+     * Reject a job (Admin)
+     * @param {string} id - Job ID
+     * @param {string} reason - Rejection reason
+     */
+    rejectJob: async (id, reason) => {
+        try {
+            const response = await api.patch(`/jobs/${id}/reject`, { reason });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to reject job" };
+        }
+    },
 };
 
 export default jobApi;

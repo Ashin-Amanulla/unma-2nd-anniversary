@@ -1,0 +1,104 @@
+/* React Slider Styles */
+.horizontal-slider {
+  width: 100%;
+  height: 40px;
+  position: relative;
+}
+
+.slider-track {
+  top: 50%;
+  transform: translateY(-50%);
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  position: absolute;
+  width: 100%;
+}
+
+.slider-track-custom {
+  top: 50%;
+  transform: translateY(-50%);
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  position: absolute;
+}
+
+.slider-track-active {
+  background: #3b82f6; /* primary color */
+}
+
+.slider-thumb {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
+  z-index: 3;
+}
+
+.slider-thumb:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%) scale(1.1);
+  transition: all 0.2s ease;
+}
+
+.slider-thumb:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.slider-thumb:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  ring-opacity: 0.5;
+}
+
+.slider-thumb-custom {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.slider-thumb-custom:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%) scale(1.1);
+  border-color: #2563eb;
+}
+
+.slider-thumb-custom:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.slider-thumb-custom:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.slider-thumb-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+}

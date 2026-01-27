@@ -20,7 +20,15 @@ export const getActiveJobs = async (req, res) => {
             sortOrder = "desc",
         } = req.query;
 
-        const query = { isActive: true };
+        // Show approved jobs, or legacy jobs without approvalStatus (created before approval workflow)
+        const query = {
+            isActive: true,
+            $or: [
+                { approvalStatus: "approved" },
+                { approvalStatus: { $exists: false } },
+                { approvalStatus: null },
+            ],
+        };
 
         // Filter by job type
         if (type && type !== "All") {
@@ -311,11 +319,17 @@ export const createJob = async (req, res) => {
         const jobData = req.body;
 
         // Add the admin who posted the job
-        if (req.user) {
-            jobData.postedBy = req.user.id;
+        if (req.admin) {
+            jobData.postedBy = req.admin._id;
         }
 
         const job = new Job(jobData);
+        await job.save();
+
+        // Admin-created jobs are auto-approved
+        job.approvalStatus = "approved";
+        job.approvedBy = req.admin?._id || null;
+        job.approvedAt = new Date();
         await job.save();
 
         logger.info(`Job created: ${job.title} at ${job.company}`);
@@ -518,6 +532,265 @@ export const getJobStats = async (req, res) => {
         res.status(500).json({
             status: "error",
             message: "Failed to fetch statistics",
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Submit job for public approval (Public endpoint - no auth required)
+ */
+export const submitPublicJob = async (req, res) => {
+    try {
+        const {
+            title,
+            company,
+            description,
+            type,
+            location,
+            salary,
+            requirements,
+            responsibilities,
+            applicationUrl,
+            applicationEmail,
+            contactPerson,
+            contactPhone,
+            deadline,
+            ageLimit,
+            qualification,
+            careerGrowth,
+            selectionCriteria,
+            image,
+            notificationPdf,
+            poster,
+            // Submitter info
+            submitterName,
+            submitterEmail,
+            submitterPhone,
+            submitterOrganization,
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !company || !description || !type) {
+            return res.status(400).json({
+                status: "error",
+                message: "Title, company, description, and type are required",
+            });
+        }
+
+        // Validate submitter info
+        if (!submitterName || !submitterEmail) {
+            return res.status(400).json({
+                status: "error",
+                message: "Submitter name and email are required",
+            });
+        }
+
+        // Process requirements and responsibilities (split by newline if string)
+        let requirementsArray = [];
+        let responsibilitiesArray = [];
+
+        if (requirements) {
+            requirementsArray = Array.isArray(requirements)
+                ? requirements
+                : requirements.split("\n").filter((r) => r.trim());
+        }
+
+        if (responsibilities) {
+            responsibilitiesArray = Array.isArray(responsibilities)
+                ? responsibilities
+                : responsibilities.split("\n").filter((r) => r.trim());
+        }
+
+        const jobData = {
+            title,
+            company,
+            description,
+            type,
+            location: location || "",
+            salary: salary || "",
+            requirements: requirementsArray,
+            responsibilities: responsibilitiesArray,
+            applicationUrl: applicationUrl || "",
+            applicationEmail: applicationEmail || "",
+            contactPerson: contactPerson || "",
+            contactPhone: contactPhone || "",
+            deadline: deadline || null,
+            ageLimit: ageLimit || { minAge: null, maxAge: null },
+            qualification: qualification || "Any",
+            careerGrowth: careerGrowth || "",
+            selectionCriteria: selectionCriteria || "Other",
+            image: image || "",
+            notificationPdf: notificationPdf || "",
+            poster: poster || "",
+            isActive: true,
+            approvalStatus: "pending", // Public submissions start as pending
+            submitterInfo: {
+                name: submitterName,
+                email: submitterEmail,
+                phone: submitterPhone || "",
+                organization: submitterOrganization || "",
+            },
+        };
+
+        const job = new Job(jobData);
+        await job.save();
+
+        logger.info(`Public job submission received: ${job.title} at ${job.company} by ${submitterEmail}`);
+
+        res.status(201).json({
+            status: "success",
+            message: "Job submitted successfully. It will be reviewed by an administrator before being published.",
+            data: {
+                id: job._id,
+                title: job.title,
+                company: job.company,
+            },
+        });
+    } catch (error) {
+        logger.error("Error submitting public job:", error);
+        res.status(500).json({
+            status: "error",
+            message: "Failed to submit job",
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Get pending jobs (Admin endpoint)
+ */
+export const getPendingJobs = async (req, res) => {
+    try {
+        const {
+            page = 1,
+            limit = 20,
+            sortBy = "createdAt",
+            sortOrder = "desc",
+        } = req.query;
+
+        const query = { approvalStatus: "pending" };
+
+        const skip = (Number(page) - 1) * Number(limit);
+        const sortOptions = {};
+        sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+
+        const jobs = await Job.find(query)
+            .populate("postedBy", "name email")
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(Number(limit))
+            .lean();
+
+        const total = await Job.countDocuments(query);
+
+        res.status(200).json({
+            status: "success",
+            data: jobs,
+            pagination: {
+                total,
+                page: Number(page),
+                limit: Number(limit),
+                pages: Math.ceil(total / Number(limit)),
+            },
+        });
+    } catch (error) {
+        logger.error("Error fetching pending jobs:", error);
+        res.status(500).json({
+            status: "error",
+            message: "Failed to fetch pending jobs",
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Approve a job (Admin endpoint)
+ */
+export const approveJob = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const job = await Job.findById(id);
+
+        if (!job) {
+            return res.status(404).json({
+                status: "error",
+                message: "Job not found",
+            });
+        }
+
+        if (job.approvalStatus !== "pending") {
+            return res.status(400).json({
+                status: "error",
+                message: `Job is already ${job.approvalStatus}`,
+            });
+        }
+
+        job.approvalStatus = "approved";
+        job.approvedBy = req.admin._id;
+        job.approvedAt = new Date();
+        await job.save();
+
+        logger.info(`Job approved: ${job.title} (${job._id}) by ${req.admin.email}`);
+
+        res.status(200).json({
+            status: "success",
+            message: "Job approved successfully",
+            data: job,
+        });
+    } catch (error) {
+        logger.error("Error approving job:", error);
+        res.status(500).json({
+            status: "error",
+            message: "Failed to approve job",
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Reject a job (Admin endpoint)
+ */
+export const rejectJob = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+
+        const job = await Job.findById(id);
+
+        if (!job) {
+            return res.status(404).json({
+                status: "error",
+                message: "Job not found",
+            });
+        }
+
+        if (job.approvalStatus !== "pending") {
+            return res.status(400).json({
+                status: "error",
+                message: `Job is already ${job.approvalStatus}`,
+            });
+        }
+
+        job.approvalStatus = "rejected";
+        job.rejectionReason = reason || "";
+        job.approvedBy = req.admin._id;
+        job.approvedAt = new Date();
+        await job.save();
+
+        logger.info(`Job rejected: ${job.title} (${job._id}) by ${req.admin.email}. Reason: ${reason || "No reason provided"}`);
+
+        res.status(200).json({
+            status: "success",
+            message: "Job rejected successfully",
+            data: job,
+        });
+    } catch (error) {
+        logger.error("Error rejecting job:", error);
+        res.status(500).json({
+            status: "error",
+            message: "Failed to reject job",
             error: error.message,
         });
     }

@@ -12,6 +12,7 @@ import {
   ChatBubbleBottomCenterTextIcon,
   BriefcaseIcon,
   CalendarDaysIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 import { useAdminStore } from "../../store";
@@ -33,6 +34,20 @@ const AdminLayout = () => {
   const canViewAnalytics = user?.permissions?.canViewAnalytics !== false; // Default to true
   const canManageSettings =
     user?.permissions?.canManageSettings || isSuperAdmin;
+
+  // Helper function to check if user has access to a sidebar item
+  const hasSidebarAccess = (itemKey) => {
+    // Super admin always has access
+    if (isSuperAdmin) return true;
+    
+    // If sidebarAccess is not set or empty, fall back to role-based defaults
+    if (!user?.sidebarAccess || user.sidebarAccess.length === 0) {
+      return null; // Return null to use role-based defaults
+    }
+    
+    // Check if item is in sidebarAccess array
+    return user.sidebarAccess.includes(itemKey);
+  };
 
   // Get school-specific label for school admins
   const getSchoolLabel = () => {
@@ -112,45 +127,49 @@ const AdminLayout = () => {
             </li> */}
             
             {/* Events Section */}
-            {user?.role !== "career_admin" && (
+            {(hasSidebarAccess("event_dashboard") !== false && user?.role !== "career_admin") && (
               <>
                 <li className="pt-2">
                   <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
                     Events
                   </div>
                 </li>
-                <li>
-                  <Link
-                    to="/admin/republic-day-event/dashboard"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5 mr-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                {(hasSidebarAccess("event_dashboard") || (hasSidebarAccess("event_dashboard") === null && user?.role !== "career_admin")) && (
+                  <li>
+                    <Link
+                      to="/admin/republic-day-event/dashboard"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-                      />
-                    </svg>
-                    <span>Event Dashboard</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/republic-day-event/registrations"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <UserGroupIcon className="w-5 h-5 mr-3" />
-                    <span>Event Registrations</span>
-                  </Link>
-                </li>
-                {isSuperAdmin && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5 mr-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                        />
+                      </svg>
+                      <span>Event Dashboard</span>
+                    </Link>
+                  </li>
+                )}
+                {(hasSidebarAccess("event_registrations") || (hasSidebarAccess("event_registrations") === null && user?.role !== "career_admin")) && (
+                  <li>
+                    <Link
+                      to="/admin/republic-day-event/registrations"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <UserGroupIcon className="w-5 h-5 mr-3" />
+                      <span>Event Registrations</span>
+                    </Link>
+                  </li>
+                )}
+                {(hasSidebarAccess("event_management") || (hasSidebarAccess("event_management") === null && isSuperAdmin)) && (
                   <li>
                     <Link
                       to="/admin/events"
@@ -165,36 +184,37 @@ const AdminLayout = () => {
             )}
             
             {/* Website Content Section */}
-            {(isSuperAdmin || isCareerAdmin) && (
+            {((hasSidebarAccess("team_management") !== false || hasSidebarAccess("updates_management") !== false || hasSidebarAccess("careers_jobs") !== false || hasSidebarAccess("pending_jobs") !== false) || 
+              (hasSidebarAccess("team_management") === null && hasSidebarAccess("updates_management") === null && hasSidebarAccess("careers_jobs") === null && hasSidebarAccess("pending_jobs") === null && (isSuperAdmin || isCareerAdmin))) && (
               <>
                 <li className="pt-4">
                   <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
                     Website Content
                   </div>
                 </li>
-                {isSuperAdmin && (
-                  <>
-                    <li>
-                      <Link
-                        to="/admin/team"
-                        className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                      >
-                        <UserGroupIcon className="w-5 h-5 mr-3" />
-                        <span>Team Management</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/admin/updates"
-                        className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                      >
-                        <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
-                        <span>Updates Management</span>
-                      </Link>
-                    </li>
-                  </>
+                {(hasSidebarAccess("team_management") || (hasSidebarAccess("team_management") === null && isSuperAdmin)) && (
+                  <li>
+                    <Link
+                      to="/admin/team"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <UserGroupIcon className="w-5 h-5 mr-3" />
+                      <span>Team Management</span>
+                    </Link>
+                  </li>
                 )}
-                {(isCareerAdmin || isSuperAdmin) && (
+                {(hasSidebarAccess("updates_management") || (hasSidebarAccess("updates_management") === null && isSuperAdmin)) && (
+                  <li>
+                    <Link
+                      to="/admin/updates"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
+                      <span>Updates Management</span>
+                    </Link>
+                  </li>
+                )}
+                {(hasSidebarAccess("careers_jobs") || (hasSidebarAccess("careers_jobs") === null && (isCareerAdmin || isSuperAdmin))) && (
                   <li>
                     <Link
                       to="/admin/jobs"
@@ -202,6 +222,17 @@ const AdminLayout = () => {
                     >
                       <BriefcaseIcon className="w-5 h-5 mr-3" />
                       <span>Careers / Jobs</span>
+                    </Link>
+                  </li>
+                )}
+                {(hasSidebarAccess("pending_jobs") || (hasSidebarAccess("pending_jobs") === null && (isCareerAdmin || isSuperAdmin))) && (
+                  <li>
+                    <Link
+                      to="/admin/pending-jobs"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <ClockIcon className="w-5 h-5 mr-3" />
+                      <span>Pending Jobs</span>
                     </Link>
                   </li>
                 )}
@@ -269,40 +300,47 @@ const AdminLayout = () => {
             )} */}
 
             {/* User Communications Section */}
-            {canManageSettings && (
+            {((hasSidebarAccess("feedback") !== false || hasSidebarAccess("issues") !== false || hasSidebarAccess("contact_messages") !== false) ||
+              (hasSidebarAccess("feedback") === null && hasSidebarAccess("issues") === null && hasSidebarAccess("contact_messages") === null && canManageSettings)) && (
               <>
                 <li className="pt-4">
                   <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
                     User Communications
                   </div>
                 </li>
-                <li>
-                  <Link
-                    to="/admin/feedback"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <ChatBubbleBottomCenterTextIcon className="w-5 h-5 mr-3" />
-                    <span>Feedback</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/issues"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <ExclamationTriangleIcon className="w-5 h-5 mr-3" />
-                    <span>Issues</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/contact-messages"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
-                    <span>Contact Messages</span>
-                  </Link>
-                </li>
+                {(hasSidebarAccess("feedback") || (hasSidebarAccess("feedback") === null && canManageSettings)) && (
+                  <li>
+                    <Link
+                      to="/admin/feedback"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <ChatBubbleBottomCenterTextIcon className="w-5 h-5 mr-3" />
+                      <span>Feedback</span>
+                    </Link>
+                  </li>
+                )}
+                {(hasSidebarAccess("issues") || (hasSidebarAccess("issues") === null && canManageSettings)) && (
+                  <li>
+                    <Link
+                      to="/admin/issues"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <ExclamationTriangleIcon className="w-5 h-5 mr-3" />
+                      <span>Issues</span>
+                    </Link>
+                  </li>
+                )}
+                {(hasSidebarAccess("contact_messages") || (hasSidebarAccess("contact_messages") === null && canManageSettings)) && (
+                  <li>
+                    <Link
+                      to="/admin/contact-messages"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
+                      <span>Contact Messages</span>
+                    </Link>
+                  </li>
+                )}
               </>
             )}
 
@@ -319,14 +357,15 @@ const AdminLayout = () => {
             )} */}
 
             {/* System Section */}
-            {(canManageSettings || isSuperAdmin) && (
+            {((hasSidebarAccess("settings") !== false || hasSidebarAccess("user_logs") !== false) ||
+              (hasSidebarAccess("settings") === null && hasSidebarAccess("user_logs") === null && (canManageSettings || isSuperAdmin))) && (
               <>
                 <li className="pt-4">
                   <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
                     System
                   </div>
                 </li>
-                {canManageSettings && (
+                {(hasSidebarAccess("settings") || (hasSidebarAccess("settings") === null && canManageSettings)) && (
                   <li>
                     <Link
                       to="/admin/settings"
@@ -337,7 +376,7 @@ const AdminLayout = () => {
                     </Link>
                   </li>
                 )}
-                {isSuperAdmin && (
+                {(hasSidebarAccess("user_logs") || (hasSidebarAccess("user_logs") === null && isSuperAdmin)) && (
                   <li>
                     <Link
                       to="/admin/user-logs"

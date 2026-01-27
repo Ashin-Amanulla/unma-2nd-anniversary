@@ -6,8 +6,6 @@ import {
   PencilIcon,
   TrashIcon,
   UserGroupIcon,
-  AcademicCapIcon,
-  ShieldCheckIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -17,7 +15,6 @@ const Settings = () => {
     useSubAdmins,
     useCreateSubAdmin,
     useUpdateSubAdmin,
-    useAvailableSchools,
   } = useAdmin();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -26,15 +23,11 @@ const Settings = () => {
     name: "",
     email: "",
     password: "",
-    assignedSchools: [],
-    permissions: {
-      canViewAnalytics: true,
-      canExportData: false,
-    },
+    role: "school_admin",
+    sidebarAccess: [],
   });
 
   const { data: subAdmins, isLoading, refetch } = useSubAdmins();
-  const { data: availableSchools } = useAvailableSchools();
   const createSubAdminMutation = useCreateSubAdmin();
   const updateSubAdminMutation = useUpdateSubAdmin();
 
@@ -59,6 +52,7 @@ const Settings = () => {
     e.preventDefault();
 
     try {
+      console.log("Submitting form data:", formData);
       if (editingAdmin) {
         await updateSubAdminMutation.mutateAsync({
           id: editingAdmin._id,
@@ -72,6 +66,7 @@ const Settings = () => {
       refetch();
     } catch (error) {
       console.error("Error saving sub-admin:", error);
+      alert(error.message || "Failed to save sub-admin. Please check the console for details.");
     }
   };
 
@@ -82,11 +77,8 @@ const Settings = () => {
       name: "",
       email: "",
       password: "",
-      assignedSchools: [],
-      permissions: {
-        canViewAnalytics: true,
-        canExportData: false,
-      },
+      role: "school_admin",
+      sidebarAccess: [],
     });
   };
 
@@ -96,22 +88,10 @@ const Settings = () => {
       name: admin.name,
       email: admin.email,
       password: "", // Don't populate password for security
-      assignedSchools: admin.assignedSchools || [],
-      permissions: admin.permissions || {
-        canViewAnalytics: true,
-        canExportData: false,
-      },
+      role: admin.role || "school_admin",
+      sidebarAccess: admin.sidebarAccess || [],
     });
     setShowCreateModal(true);
-  };
-
-  const handleSchoolToggle = (school) => {
-    setFormData((prev) => ({
-      ...prev,
-      assignedSchools: prev.assignedSchools.includes(school)
-        ? prev.assignedSchools.filter((s) => s !== school)
-        : [...prev.assignedSchools, school],
-    }));
   };
 
   if (isLoading) {
@@ -170,12 +150,6 @@ const Settings = () => {
                       Admin Details
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Assigned Schools
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Permissions
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="relative px-6 py-3">
@@ -194,33 +168,6 @@ const Settings = () => {
                           <div className="text-sm text-gray-500">
                             {admin.email}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {admin.assignedSchools?.map((school) => (
-                            <span
-                              key={school}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                            >
-                              <AcademicCapIcon className="w-3 h-3 mr-1" />
-                              {school}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {admin.permissions?.canViewAnalytics && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Analytics
-                            </span>
-                          )}
-                          {admin.permissions?.canExportData && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              Export
-                            </span>
-                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -317,71 +264,231 @@ const Settings = () => {
                     />
                   </div>
                 )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Assigned Schools
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                  {availableSchools?.map((school) => (
-                    <label key={school} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={formData.assignedSchools.includes(school)}
-                        onChange={() => handleSchoolToggle(school)}
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <span className="text-sm text-gray-700">{school}</span>
-                    </label>
-                  ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        role: e.target.value,
+                      }))
+                    }
+                    className="form-input"
+                    required
+                  >
+                    <option value="school_admin">School Admin</option>
+                    <option value="career_admin">Career Admin</option>
+                    <option value="registration_desk">Registration Desk</option>
+                  </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Permissions
+                  Sidebar Access Control
                 </label>
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.canViewAnalytics}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          permissions: {
-                            ...prev.permissions,
-                            canViewAnalytics: e.target.checked,
-                          },
-                        }))
-                      }
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm text-gray-700">
-                      Can View Analytics
-                    </span>
-                  </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Select which sidebar items this admin can access. Leave empty for default role-based access.
+                </p>
+                <div className="space-y-4 border border-gray-200 rounded-md p-4">
+                  {/* Events Section */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Events</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("event_dashboard")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "event_dashboard"]
+                              : formData.sidebarAccess.filter((a) => a !== "event_dashboard");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Event Dashboard</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("event_registrations")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "event_registrations"]
+                              : formData.sidebarAccess.filter((a) => a !== "event_registrations");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Event Registrations</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("event_management")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "event_management"]
+                              : formData.sidebarAccess.filter((a) => a !== "event_management");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Event Management</span>
+                      </label>
+                    </div>
+                  </div>
 
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.canExportData}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          permissions: {
-                            ...prev.permissions,
-                            canExportData: e.target.checked,
-                          },
-                        }))
-                      }
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm text-gray-700">
-                      Can Export Data
-                    </span>
-                  </label>
+                  {/* Website Content Section */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Website Content</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("team_management")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "team_management"]
+                              : formData.sidebarAccess.filter((a) => a !== "team_management");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Team Management</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("updates_management")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "updates_management"]
+                              : formData.sidebarAccess.filter((a) => a !== "updates_management");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Updates Management</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("careers_jobs")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "careers_jobs"]
+                              : formData.sidebarAccess.filter((a) => a !== "careers_jobs");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Careers / Jobs</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("pending_jobs")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "pending_jobs"]
+                              : formData.sidebarAccess.filter((a) => a !== "pending_jobs");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Pending Jobs</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* User Communications Section */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">User Communications</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("feedback")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "feedback"]
+                              : formData.sidebarAccess.filter((a) => a !== "feedback");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Feedback</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("issues")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "issues"]
+                              : formData.sidebarAccess.filter((a) => a !== "issues");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Issues</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("contact_messages")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "contact_messages"]
+                              : formData.sidebarAccess.filter((a) => a !== "contact_messages");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Contact Messages</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* System Section */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">System</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("settings")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "settings"]
+                              : formData.sidebarAccess.filter((a) => a !== "settings");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Settings</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.sidebarAccess.includes("user_logs")}
+                          onChange={(e) => {
+                            const newAccess = e.target.checked
+                              ? [...formData.sidebarAccess, "user_logs"]
+                              : formData.sidebarAccess.filter((a) => a !== "user_logs");
+                            setFormData((prev) => ({ ...prev, sidebarAccess: newAccess }));
+                          }}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">User Logs</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
 

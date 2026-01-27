@@ -613,6 +613,8 @@ const JobManagement = () => {
                         <option value="Internship">Internship</option>
                         <option value="Contract">Contract</option>
                         <option value="Freelance">Freelance</option>
+                        <option value="Apprenticeship">Apprenticeship</option>
+                        <option value="Trainee">Trainee</option>
                       </select>
                     </div>
                     <div>
