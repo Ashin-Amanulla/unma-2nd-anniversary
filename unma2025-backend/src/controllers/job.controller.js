@@ -12,6 +12,10 @@ export const getActiveJobs = async (req, res) => {
             limit = 20,
             type,
             search,
+            qualification,
+            selectionCriteria,
+            minAge,
+            maxAge,
             sortBy = "createdAt",
             sortOrder = "desc",
         } = req.query;
@@ -23,14 +27,81 @@ export const getActiveJobs = async (req, res) => {
             query.type = type;
         }
 
+        // Filter by qualification
+        if (qualification && qualification !== "All" && qualification !== "Any") {
+            query.qualification = qualification;
+        }
+
+        // Filter by selection criteria
+        if (selectionCriteria && selectionCriteria !== "All") {
+            query.selectionCriteria = selectionCriteria;
+        }
+
+        // Filter by age range - find jobs where age range overlaps with filter range
+        // Job age range overlaps if: job.minAge <= filter.maxAge AND job.maxAge >= filter.minAge
+        if (minAge || maxAge) {
+            const ageConditions = [];
+            
+            if (minAge && maxAge) {
+                // Both min and max provided - find overlapping ranges
+                ageConditions.push(
+                    // Job has both min and max, and ranges overlap
+                    {
+                        "ageLimit.minAge": { $exists: true, $ne: null, $lte: Number(maxAge) },
+                        "ageLimit.maxAge": { $exists: true, $ne: null, $gte: Number(minAge) },
+                    },
+                    // Job has only max age, and it's within range
+                    {
+                        "ageLimit.minAge": null,
+                        "ageLimit.maxAge": { $exists: true, $ne: null, $gte: Number(minAge), $lte: Number(maxAge) },
+                    },
+                    // Job has only min age, and it's within range
+                    {
+                        "ageLimit.maxAge": null,
+                        "ageLimit.minAge": { $exists: true, $ne: null, $gte: Number(minAge), $lte: Number(maxAge) },
+                    },
+                    // Job has no age restrictions
+                    {
+                        "ageLimit.minAge": null,
+                        "ageLimit.maxAge": null,
+                    }
+                );
+            } else if (minAge) {
+                // Only min age provided
+                ageConditions.push(
+                    { "ageLimit.maxAge": { $exists: true, $ne: null, $gte: Number(minAge) } },
+                    { "ageLimit.maxAge": null }
+                );
+            } else if (maxAge) {
+                // Only max age provided
+                ageConditions.push(
+                    { "ageLimit.minAge": { $exists: true, $ne: null, $lte: Number(maxAge) } },
+                    { "ageLimit.minAge": null }
+                );
+            }
+            
+            if (ageConditions.length > 0) {
+                query.$and = query.$and || [];
+                query.$and.push({ $or: ageConditions });
+            }
+        }
+
         // Search filter
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: "i" } },
-                { company: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } },
-                { location: { $regex: search, $options: "i" } },
-            ];
+            const searchConditions = {
+                $or: [
+                    { title: { $regex: search, $options: "i" } },
+                    { company: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } },
+                    { location: { $regex: search, $options: "i" } },
+                ],
+            };
+            
+            if (query.$and) {
+                query.$and.push(searchConditions);
+            } else {
+                query.$and = [searchConditions];
+            }
         }
 
         const skip = (Number(page) - 1) * Number(limit);
@@ -78,6 +149,10 @@ export const getAllJobs = async (req, res) => {
             type,
             search,
             isActive,
+            qualification,
+            selectionCriteria,
+            minAge,
+            maxAge,
             sortBy = "createdAt",
             sortOrder = "desc",
         } = req.query;
@@ -94,14 +169,73 @@ export const getAllJobs = async (req, res) => {
             query.isActive = isActive === "true";
         }
 
+        // Filter by qualification
+        if (qualification && qualification !== "All" && qualification !== "Any") {
+            query.qualification = qualification;
+        }
+
+        // Filter by selection criteria
+        if (selectionCriteria && selectionCriteria !== "All") {
+            query.selectionCriteria = selectionCriteria;
+        }
+
+        // Filter by age range - find jobs where age range overlaps with filter range
+        if (minAge || maxAge) {
+            const ageConditions = [];
+            
+            if (minAge && maxAge) {
+                ageConditions.push(
+                    {
+                        "ageLimit.minAge": { $exists: true, $ne: null, $lte: Number(maxAge) },
+                        "ageLimit.maxAge": { $exists: true, $ne: null, $gte: Number(minAge) },
+                    },
+                    {
+                        "ageLimit.minAge": null,
+                        "ageLimit.maxAge": { $exists: true, $ne: null, $gte: Number(minAge), $lte: Number(maxAge) },
+                    },
+                    {
+                        "ageLimit.maxAge": null,
+                        "ageLimit.minAge": { $exists: true, $ne: null, $gte: Number(minAge), $lte: Number(maxAge) },
+                    },
+                    {
+                        "ageLimit.minAge": null,
+                        "ageLimit.maxAge": null,
+                    }
+                );
+            } else if (minAge) {
+                ageConditions.push(
+                    { "ageLimit.maxAge": { $exists: true, $ne: null, $gte: Number(minAge) } },
+                    { "ageLimit.maxAge": null }
+                );
+            } else if (maxAge) {
+                ageConditions.push(
+                    { "ageLimit.minAge": { $exists: true, $ne: null, $lte: Number(maxAge) } },
+                    { "ageLimit.minAge": null }
+                );
+            }
+            
+            if (ageConditions.length > 0) {
+                query.$and = query.$and || [];
+                query.$and.push({ $or: ageConditions });
+            }
+        }
+
         // Search filter
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: "i" } },
-                { company: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } },
-                { location: { $regex: search, $options: "i" } },
-            ];
+            const searchConditions = {
+                $or: [
+                    { title: { $regex: search, $options: "i" } },
+                    { company: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } },
+                    { location: { $regex: search, $options: "i" } },
+                ],
+            };
+            
+            if (query.$and) {
+                query.$and.push(searchConditions);
+            } else {
+                query.$and = [searchConditions];
+            }
         }
 
         const skip = (Number(page) - 1) * Number(limit);
@@ -340,6 +474,32 @@ export const getJobStats = async (req, res) => {
             },
         ]);
 
+        // Get jobs by qualification
+        const jobsByQualification = await Job.aggregate([
+            {
+                $group: {
+                    _id: "$qualification",
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $sort: { count: -1 },
+            },
+        ]);
+
+        // Get jobs by selection criteria
+        const jobsBySelectionCriteria = await Job.aggregate([
+            {
+                $group: {
+                    _id: "$selectionCriteria",
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $sort: { count: -1 },
+            },
+        ]);
+
         res.status(200).json({
             status: "success",
             data: {
@@ -349,6 +509,8 @@ export const getJobStats = async (req, res) => {
                     inactiveJobs: 0,
                 }),
                 jobsByType,
+                jobsByQualification,
+                jobsBySelectionCriteria,
             },
         });
     } catch (error) {

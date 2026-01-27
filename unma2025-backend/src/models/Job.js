@@ -82,6 +82,57 @@ const JobSchema = new mongoose.Schema(
             default: null,
         },
 
+        // Age Eligibility
+        ageLimit: {
+            minAge: {
+                type: Number,
+                default: null,
+                min: 0,
+                max: 100,
+            },
+            maxAge: {
+                type: Number,
+                default: null,
+                min: 0,
+                max: 100,
+            },
+        },
+
+        // Educational Qualification
+        qualification: {
+            type: String,
+            enum: ["10th Pass", "12th Pass", "Diploma", "Graduate", "Post Graduate", "PhD", "Any"],
+            default: "Any",
+        },
+
+        // Career Growth/Promotions Information
+        careerGrowth: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        // Selection Criteria
+        selectionCriteria: {
+            type: String,
+            enum: ["Written Exam", "Interview", "Both", "Degree Marks", "Walk-in", "Online Assessment", "Other"],
+            default: "Other",
+        },
+
+        // Notification PDF URL
+        notificationPdf: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        // Optional Poster Image
+        poster: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
         // Status
         isActive: {
             type: Boolean,
@@ -103,6 +154,9 @@ const JobSchema = new mongoose.Schema(
 // Indexes for efficient queries
 JobSchema.index({ isActive: 1, createdAt: -1 });
 JobSchema.index({ type: 1, isActive: 1 });
+JobSchema.index({ qualification: 1, isActive: 1 });
+JobSchema.index({ selectionCriteria: 1, isActive: 1 });
+JobSchema.index({ "ageLimit.minAge": 1, "ageLimit.maxAge": 1 });
 JobSchema.index({ title: "text", company: "text", description: "text" });
 
 const Job = mongoose.model("Job", JobSchema);

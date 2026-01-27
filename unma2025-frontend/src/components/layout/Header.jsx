@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import ScrollLink from "../ui/ScrollLink";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,6 +22,7 @@ const Header = () => {
     };
   }, []);
 
+
   // Toggle mobile menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -33,212 +33,97 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
+  // Navigation items - single unified list
+  const navItems = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About" },
+    { to: "/news-updates", label: "News & Updates" },
+    { to: "/events", label: "Events" },
+    { to: "/gallery", label: "Gallery" },
+    { to: "/careers", label: "Careers" },
+    { to: "/contact", label: "Contact" },
+  ];
+
+  const NavItem = ({ to, label }) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative text-sm ${
+          isActive
+            ? "text-primary font-medium"
+            : "text-gray-600 hover:text-primary hover:bg-gray-50"
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {label}
+          {isActive && (
+            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
+          )}
+        </>
+      )}
+    </NavLink>
+  );
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-white shadow-md py-3"
-          : "bg-white py-4 border-b border-gray-200"
+          ? "bg-white shadow-md py-2"
+          : "bg-white py-3 border-b border-gray-200"
       }`}
     >
-      <div className="container mx-auto px-4 grid grid-cols-3 items-center">
-        {/* Logo - Left */}
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="UNMA 2026"
-              className="h-10 w-auto"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  "https://media.licdn.com/dms/image/v2/C4E0BAQHBiErpz5o1lQ/company-logo_200_200/company-logo_200_200/0/1631331050086?e=2147483647&v=beta&t=4nyvBmOtfitoTakRa43Jj5aP37obR-FqNF80JBm2VQk";
-              }}
-            />
-            {/* <span className="ml-2 text-xl font-bold text-primary">UNMA 2026</span> */}
-          </Link>
-        </div>
-
-        {/* Desktop Navigation - Center */}
-        <nav className="hidden md:flex items-center justify-center">
-          <div className="flex space-x-1 items-center">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Home
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/republic-day-event"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Register
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/program"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Program
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/gallery"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Gallery
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink>
-            <NavLink
-              to="/careers"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Careers
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/contact"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Contact
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink>
-            {/* <NavLink
-              to="/alumni-update"
-              className={({ isActive }) =>
-                `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative whitespace-nowrap ${
-                  isActive
-                    ? "text-primary font-medium"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  Update Registration
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded"></span>
-                  )}
-                </>
-              )}
-            </NavLink> */}
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between">
+          {/* Logo - Left */}
+          <div className="flex items-center flex-shrink-0">
+            <Link to="/" className="flex items-center">
+              <img
+                src="/logo.png"
+                alt="UNMA"
+                className="h-10 w-auto"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://media.licdn.com/dms/image/v2/C4E0BAQHBiErpz5o1lQ/company-logo_200_200/company-logo_200_200/0/1631331050086?e=2147483647&v=beta&t=4nyvBmOtfitoTakRa43Jj5aP37obR-FqNF80JBm2VQk";
+                }}
+              />
+            </Link>
           </div>
-        </nav>
 
-        {/* Admin Login - Right */}
-        {/* <div className="hidden md:flex justify-end">
-          <NavLink
-            to="/admin/login"
-            className={({ isActive }) =>
-              `px-4 py-2 rounded-md border transition-all duration-300 ${
-                isActive
-                  ? "bg-blue-50 text-blue-600 border-blue-200"
-                  : "border-blue-300 text-blue-600 hover:bg-blue-600 hover:text-white"
-              }`
-            }
+          {/* Desktop Navigation - Center */}
+          <nav className="hidden lg:flex items-center justify-center flex-1">
+            <div className="flex items-center space-x-1">
+              {navItems.map((item) => (
+                <NavItem key={item.to} to={item.to} label={item.label} />
+              ))}
+            </div>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMenu}
+            className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 lg:hidden"
           >
-            Admin Login
-          </NavLink>
-        </div> */}
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={toggleMenu}
-          className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 md:hidden ml-auto col-span-2 md:col-span-1"
-        >
-          <span className="sr-only">Open main menu</span>
-          {isMenuOpen ? (
-            <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-          ) : (
-            <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-          )}
-        </button>
+            <span className="sr-only">Open main menu</span>
+            {isMenuOpen ? (
+              <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-4 py-2 space-y-1 bg-white shadow-lg rounded-b-lg divide-y divide-gray-100">
-            <div className="py-2">
+        <div className="lg:hidden">
+          <div className="px-4 py-2 space-y-1 bg-white shadow-lg border-t border-gray-100">
+            {navItems.map((item) => (
               <NavLink
-                to="/"
+                key={item.to}
+                to={item.to}
                 onClick={closeMenu}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-md text-base ${
@@ -248,84 +133,9 @@ const Header = () => {
                   }`
                 }
               >
-                Home
+                {item.label}
               </NavLink>
-              <NavLink
-                to="/republic-day-event"
-                onClick={closeMenu}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-md text-base ${
-                    isActive
-                      ? "text-primary font-medium bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
-                  }`
-                }
-              >
-                Register
-              </NavLink>
-              <NavLink
-                to="/program"
-                onClick={closeMenu}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-md text-base ${
-                    isActive
-                      ? "text-primary font-medium bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
-                  }`
-                }
-              >
-                Program
-              </NavLink>
-              <NavLink
-                to="/gallery"
-                onClick={closeMenu}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-md text-base ${
-                    isActive
-                      ? "text-primary font-medium bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
-                  }`
-                }
-              >
-                Gallery
-              </NavLink>
-              <NavLink
-                to="/careers"
-                onClick={closeMenu}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-md text-base ${
-                    isActive
-                      ? "text-primary font-medium bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
-                  }`
-                }
-              >
-                Careers
-              </NavLink>
-              <NavLink
-                to="/contact"
-                onClick={closeMenu}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-md text-base ${
-                    isActive
-                      ? "text-primary font-medium bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
-                  }`
-                }
-              >
-                Contact
-              </NavLink>
-            </div>
-
-            {/* <div className="py-2">
-              <NavLink
-                to="/admin/login"
-                onClick={closeMenu}
-                className="block px-4 py-2 rounded-md text-base font-medium text-blue-600 hover:bg-blue-50"
-              >
-                Admin Login
-              </NavLink>
-            </div> */}
+            ))}
           </div>
         </div>
       )}

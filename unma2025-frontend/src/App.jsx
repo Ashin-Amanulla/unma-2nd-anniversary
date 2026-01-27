@@ -69,6 +69,16 @@ const RepublicDayEventRegistrations = lazy(() =>
 const Careers = lazy(() => import("./pages/Careers"));
 const JobDetail = lazy(() => import("./pages/JobDetail"));
 const JobManagement = lazy(() => import("./pages/admin/JobManagement"));
+const TeamManagement = lazy(() => import("./pages/admin/TeamManagement"));
+const UpdatesManagement = lazy(() => import("./pages/admin/UpdatesManagement"));
+const EventManagement = lazy(() => import("./pages/admin/EventManagement"));
+
+// New UNMA organizational pages
+const AboutUnma = lazy(() => import("./pages/AboutUnma"));
+const CoordinationTeam = lazy(() => import("./pages/CoordinationTeam"));
+const Events = lazy(() => import("./pages/Events"));
+const NewsUpdates = lazy(() => import("./pages/NewsUpdates"));
+
 
 function App() {
   const { logout, user, isSuperAdmin, isRegistrationDesk } = useAuthStore();
@@ -130,6 +140,12 @@ function App() {
                 />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/careers/:id" element={<JobDetail />} />
+                
+                {/* New organizational pages */}
+                <Route path="/about" element={<AboutUnma />} />
+                <Route path="/team" element={<CoordinationTeam />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/news-updates" element={<NewsUpdates />} />
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}
@@ -184,6 +200,11 @@ function App() {
                     element={<RepublicDayEventRegistrations />}
                   />
                   <Route path="jobs" element={<JobManagement />} />
+                  <Route path="team" element={<TeamManagement />} />
+                  <Route path="updates" element={<UpdatesManagement />} />
+                  {isSuperAdmin && (
+                    <Route path="events" element={<EventManagement />} />
+                  )}
                 </>
               </Route>
 

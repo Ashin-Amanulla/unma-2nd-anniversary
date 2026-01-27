@@ -11,6 +11,11 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   UserIcon,
+  DocumentIcon,
+  AcademicCapIcon,
+  DocumentArrowDownIcon,
+  PhotoIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import jobApi from "../api/jobApi";
 import Loading from "../components/ui/Loading";
@@ -20,6 +25,7 @@ const JobDetail = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showPosterModal, setShowPosterModal] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -133,6 +139,17 @@ const JobDetail = () => {
                           {job.salary}
                         </span>
                      )}
+                     {job.qualification && job.qualification !== "Any" && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                          <AcademicCapIcon className="w-4 h-4 mr-2" />
+                          {job.qualification}
+                        </span>
+                     )}
+                     {job.ageLimit?.minAge && job.ageLimit?.maxAge && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                          Age: {job.ageLimit.minAge}-{job.ageLimit.maxAge} years
+                        </span>
+                     )}
                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
                         <ClockIcon className="w-4 h-4 mr-2" />
                         Posted {new Date(job.createdAt).toLocaleDateString()}
@@ -180,62 +197,178 @@ const JobDetail = () => {
                    </ul>
                  </section>
                )}
+
+               {job.careerGrowth && (
+                 <section>
+                   <h2 className="text-xl font-bold text-gray-900 mb-4">Career Growth & Promotions</h2>
+                   <p className="whitespace-pre-line text-gray-600 leading-relaxed">
+                     {job.careerGrowth}
+                   </p>
+                 </section>
+               )}
             </div>
 
             {/* Sidebar info */}
-            <div className="bg-gray-50/50 p-6 md:p-8">
-              <h3 className="font-bold text-gray-900 mb-6 text-lg">Contact & Application</h3>
-              
-              <div className="space-y-6">
-                {job.deadline && (
-                  <div className="flex items-start">
+            <div className="bg-gray-50/50 p-6 md:p-8 space-y-6">
+              {/* Eligibility Section */}
+              {(job.ageLimit?.minAge || job.ageLimit?.maxAge || job.qualification) && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-4 text-lg flex items-center">
+                    <AcademicCapIcon className="w-5 h-5 mr-2 text-primary" />
+                    Eligibility
+                  </h3>
+                  <div className="space-y-3">
+                    {job.ageLimit?.minAge && job.ageLimit?.maxAge && (
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 font-medium mb-1">Age Limit</p>
+                        <p className="text-gray-900 font-semibold">
+                          {job.ageLimit.minAge} - {job.ageLimit.maxAge} years
+                        </p>
+                      </div>
+                    )}
+                    {job.qualification && job.qualification !== "Any" && (
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 font-medium mb-1">Educational Qualification</p>
+                        <p className="text-gray-900 font-semibold">{job.qualification}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Selection Process */}
+              {job.selectionCriteria && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-4 text-lg">Selection Process</h3>
+                  <div className="bg-white p-3 rounded-lg">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                      {job.selectionCriteria}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Documents Section */}
+              {(job.notificationPdf || job.poster) && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-4 text-lg flex items-center">
+                    <DocumentIcon className="w-5 h-5 mr-2 text-primary" />
+                    Documents
+                  </h3>
+                  <div className="space-y-3">
+                    {job.notificationPdf && (
+                      <a
+                        href={job.notificationPdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between bg-white p-4 rounded-lg hover:bg-gray-50 transition-colors border-2 border-primary/20 hover:border-primary/40"
+                      >
+                        <div className="flex items-center">
+                          <div className="bg-red-100 p-2 rounded-lg mr-3">
+                            <DocumentArrowDownIcon className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">Notification PDF</p>
+                            <p className="text-xs text-gray-500">Download official notification</p>
+                          </div>
+                        </div>
+                        <DocumentArrowDownIcon className="w-5 h-5 text-primary" />
+                      </a>
+                    )}
+                    {job.poster && (
+                      <button
+                        onClick={() => setShowPosterModal(true)}
+                        className="w-full flex items-center justify-between bg-white p-4 rounded-lg hover:bg-gray-50 transition-colors border-2 border-primary/20 hover:border-primary/40"
+                      >
+                        <div className="flex items-center">
+                          <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                            <PhotoIcon className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">View Poster</p>
+                            <p className="text-xs text-gray-500">Click to view full poster</p>
+                          </div>
+                        </div>
+                        <PhotoIcon className="w-5 h-5 text-primary" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Deadline */}
+              {job.deadline && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-4 text-lg">Application</h3>
+                  <div className="flex items-start bg-white p-4 rounded-lg">
                     <div className="bg-red-100 p-2 rounded-lg mr-4">
                       <CalendarIcon className="w-5 h-5 text-red-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium">Deadline</p>
+                      <p className="text-sm text-gray-500 font-medium">Application Deadline</p>
                       <p className="text-gray-900 font-semibold">{new Date(job.deadline).toLocaleDateString()}</p>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {(job.contactPerson || job.contactPhone || job.applicationEmail) && (
-                   <div className="border-t border-gray-200 pt-6">
-                     <p className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Contact Details</p>
-                     
-                     {job.contactPerson && (
-                       <div className="flex items-center mb-3 text-gray-700">
-                         <UserIcon className="w-5 h-5 text-gray-400 mr-3" />
-                         <span>{job.contactPerson}</span>
-                       </div>
-                     )}
-                     
-                     {job.contactPhone && (
-                       <div className="flex items-center mb-3">
-                         <PhoneIcon className="w-5 h-5 text-gray-400 mr-3" />
-                         <a href={`tel:${job.contactPhone}`} className="text-primary hover:underline font-medium">
-                           {job.contactPhone}
-                         </a>
-                       </div>
-                     )}
-
-                     {job.applicationEmail && (
-                       <div className="flex items-center">
-                         <EnvelopeIcon className="w-5 h-5 text-gray-400 mr-3" />
-                         <a href={`mailto:${job.applicationEmail}`} className="text-primary hover:underline font-medium break-all">
-                           {job.applicationEmail}
-                         </a>
-                       </div>
-                     )}
-                   </div>
-                )}
-                
-             
-              </div>
+              {/* Contact Details */}
+              {(job.contactPerson || job.contactPhone || job.applicationEmail) && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-4 text-lg">Contact Details</h3>
+                  <div className="bg-white p-4 rounded-lg space-y-3">
+                    {job.contactPerson && (
+                      <div className="flex items-center text-gray-700">
+                        <UserIcon className="w-5 h-5 text-gray-400 mr-3" />
+                        <span>{job.contactPerson}</span>
+                      </div>
+                    )}
+                    {job.contactPhone && (
+                      <div className="flex items-center">
+                        <PhoneIcon className="w-5 h-5 text-gray-400 mr-3" />
+                        <a href={`tel:${job.contactPhone}`} className="text-primary hover:underline font-medium">
+                          {job.contactPhone}
+                        </a>
+                      </div>
+                    )}
+                    {job.applicationEmail && (
+                      <div className="flex items-center">
+                        <EnvelopeIcon className="w-5 h-5 text-gray-400 mr-3" />
+                        <a href={`mailto:${job.applicationEmail}`} className="text-primary hover:underline font-medium break-all">
+                          {job.applicationEmail}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Poster Modal */}
+      {showPosterModal && job.poster && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+          onClick={() => setShowPosterModal(false)}
+        >
+          <div className="relative max-w-4xl w-full bg-white rounded-xl overflow-hidden">
+            <button
+              onClick={() => setShowPosterModal(false)}
+              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6 text-gray-600" />
+            </button>
+            <img
+              src={job.poster}
+              alt="Job Poster"
+              className="w-full h-auto max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

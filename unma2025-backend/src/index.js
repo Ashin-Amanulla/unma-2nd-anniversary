@@ -6,6 +6,9 @@ import rateLimit from "express-rate-limit";
 import compression from "compression";
 import dotenv from "dotenv";
 import loginSeedData from "./seed/login_seed_data.js";
+import seedUpdates from "./seed/updates_seed_data.js";
+import seedActivities from "./seed/activities_seed_data.js";
+import seedEvents from "./seed/events_seed_data.js";
 // Load environment variables
 dotenv.config();
 
@@ -27,6 +30,12 @@ import feedbackRoutes from "./routes/feedback.js";
 import reportRoutes from "./routes/report.js";
 import republicDayEventRoutes from "./routes/republicDayEvent.js";
 import jobRoutes from "./routes/job.js";
+import teamRoutes from "./routes/team.js";
+import newsRoutes from "./routes/news.js";
+import activityRoutes from "./routes/activity.js";
+import documentRequestRoutes from "./routes/documentRequest.js";
+import updateRoutes from "./routes/update.js";
+import eventRoutes from "./routes/event.js";
 // Import middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 
@@ -40,11 +49,13 @@ import { logUserActivity } from "./middleware/userLogger.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to database
-connectDB();
-
-// Seed data (admin already created)
-// loginSeedData();
+// Connect to database and seed data
+connectDB().then(() => {
+  // Seed initial data (only runs if collections are empty)
+  seedUpdates();
+  seedActivities();
+  seedEvents();
+});
 
 // Setup security middlewares
 app.use(helmet());
@@ -113,6 +124,12 @@ app.use(`${baseRoutes}/feedback`, feedbackRoutes);
 app.use(`${baseRoutes}/report`, reportRoutes);
 app.use(`${baseRoutes}/republic-day-event`, republicDayEventRoutes);
 app.use(`${baseRoutes}/jobs`, jobRoutes);
+app.use(`${baseRoutes}/team`, teamRoutes);
+app.use(`${baseRoutes}/news`, newsRoutes);
+app.use(`${baseRoutes}/activities`, activityRoutes);
+app.use(`${baseRoutes}/document-request`, documentRequestRoutes);
+app.use(`${baseRoutes}/updates`, updateRoutes);
+app.use(`${baseRoutes}/events`, eventRoutes);
 
 // Setup Swagger documentation
 // setupSwagger(app);

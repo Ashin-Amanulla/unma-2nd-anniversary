@@ -6,9 +6,11 @@ import {
   EyeIcon,
   EyeSlashIcon,
   MagnifyingGlassIcon,
-  ArrowPathIcon, // Added for reset/refresh
-  XMarkIcon,    // Added for modal close
-  PhotoIcon    // Added for image placeholder
+  ArrowPathIcon,
+  XMarkIcon,
+  PhotoIcon,
+  DocumentIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 import jobApi from "../../api/jobApi";
 import Loading from "../../components/ui/Loading";
@@ -35,6 +37,10 @@ const JobManagement = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfPreview, setPdfPreview] = useState(null);
+  const [posterFile, setPosterFile] = useState(null);
+  const [posterPreview, setPosterPreview] = useState(null);
 
   // Form Initial State
   const initialFormState = {
@@ -52,6 +58,15 @@ const JobManagement = () => {
     responsibilities: "", // Managed as string in form, array in backend
     contactPerson: "",
     contactPhone: "",
+    ageLimit: {
+      minAge: "",
+      maxAge: "",
+    },
+    qualification: "Any",
+    careerGrowth: "",
+    selectionCriteria: "Other",
+    notificationPdf: "",
+    poster: "",
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -99,17 +114,32 @@ const JobManagement = () => {
       setCurrentJob(job);
       setFormData({
         ...job,
-        requirements: job.requirements.join("\n"),
-        responsibilities: job.responsibilities.join("\n"),
+        requirements: job.requirements?.join("\n") || "",
+        responsibilities: job.responsibilities?.join("\n") || "",
         deadline: job.deadline ? job.deadline.split("T")[0] : "",
+        ageLimit: {
+          minAge: job.ageLimit?.minAge || "",
+          maxAge: job.ageLimit?.maxAge || "",
+        },
+        qualification: job.qualification || "Any",
+        careerGrowth: job.careerGrowth || "",
+        selectionCriteria: job.selectionCriteria || "Other",
+        notificationPdf: job.notificationPdf || "",
+        poster: job.poster || "",
       });
       setImagePreview(job.image || null);
+      setPdfPreview(job.notificationPdf || null);
+      setPosterPreview(job.poster || null);
     } else {
       setCurrentJob(null);
       setFormData(initialFormState);
       setImagePreview(null);
+      setPdfPreview(null);
+      setPosterPreview(null);
     }
     setImageFile(null);
+    setPdfFile(null);
+    setPosterFile(null);
     setShowModal(true);
   };
 
@@ -130,12 +160,34 @@ const JobManagement = () => {
     }
   };
 
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPdfFile(file);
+      setPdfPreview(file.name);
+    }
+  };
+
+  const handlePosterChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPosterFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPosterPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormLoading(true);
 
     try {
       let imageUrl = formData.image;
+      let pdfUrl = formData.notificationPdf;
+      let posterUrl = formData.poster;
 
       // Upload image if new file selected
       if (imageFile) {
@@ -143,9 +195,27 @@ const JobManagement = () => {
         imageUrl = uploadResponse.fileUrl;
       }
 
+      // Upload PDF if new file selected
+      if (pdfFile) {
+        const uploadResponse = await jobApi.uploadJobPdf(pdfFile);
+        pdfUrl = uploadResponse.fileUrl;
+      }
+
+      // Upload poster if new file selected
+      if (posterFile) {
+        const uploadResponse = await jobApi.uploadJobImage(posterFile);
+        posterUrl = uploadResponse.fileUrl;
+      }
+
       const payload = {
         ...formData,
         image: imageUrl,
+        notificationPdf: pdfUrl,
+        poster: posterUrl,
+        ageLimit: {
+          minAge: formData.ageLimit.minAge ? Number(formData.ageLimit.minAge) : null,
+          maxAge: formData.ageLimit.maxAge ? Number(formData.ageLimit.maxAge) : null,
+        },
         requirements: formData.requirements
           .split("\n")
           .filter((item) => item.trim() !== ""),
@@ -297,10 +367,13 @@ const JobManagement = () => {
                     Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
+                    Qualification
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Posted By
+                    Selection
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Location
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -313,7 +386,7 @@ const JobManagement = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {jobs.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
                       No jobs found matching your filters.
                     </td>
                   </tr>
@@ -352,11 +425,18 @@ const JobManagement = () => {
                           {job.type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {job.location || "Remote"}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                          {job.qualification || "Any"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                          {job.selectionCriteria || "Other"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {job.postedBy?.name || "Admin"}
+                        {job.location || "Remote"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                          <span
@@ -647,22 +727,171 @@ const JobManagement = () => {
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Company Logo / Image</label>
-                      <div className="mt-1 flex items-center space-x-4">
-                        <div className="h-16 w-16 rounded-lg border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-50">
-                          {imagePreview ? (
-                            <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                          ) : (
-                            <PhotoIcon className="h-8 w-8 text-gray-400" />
-                          )}
-                        </div>
+                  </div>
+
+                  {/* Eligibility Section */}
+                  <div className="border-t border-gray-200 pt-4 mt-6">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                      <AcademicCapIcon className="w-5 h-5 mr-2 text-primary" />
+                      Eligibility & Selection Criteria
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Minimum Age</label>
                         <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.ageLimit.minAge}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              ageLimit: { ...formData.ageLimit, minAge: e.target.value },
+                            })
+                          }
+                          placeholder="e.g. 18"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                         />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Maximum Age</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.ageLimit.maxAge}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              ageLimit: { ...formData.ageLimit, maxAge: e.target.value },
+                            })
+                          }
+                          placeholder="e.g. 35"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Educational Qualification *</label>
+                        <select
+                          value={formData.qualification}
+                          onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        >
+                          <option value="Any">Any</option>
+                          <option value="10th Pass">10th Pass</option>
+                          <option value="12th Pass">12th Pass</option>
+                          <option value="Diploma">Diploma</option>
+                          <option value="Graduate">Graduate</option>
+                          <option value="Post Graduate">Post Graduate</option>
+                          <option value="PhD">PhD</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Selection Criteria *</label>
+                        <select
+                          value={formData.selectionCriteria}
+                          onChange={(e) => setFormData({ ...formData, selectionCriteria: e.target.value })}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        >
+                          <option value="Written Exam">Written Exam</option>
+                          <option value="Interview">Interview</option>
+                          <option value="Both">Both</option>
+                          <option value="Degree Marks">Degree Marks</option>
+                          <option value="Walk-in">Walk-in</option>
+                          <option value="Online Assessment">Online Assessment</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">Career Growth / Promotions</label>
+                      <textarea
+                        rows={3}
+                        value={formData.careerGrowth}
+                        onChange={(e) => setFormData({ ...formData, careerGrowth: e.target.value })}
+                        placeholder="Describe career growth opportunities, promotion paths, etc."
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Documents Section */}
+                  <div className="border-t border-gray-200 pt-4 mt-6">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                      <DocumentIcon className="w-5 h-5 mr-2 text-primary" />
+                      Documents & Media
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Company Logo / Image</label>
+                        <div className="mt-1 flex flex-col space-y-2">
+                          <div className="h-20 w-full rounded-lg border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-50">
+                            {imagePreview ? (
+                              <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                            ) : (
+                              <PhotoIcon className="h-8 w-8 text-gray-400" />
+                            )}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Notification PDF</label>
+                        <div className="mt-1 flex flex-col space-y-2">
+                          <div className="h-20 w-full rounded-lg border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-50">
+                            {pdfPreview ? (
+                              <div className="text-center p-2">
+                                <DocumentIcon className="h-8 w-8 text-red-500 mx-auto mb-1" />
+                                <p className="text-xs text-gray-600 truncate">{pdfPreview}</p>
+                              </div>
+                            ) : formData.notificationPdf ? (
+                              <a
+                                href={formData.notificationPdf}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-center p-2 hover:bg-gray-100 rounded"
+                              >
+                                <DocumentIcon className="h-8 w-8 text-red-500 mx-auto mb-1" />
+                                <p className="text-xs text-primary">View PDF</p>
+                              </a>
+                            ) : (
+                              <DocumentIcon className="h-8 w-8 text-gray-400" />
+                            )}
+                          </div>
+                          <input
+                            type="file"
+                            accept="application/pdf"
+                            onChange={handlePdfChange}
+                            className="text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Poster (Optional)</label>
+                        <div className="mt-1 flex flex-col space-y-2">
+                          <div className="h-20 w-full rounded-lg border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-50">
+                            {posterPreview ? (
+                              <img src={posterPreview} alt="Poster Preview" className="h-full w-full object-cover" />
+                            ) : formData.poster ? (
+                              <img src={formData.poster} alt="Poster" className="h-full w-full object-cover" />
+                            ) : (
+                              <PhotoIcon className="h-8 w-8 text-gray-400" />
+                            )}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePosterChange}
+                            className="text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

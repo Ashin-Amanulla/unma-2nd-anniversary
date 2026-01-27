@@ -1,0 +1,20 @@
+// List of JNV schools in Kerala
+export const JNV_SCHOOLS = [
+    "JNV Alappuzha",
+    "JNV Malappuram",
+    "JNV Ernakulam",
+    "JNV Idukki",
+    "JNV Kannur",
+    "JNV Kasaragod",
+    "JNV Kollam",
+    "JNV Kottayam",
+    "JNV Kozhikode",
+    "JNV Lakshadweep",
+    "JNV Mahe",
+    "JNV Palakkad",
+    "JNV Pathanamthitta",
+    "JNV Thiruvananthapuram",
+    "JNV Thrissur",
+    "JNV Wayanad",
+    "JNV Other",
+];

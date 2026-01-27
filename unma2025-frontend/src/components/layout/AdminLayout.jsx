@@ -11,6 +11,7 @@ import {
   CurrencyDollarIcon,
   ChatBubbleBottomCenterTextIcon,
   BriefcaseIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 import { useAdminStore } from "../../store";
@@ -110,12 +111,12 @@ const AdminLayout = () => {
               </Link>
             </li> */}
             
-            {/* Republic Day Event Section */}
+            {/* Events Section */}
             {user?.role !== "career_admin" && (
               <>
                 <li className="pt-2">
                   <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
-                    Republic Day Event
+                    Events
                   </div>
                 </li>
                 <li>
@@ -149,6 +150,61 @@ const AdminLayout = () => {
                     <span>Event Registrations</span>
                   </Link>
                 </li>
+                {isSuperAdmin && (
+                  <li>
+                    <Link
+                      to="/admin/events"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <CalendarDaysIcon className="w-5 h-5 mr-3" />
+                      <span>Event Management</span>
+                    </Link>
+                  </li>
+                )}
+              </>
+            )}
+            
+            {/* Website Content Section */}
+            {(isSuperAdmin || isCareerAdmin) && (
+              <>
+                <li className="pt-4">
+                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
+                    Website Content
+                  </div>
+                </li>
+                {isSuperAdmin && (
+                  <>
+                    <li>
+                      <Link
+                        to="/admin/team"
+                        className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                      >
+                        <UserGroupIcon className="w-5 h-5 mr-3" />
+                        <span>Team Management</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/admin/updates"
+                        className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                      >
+                        <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
+                        <span>Updates Management</span>
+                      </Link>
+                    </li>
+                  </>
+                )}
+                {(isCareerAdmin || isSuperAdmin) && (
+                  <li>
+                    <Link
+                      to="/admin/jobs"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <BriefcaseIcon className="w-5 h-5 mr-3" />
+                      <span>Careers / Jobs</span>
+                    </Link>
+                  </li>
+                )}
               </>
             )}
             
@@ -212,44 +268,23 @@ const AdminLayout = () => {
               </li>
             )} */}
 
-            {(isCareerAdmin || isSuperAdmin) && (
-              <li>
-                <Link
-                  to="/admin/jobs"
-                  className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                >
-                  <BriefcaseIcon className="w-5 h-5 mr-3" />
-                  <span>Careers / Jobs</span>
-                </Link>
-              </li>
-            )}
-
-            {canManageSettings && (
-              <li>
-                <Link
-                  to="/admin/feedback"
-                  className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                >
-                  <ChatBubbleBottomCenterTextIcon className="w-5 h-5 mr-3" />
-                  <span>Feedback</span>
-                </Link>
-              </li>
-            )}
-
-            {/* {isSuperAdmin && (
-              <li>
-                <Link
-                  to="/admin/payment-history"
-                  className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                >
-                  <CurrencyDollarIcon className="w-5 h-5 mr-3" />
-                  <span>Payment History</span>
-                </Link>
-              </li>
-            )} */}
-
+            {/* User Communications Section */}
             {canManageSettings && (
               <>
+                <li className="pt-4">
+                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
+                    User Communications
+                  </div>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/feedback"
+                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                  >
+                    <ChatBubbleBottomCenterTextIcon className="w-5 h-5 mr-3" />
+                    <span>Feedback</span>
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/admin/issues"
@@ -268,29 +303,52 @@ const AdminLayout = () => {
                     <span>Contact Messages</span>
                   </Link>
                 </li>
-
-                <li>
-                  <Link
-                    to="/admin/settings"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <Cog6ToothIcon className="w-5 h-5 mr-3" />
-                    <span>Settings</span>
-                  </Link>
-                </li>
               </>
             )}
 
-            {isSuperAdmin && (
+            {/* {isSuperAdmin && (
               <li>
                 <Link
-                  to="/admin/user-logs"
+                  to="/admin/payment-history"
                   className="flex items-center p-2 rounded-md hover:bg-primary-dark"
                 >
-                  <DocumentTextIcon className="w-5 h-5 mr-3" />
-                  <span>User Logs</span>
+                  <CurrencyDollarIcon className="w-5 h-5 mr-3" />
+                  <span>Payment History</span>
                 </Link>
               </li>
+            )} */}
+
+            {/* System Section */}
+            {(canManageSettings || isSuperAdmin) && (
+              <>
+                <li className="pt-4">
+                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
+                    System
+                  </div>
+                </li>
+                {canManageSettings && (
+                  <li>
+                    <Link
+                      to="/admin/settings"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <Cog6ToothIcon className="w-5 h-5 mr-3" />
+                      <span>Settings</span>
+                    </Link>
+                  </li>
+                )}
+                {isSuperAdmin && (
+                  <li>
+                    <Link
+                      to="/admin/user-logs"
+                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
+                    >
+                      <DocumentTextIcon className="w-5 h-5 mr-3" />
+                      <span>User Logs</span>
+                    </Link>
+                  </li>
+                )}
+              </>
             )}
           </ul>
 

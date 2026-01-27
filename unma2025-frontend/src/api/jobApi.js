@@ -3,7 +3,7 @@ import api from "./axios";
 const jobApi = {
     /**
      * Get all active jobs (Public)
-     * @param {Object} params - Query parameters (page, limit, type, search)
+     * @param {Object} params - Query parameters (page, limit, type, search, qualification, selectionCriteria, minAge, maxAge)
      */
     getActiveJobs: async (params = {}) => {
         try {
@@ -29,7 +29,7 @@ const jobApi = {
 
     /**
      * Get all jobs (Admin)
-     * @param {Object} params - Query parameters (page, limit, type, search, isActive)
+     * @param {Object} params - Query parameters (page, limit, type, search, isActive, qualification, selectionCriteria, minAge, maxAge)
      */
     getAllJobs: async (params = {}) => {
         try {
@@ -122,6 +122,26 @@ const jobApi = {
             return response.data;
         } catch (error) {
             throw error.response?.data || { message: "Failed to upload image" };
+        }
+    },
+
+    /**
+     * Upload job PDF (notification PDF)
+     * @param {File} file - PDF file
+     */
+    uploadJobPdf: async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await api.post("/upload/single", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: "Failed to upload PDF" };
         }
     },
 };
