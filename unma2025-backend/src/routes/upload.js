@@ -60,9 +60,16 @@ router.get("/galleries", async (req, res) => {
       });
     }
 
+    // Filter out the "upload" folder from galleries
+    const filteredPrefixes = response.CommonPrefixes.filter((prefix) => {
+      const folderPath = prefix.Prefix;
+      const folderName = folderPath.replace(basePrefix, "").replace(/\/$/, "").toLowerCase();
+      return folderName !== "uploads";
+    });
+
     // Process each folder to get image count and thumbnail
     const galleries = await Promise.all(
-      response.CommonPrefixes.map(async (prefix) => {
+      filteredPrefixes.map(async (prefix) => {
         const folderPath = prefix.Prefix;
         // Extract folder name by removing base prefix and trailing slash
         const folderName = folderPath.replace(basePrefix, "").replace(/\/$/, "");
