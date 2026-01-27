@@ -14,11 +14,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlusIcon,
-  CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import jobApi from "../api/jobApi";
 import Loading from "../components/ui/Loading";
 import RangeSlider from "../components/ui/RangeSlider";
+import { toast } from "react-hot-toast";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 const Careers = () => {
   const [jobs, setJobs] = useState([]);
@@ -295,7 +296,9 @@ const Careers = () => {
       };
 
       await jobApi.submitPublicJob(submitData);
-      setSubmitSuccess(true);
+      setShowJobForm(false);
+      setSubmitSuccess(false);
+      setError(null);
       setJobFormData({
         title: "",
         company: "",
@@ -319,12 +322,15 @@ const Careers = () => {
         submitterPhone: "",
         submitterOrganization: "",
       });
-      setTimeout(() => {
-        setShowJobForm(false);
-        setSubmitSuccess(false);
-      }, 3000);
+      toast.success("Job submitted successfully! It will be reviewed by an administrator before being published. You may be contacted for verification.", {
+        duration: 5000,
+      });
     } catch (err) {
-      setError(err.message || "Failed to submit job. Please try again.");
+      const errorMessage = err.message || "Failed to submit job. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        duration: 4000,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -635,14 +641,19 @@ const Careers = () => {
             </div>
 
             <form onSubmit={handleJobFormSubmit} className="p-6 space-y-6">
-              {submitSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
-                  <p className="text-green-800 font-medium">
-                    Job submitted successfully! It will be reviewed by an administrator before being published.
+              {/* Info Alert */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <InformationCircleIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-blue-800 text-sm font-medium mb-1">
+                    Review Process
+                  </p>
+                  <p className="text-blue-700 text-sm">
+                    Your job posting will be reviewed by an administrator before being published. 
+                    You may be contacted via email or phone for verification purposes.
                   </p>
                 </div>
-              )}
+              </div>
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
