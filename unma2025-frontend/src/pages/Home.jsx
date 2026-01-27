@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -15,16 +16,19 @@ import { MEMBER_ASSOCIATIONS, getActiveAssociationsCount } from "../data/memberA
 import { ACTIVITIES, getUpcomingActivities } from "../data/activities";
 import { getRecentUpdates, getNews } from "../data/updates";
 
+// Lazy load the Globe component for better performance
+const GlobalVolunteerGlobe = lazy(() => import("../components/home/GlobalVolunteerGlobe"));
+
 const Home = () => {
   const upcomingActivities = getUpcomingActivities().slice(0, 3);
   const associationsCount = getActiveAssociationsCount();
   const recentNews = getNews().slice(0, 3);
 
   const stats = [
-    { label: "Member Associations", value: associationsCount + "+", icon: UserGroupIcon },
-    { label: "Districts Covered", value: SITE_CONTENT.stats.districts, icon: GlobeAltIcon },
-    { label: "Joint Initiatives", value: SITE_CONTENT.stats.initiatives, icon: SparklesIcon },
-    { label: "Navodayans Connected", value: SITE_CONTENT.stats.members, icon: HeartIcon },
+    // { label: "Member Associations", value: associationsCount + "+", icon: UserGroupIcon },
+    // { label: "Districts Covered", value: SITE_CONTENT.stats.districts, icon: GlobeAltIcon },
+    // { label: "Joint Initiatives", value: SITE_CONTENT.stats.initiatives, icon: SparklesIcon },
+    // { label: "Navodayans Connected", value: SITE_CONTENT.stats.members, icon: HeartIcon },
   ];
 
   return (
@@ -180,31 +184,48 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-r from-primary to-indigo-900">
+      {/* Global Network & Stats Section - Combined */}
+      <section className="py-16 md:py-20 bg-gradient-to-br from-indigo-950 via-primary to-indigo-900 overflow-hidden">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ y: 20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="flex justify-center mb-3">
-                  <div className="p-3 bg-white/10 rounded-xl">
-                    <stat.icon className="w-8 h-8 text-yellow-400" />
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-8"
+          >
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 mb-4">
+              <GlobeAltIcon className="w-5 h-5 text-yellow-400" />
+              <span className="text-white text-sm font-medium">Global Navodayan Network</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Spread Across <span className="text-yellow-400">All Continents</span>
+            </h2>
+            <p className="text-white/70 max-w-xl mx-auto">
+              From Kerala to every corner of the world, Navodayan alumni are making an impact
+            </p>
+          </motion.div>
+
+          {/* Globe Visualization with Stats */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <Suspense 
+              fallback={
+                <div className="flex items-center justify-center h-[600px]">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-white/20 border-t-yellow-400 rounded-full animate-spin"></div>
+                    <span className="text-white/60 text-sm">Loading globe...</span>
                   </div>
                 </div>
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-white/80 text-sm">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
+              }
+            >
+              <GlobalVolunteerGlobe stats={stats} />
+            </Suspense>
+          </motion.div>
         </div>
       </section>
 
@@ -360,45 +381,6 @@ const Home = () => {
               View News & Updates
               <ArrowRightIcon className="w-5 h-5" />
             </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Upcoming Events CTA */}
-      <section className="py-20 bg-gradient-to-br from-indigo-950 via-primary to-indigo-900">
-        <div className="container">
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 mb-6">
-              <CalendarDaysIcon className="w-5 h-5 text-yellow-400" />
-              <span className="text-white text-sm font-medium">Upcoming Event</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-              UNMA 2nd Anniversary & 77th Republic Day Celebration
-            </h2>
-            <p className="text-xl text-white/80 mb-8">
-              January 26, 2026 • T. K. Ramakrishnan Samskarika Kendram, Ernakulam
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                to="/republic-day-event"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-pink-500 text-indigo-950 px-8 py-4 rounded-xl font-semibold hover:from-yellow-500 hover:to-pink-600 transition-all transform hover:scale-105"
-              >
-                Register Now
-                <ArrowRightIcon className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/program"
-                className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-8 py-4 rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
-              >
-                View Program
-              </Link>
-            </div>
           </motion.div>
         </div>
       </section>
