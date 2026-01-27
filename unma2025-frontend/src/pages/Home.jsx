@@ -385,41 +385,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Join Us CTA */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Interested in Participating?
-            </h2>
-            <p className="text-gray-600 text-lg mb-8">
-              JNV alumni associations from Kerala, Mahe, and Lakshadweep are welcome to 
-              connect with UNMA. Participation is entirely voluntary.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                to="/membership"
-                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-all"
-              >
-                Learn About Membership
-                <ArrowRightIcon className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary hover:text-white transition-all"
-              >
-                Get in Touch
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+     
     </LazyMotion>
   );
 };
