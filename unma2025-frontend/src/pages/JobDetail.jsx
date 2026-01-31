@@ -362,7 +362,10 @@ const JobDetail = () => {
           <div className="p-4 md:p-6 border-t border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
             <button
               onClick={() => {
-                const jobUrl = window.location.href;
+                // Use slug-based URL for sharing (cleaner, SEO-friendly)
+                const baseUrl = window.location.origin;
+                const jobSlug = job.slug || job._id;
+                const jobUrl = `${baseUrl}/careers/${jobSlug}`;
                 const message = `*JOB OPPORTUNITY*\n\n` +
                   `*${job.title}*\n` +
                   `Company: ${job.company}\n` +

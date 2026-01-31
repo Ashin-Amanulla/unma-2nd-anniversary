@@ -133,6 +133,14 @@ const JobSchema = new mongoose.Schema(
             default: "",
         },
 
+        // SEO-friendly slug for URL
+        slug: {
+            type: String,
+            trim: true,
+            unique: true,
+            sparse: true, // Allow multiple documents without slug (for migration)
+        },
+
         // Status
         isActive: {
             type: Boolean,
@@ -203,6 +211,32 @@ const JobSchema = new mongoose.Schema(
     }
 );
 
+// Helper function to generate slug from text
+const generateSlug = (text) => {
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .trim()
+        .substring(0, 80); // Limit length
+};
+
+// Pre-save middleware to generate unique slug
+JobSchema.pre('save', async function (next) {
+    // Only generate slug if it doesn't exist and title + company are present
+    if (!this.slug && this.title && this.company) {
+        const baseSlug = generateSlug(`${this.title} ${this.company}`);
+
+        // Add a unique suffix using timestamp + random string
+        const uniqueSuffix = Date.now().toString(36).slice(-4) +
+            Math.random().toString(36).slice(2, 6);
+
+        this.slug = `${baseSlug}-${uniqueSuffix}`;
+    }
+    next();
+});
+
 // Indexes for efficient queries
 JobSchema.index({ isActive: 1, createdAt: -1 });
 JobSchema.index({ type: 1, isActive: 1 });
@@ -211,6 +245,7 @@ JobSchema.index({ selectionCriteria: 1, isActive: 1 });
 JobSchema.index({ "ageLimit.minAge": 1, "ageLimit.maxAge": 1 });
 JobSchema.index({ title: "text", company: "text", description: "text" });
 JobSchema.index({ approvalStatus: 1, createdAt: -1 }); // For pending jobs queries
+JobSchema.index({ slug: 1 }); // Index for slug lookups
 
 const Job = mongoose.model("Job", JobSchema);
 

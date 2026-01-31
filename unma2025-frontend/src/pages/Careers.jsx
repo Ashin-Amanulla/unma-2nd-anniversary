@@ -173,7 +173,7 @@ const Careers = () => {
   const JobCard = ({ job }) => (
     <div 
       className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer group"
-      onClick={() => navigate(`/careers/${job._id}`)}
+      onClick={() => navigate(`/careers/${job.slug || job._id}`)}
     >
       <div className="p-6">
         <div className="flex flex-col md:flex-row md:items-start gap-6">

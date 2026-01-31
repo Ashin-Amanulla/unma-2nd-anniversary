@@ -49,7 +49,7 @@ export const getActiveJobs = async (req, res) => {
         // Job age range overlaps if: job.minAge <= filter.maxAge AND job.maxAge >= filter.minAge
         if (minAge || maxAge) {
             const ageConditions = [];
-            
+
             if (minAge && maxAge) {
                 // Both min and max provided - find overlapping ranges
                 ageConditions.push(
@@ -87,7 +87,7 @@ export const getActiveJobs = async (req, res) => {
                     { "ageLimit.minAge": null }
                 );
             }
-            
+
             if (ageConditions.length > 0) {
                 query.$and = query.$and || [];
                 query.$and.push({ $or: ageConditions });
@@ -104,7 +104,7 @@ export const getActiveJobs = async (req, res) => {
                     { location: { $regex: search, $options: "i" } },
                 ],
             };
-            
+
             if (query.$and) {
                 query.$and.push(searchConditions);
             } else {
@@ -190,7 +190,7 @@ export const getAllJobs = async (req, res) => {
         // Filter by age range - find jobs where age range overlaps with filter range
         if (minAge || maxAge) {
             const ageConditions = [];
-            
+
             if (minAge && maxAge) {
                 ageConditions.push(
                     {
@@ -221,7 +221,7 @@ export const getAllJobs = async (req, res) => {
                     { "ageLimit.minAge": null }
                 );
             }
-            
+
             if (ageConditions.length > 0) {
                 query.$and = query.$and || [];
                 query.$and.push({ $or: ageConditions });
@@ -238,7 +238,7 @@ export const getAllJobs = async (req, res) => {
                     { location: { $regex: search, $options: "i" } },
                 ],
             };
-            
+
             if (query.$and) {
                 query.$and.push(searchConditions);
             } else {
@@ -280,15 +280,27 @@ export const getAllJobs = async (req, res) => {
 };
 
 /**
- * Get job by ID (Public/Admin)
+ * Get job by ID or slug (Public/Admin)
  */
 export const getJobById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const job = await Job.findById(id)
-            .populate("postedBy", "name email")
-            .lean();
+        let job;
+
+        // Check if id looks like a MongoDB ObjectId (24 hex characters)
+        const isObjectId = /^[a-f\d]{24}$/i.test(id);
+
+        if (isObjectId) {
+            job = await Job.findById(id)
+                .populate("postedBy", "name email")
+                .lean();
+        } else {
+            // Try to find by slug
+            job = await Job.findOne({ slug: id })
+                .populate("postedBy", "name email")
+                .lean();
+        }
 
         if (!job) {
             return res.status(404).json({
