@@ -363,16 +363,16 @@ const JobDetail = () => {
             <button
               onClick={() => {
                 const jobUrl = window.location.href;
-                const message = `🔔 *Job Opportunity*\n\n` +
+                const message = `*JOB OPPORTUNITY*\n\n` +
                   `*${job.title}*\n` +
-                  `🏢 ${job.company}\n` +
-                  `📍 ${job.location || 'Remote'}\n` +
-                  `💼 ${job.type}\n` +
-                  (job.salary ? `💰 ${job.salary}\n` : '') +
-                  (job.qualification && job.qualification !== 'Any' ? `🎓 ${job.qualification}\n` : '') +
-                  (job.deadline ? `📅 Apply by: ${new Date(job.deadline).toLocaleDateString()}\n` : '') +
-                  `\n🔗 View Details: ${jobUrl}\n\n` +
-                  `👉 For more job opportunities, visit:\nhttps://unma.in/careers`;
+                  `Company: ${job.company}\n` +
+                  `Location: ${job.location || 'Remote'}\n` +
+                  `Type: ${job.type}\n` +
+                  (job.salary ? `Salary: ${job.salary}\n` : '') +
+                  (job.qualification && job.qualification !== 'Any' ? `Qualification: ${job.qualification}\n` : '') +
+                  (job.deadline ? `Apply by: ${new Date(job.deadline).toLocaleDateString()}\n` : '') +
+                  `\nView Details: ${jobUrl}\n\n` +
+                  `For more job opportunities, visit:\nhttps://unma.in/careers`;
                 const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
               }}
