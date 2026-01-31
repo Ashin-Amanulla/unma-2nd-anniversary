@@ -25,7 +25,13 @@ const Careers = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Start collapsed on mobile, open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024; // lg breakpoint
+    }
+    return false;
+  });
   const [showJobForm, setShowJobForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -377,6 +383,31 @@ const Careers = () => {
           />
         )}
 
+        {/* Mobile Filter Button - Above content on mobile */}
+        {!sidebarOpen && (
+          <div className="lg:hidden mb-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 hover:border-primary transition-colors"
+              aria-label="Open filters"
+            >
+              <FunnelIcon className="w-5 h-5 text-primary" />
+              <span className="font-medium">Filters</span>
+              {hasActiveFilters() && (
+                <span className="px-2 py-0.5 bg-primary text-white text-xs font-bold rounded-full">
+                  {[
+                    filters.type !== "All" ? 1 : 0,
+                    filters.search ? 1 : 0,
+                    filters.qualification !== "All" ? 1 : 0,
+                    filters.selectionCriteria !== "All" ? 1 : 0,
+                    filters.ageRange.min !== 18 || filters.ageRange.max !== 60 ? 1 : 0,
+                  ].reduce((a, b) => a + b, 0)}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Main Layout: Sidebar + Content */}
         <div className="flex gap-6 relative">
           {/* Collapsible Sidebar */}
@@ -500,28 +531,6 @@ const Careers = () => {
               )}
             </div>
           </aside>
-
-          {/* Toggle Sidebar Button - Mobile */}
-          {!sidebarOpen && (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="fixed left-4 top-1/2 transform -translate-y-1/2 z-30 bg-primary text-white p-3 rounded-r-lg shadow-lg hover:bg-primary-dark transition-colors lg:hidden"
-              aria-label="Open filters"
-            >
-              <FunnelIcon className="w-5 h-5" />
-              {hasActiveFilters() && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                  {[
-                    filters.type !== "All" ? 1 : 0,
-                    filters.search ? 1 : 0,
-                    filters.qualification !== "All" ? 1 : 0,
-                    filters.selectionCriteria !== "All" ? 1 : 0,
-                    filters.ageRange.min !== 18 || filters.ageRange.max !== 60 ? 1 : 0,
-                  ].reduce((a, b) => a + b, 0)}
-                </span>
-              )}
-            </button>
-          )}
 
           {/* Toggle Sidebar Button - Desktop */}
           {!sidebarOpen && (
