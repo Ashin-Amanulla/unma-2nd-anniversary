@@ -126,6 +126,11 @@ const JobDetail = () => {
                    </div>
 
                    <div className="flex flex-wrap gap-3 mt-2">
+                     {job.category === "Job Fair" && (
+                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                         Job Fair
+                       </span>
+                     )}
                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                        job.type === "Full-time"
                          ? "bg-blue-100 text-blue-800"
@@ -176,6 +181,68 @@ const JobDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:divide-x divide-gray-100">
             {/* Main Info */}
             <div className="p-6 md:p-8 lg:col-span-2 space-y-8">
+               {/* Job Fair Details - shown when category is Job Fair */}
+               {job.category === "Job Fair" && job.jobFairDetails && (
+                 <section className="bg-amber-50/70 border border-amber-200 rounded-xl p-6">
+                   <h2 className="text-xl font-bold text-gray-900 mb-4">Job Fair Details</h2>
+                   <div className="space-y-4">
+                     {job.jobFairDetails.eventDate && (
+                       <div className="flex items-start">
+                         <CalendarIcon className="w-5 h-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" />
+                         <div>
+                           <p className="text-sm text-gray-500 font-medium">Event Date</p>
+                           <p className="text-gray-900 font-semibold">{new Date(job.jobFairDetails.eventDate).toLocaleDateString()}</p>
+                         </div>
+                       </div>
+                     )}
+                     {job.jobFairDetails.venue && (
+                       <div className="flex items-start">
+                         <MapPinIcon className="w-5 h-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" />
+                         <div>
+                           <p className="text-sm text-gray-500 font-medium">Venue</p>
+                           <p className="text-gray-900 font-semibold">{job.jobFairDetails.venue}</p>
+                         </div>
+                       </div>
+                     )}
+                     {job.jobFairDetails.organizer && (
+                       <div className="flex items-start">
+                         <BuildingOfficeIcon className="w-5 h-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" />
+                         <div>
+                           <p className="text-sm text-gray-500 font-medium">Organizer</p>
+                           <p className="text-gray-900 font-semibold">{job.jobFairDetails.organizer}</p>
+                         </div>
+                       </div>
+                     )}
+                     {job.jobFairDetails.registrationLink && (
+                       <div>
+                         <p className="text-sm text-gray-500 font-medium mb-1">Registration Link</p>
+                         <a
+                           href={job.jobFairDetails.registrationLink}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="inline-flex items-center text-primary font-semibold hover:underline"
+                         >
+                           Register for Job Fair
+                           <ArrowLeftIcon className="w-4 h-4 ml-1 rotate-180" />
+                         </a>
+                       </div>
+                     )}
+                     {job.jobFairDetails.participatingCompanies?.length > 0 && (
+                       <div>
+                         <p className="text-sm text-gray-500 font-medium mb-2">Participating Companies</p>
+                         <div className="flex flex-wrap gap-2">
+                           {job.jobFairDetails.participatingCompanies.map((company, idx) => (
+                             <span key={idx} className="px-3 py-1 rounded-lg bg-white border border-amber-200 text-gray-800 text-sm font-medium">
+                               {company}
+                             </span>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                   </div>
+                 </section>
+               )}
+
                <section>
                  <h2 className="text-xl font-bold text-gray-900 mb-4">Job Description</h2>
                  <p className="whitespace-pre-line text-gray-600 leading-relaxed text-lg">
@@ -250,13 +317,23 @@ const JobDetail = () => {
               )}
 
               {/* Selection Process */}
-              {job.selectionCriteria && (
+              {job.selectionCriteria && (Array.isArray(job.selectionCriteria) ? job.selectionCriteria.length > 0 : job.selectionCriteria) && (
                 <div>
                   <h3 className="font-bold text-gray-900 mb-4 text-lg">Selection Process</h3>
                   <div className="bg-white p-3 rounded-lg">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                      {job.selectionCriteria}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(job.selectionCriteria)
+                        ? job.selectionCriteria.map((c, idx) => (
+                            <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                              {c}
+                            </span>
+                          ))
+                        : (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                              {job.selectionCriteria}
+                            </span>
+                          )}
+                    </div>
                   </div>
                 </div>
               )}

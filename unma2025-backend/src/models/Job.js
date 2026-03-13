@@ -5,13 +5,17 @@ const JobSchema = new mongoose.Schema(
         // Basic Job Information
         title: {
             type: String,
-            required: [true, "Job title is required"],
+            required: function() {
+                return this.category !== "Job Fair";
+            },
             trim: true,
             maxlength: 200,
         },
         company: {
             type: String,
-            required: [true, "Company name is required"],
+            required: function() {
+                return this.category !== "Job Fair";
+            },
             trim: true,
             maxlength: 200,
         },
@@ -23,7 +27,9 @@ const JobSchema = new mongoose.Schema(
         type: {
             type: String,
             enum: ["Full-time", "Part-time", "Internship", "Contract", "Freelance", "Apprenticeship", "Trainee"],
-            required: [true, "Job type is required"],
+            required: function() {
+                return this.category !== "Job Fair";
+            },
         },
         location: {
             type: String,
@@ -76,6 +82,40 @@ const JobSchema = new mongoose.Schema(
             default: "",
         },
 
+        // Category: Job or Job Fair
+        category: {
+            type: String,
+            enum: ["Job", "Job Fair"],
+            default: "Job",
+        },
+
+        // Job Fair specific details (when category is "Job Fair")
+        jobFairDetails: {
+            eventDate: {
+                type: Date,
+                default: null,
+            },
+            venue: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            organizer: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            registrationLink: {
+                type: String,
+                trim: true,
+                default: "",
+            },
+            participatingCompanies: {
+                type: [String],
+                default: [],
+            },
+        },
+
         // Deadline
         deadline: {
             type: Date,
@@ -101,7 +141,7 @@ const JobSchema = new mongoose.Schema(
         // Educational Qualification
         qualification: {
             type: String,
-            enum: ["10th Pass", "12th Pass", "Diploma", "Graduate", "Post Graduate", "PhD", "Any"],
+            enum: ["10th Pass", "12th Pass", "Diploma", "Ongoing Degree", "Graduate", "Post Graduate", "PhD", "Any"],
             default: "Any",
         },
 
@@ -112,11 +152,22 @@ const JobSchema = new mongoose.Schema(
             default: "",
         },
 
-        // Selection Criteria
+        // Selection Criteria (multi-select)
         selectionCriteria: {
-            type: String,
-            enum: ["Written Exam", "Interview", "Both", "Degree Marks", "Walk-in", "Online Assessment", "Other"],
-            default: "Other",
+            type: [String],
+            enum: [
+                "Objective Examination",
+                "Descriptive Examination",
+                "Interview",
+                "Group Discussion",
+                "Degree Marks",
+                "12th Marks",
+                "10th Marks",
+                "Field Experience",
+                "Medical Examination",
+                "Physical Examination",
+            ],
+            default: [],
         },
 
         // Notification PDF URL
@@ -222,8 +273,35 @@ const generateSlug = (text) => {
         .substring(0, 80); // Limit length
 };
 
-// Pre-save middleware to generate unique slug
+// Pre-save middleware to normalize selectionCriteria (support legacy string)
+JobSchema.pre('save', function (next) {
+    if (this.selectionCriteria != null) {
+        this.selectionCriteria = Array.isArray(this.selectionCriteria)
+            ? this.selectionCriteria
+            : typeof this.selectionCriteria === 'string' && this.selectionCriteria
+                ? [this.selectionCriteria]
+                : [];
+    }
+    next();
+});
+
+// Pre-save middleware to auto-populate title/company for Job Fairs and generate unique slug
 JobSchema.pre('save', async function (next) {
+    // Auto-populate title and company for Job Fairs from organizer and event date
+    if (this.category === "Job Fair") {
+        if (!this.title && this.jobFairDetails?.organizer) {
+            const eventDate = this.jobFairDetails.eventDate 
+                ? new Date(this.jobFairDetails.eventDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                : '';
+            this.title = eventDate 
+                ? `Job Fair - ${eventDate}`
+                : 'Job Fair';
+        }
+        if (!this.company && this.jobFairDetails?.organizer) {
+            this.company = this.jobFairDetails.organizer;
+        }
+    }
+
     // Only generate slug if it doesn't exist and title + company are present
     if (!this.slug && this.title && this.company) {
         const baseSlug = generateSlug(`${this.title} ${this.company}`);
@@ -240,8 +318,8 @@ JobSchema.pre('save', async function (next) {
 // Indexes for efficient queries
 JobSchema.index({ isActive: 1, createdAt: -1 });
 JobSchema.index({ type: 1, isActive: 1 });
+JobSchema.index({ category: 1, isActive: 1 });
 JobSchema.index({ qualification: 1, isActive: 1 });
-JobSchema.index({ selectionCriteria: 1, isActive: 1 });
 JobSchema.index({ "ageLimit.minAge": 1, "ageLimit.maxAge": 1 });
 JobSchema.index({ title: "text", company: "text", description: "text" });
 JobSchema.index({ approvalStatus: 1, createdAt: -1 }); // For pending jobs queries

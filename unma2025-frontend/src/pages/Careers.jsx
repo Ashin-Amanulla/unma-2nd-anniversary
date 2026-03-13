@@ -40,6 +40,7 @@ const Careers = () => {
     search: "",
     qualification: "All",
     selectionCriteria: "All",
+    category: "All",
     ageRange: { min: 18, max: 60 },
   });
   const [pagination, setPagination] = useState({
@@ -65,12 +66,33 @@ const Careers = () => {
     ageLimit: { minAge: "", maxAge: "" },
     qualification: "Any",
     careerGrowth: "",
-    selectionCriteria: "Other",
+    selectionCriteria: [],
+    category: "Job",
+    jobFairDetails: {
+      eventDate: "",
+      venue: "",
+      organizer: "",
+      registrationLink: "",
+      participatingCompanies: "",
+    },
     submitterName: "",
     submitterEmail: "",
     submitterPhone: "",
     submitterOrganization: "",
   });
+
+  const SELECTION_CRITERIA_OPTIONS = [
+    "Objective Examination",
+    "Descriptive Examination",
+    "Interview",
+    "Group Discussion",
+    "Degree Marks",
+    "12th Marks",
+    "10th Marks",
+    "Field Experience",
+    "Medical Examination",
+    "Physical Examination",
+  ];
 
   const jobTypes = [
     "All",
@@ -93,6 +115,7 @@ const Careers = () => {
         search: filters.search,
         qualification: filters.qualification === "All" || filters.qualification === "Any" ? "" : filters.qualification,
         selectionCriteria: filters.selectionCriteria === "All" ? "" : filters.selectionCriteria,
+        category: filters.category === "All" ? "" : filters.category,
         minAge: filters.ageRange.min,
         maxAge: filters.ageRange.max,
       };
@@ -138,12 +161,30 @@ const Careers = () => {
     setPagination({ ...pagination, page: 1 });
   };
 
+  const handleCategoryChange = (category) => {
+    if (category === "Job Fair") {
+      // Reset job-specific filters when viewing job fairs (jobs and job fairs are different)
+      setFilters({
+        ...filters,
+        category: "Job Fair",
+        type: "All",
+        qualification: "All",
+        selectionCriteria: "All",
+        ageRange: { min: 18, max: 60 },
+      });
+    } else {
+      setFilters({ ...filters, category });
+    }
+    setPagination({ ...pagination, page: 1 });
+  };
+
   const clearFilters = () => {
     setFilters({
       type: "All",
       search: "",
       qualification: "All",
       selectionCriteria: "All",
+      category: "All",
       ageRange: { min: 18, max: 60 },
     });
     setPagination({ ...pagination, page: 1 });
@@ -155,6 +196,7 @@ const Careers = () => {
       filters.search !== "" ||
       filters.qualification !== "All" ||
       filters.selectionCriteria !== "All" ||
+      filters.category !== "All" ||
       filters.ageRange.min !== 18 ||
       filters.ageRange.max !== 60
     );
@@ -201,8 +243,27 @@ const Careers = () => {
                 </h3>
                 <p className="text-base text-gray-600 font-medium mb-3">{job.company}</p>
                 
-                {/* Badges Row */}
+                {/* Badges Row - Job Fair shows different info than Jobs */}
                 <div className="flex flex-wrap items-center gap-2 mb-3">
+                  {job.category === "Job Fair" ? (
+                    <>
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                        Job Fair
+                      </span>
+                      {job.jobFairDetails?.eventDate && (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700">
+                          {new Date(job.jobFairDetails.eventDate).toLocaleDateString()}
+                        </span>
+                      )}
+                      {job.jobFairDetails?.venue && (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 flex items-center gap-1">
+                          <MapPinIcon className="w-3 h-3" />
+                          {job.jobFairDetails.venue}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       job.type === "Full-time"
@@ -237,6 +298,8 @@ const Careers = () => {
                       PDF Available
                     </span>
                   )}
+                    </>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -246,32 +309,56 @@ const Careers = () => {
               </div>
             </div>
 
-            {/* Bottom Section: Details and Actions */}
+            {/* Bottom Section: Details - Job Fair shows venue/event date, Jobs show location/salary/deadline */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-gray-100">
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center">
-                  <MapPinIcon className="w-4 h-4 mr-2 text-gray-400" />
-                  <span>{job.location || "Remote"}</span>
-                </div>
-                {job.salary && (
-                  <div className="flex items-center">
-                    <CurrencyRupeeIcon className="w-4 h-4 mr-2 text-gray-400" />
-                    <span className="font-medium">{job.salary}</span>
-                  </div>
-                )}
-                <div className="flex items-center">
-                  <ClockIcon className="w-4 h-4 mr-2 text-gray-400" />
-                  <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
-                </div>
-                {job.deadline && (
-                  <div className="flex items-center text-red-600 font-medium">
-                    <ClockIcon className="w-4 h-4 mr-2" />
-                    <span>Apply by {new Date(job.deadline).toLocaleDateString()}</span>
-                  </div>
+                {job.category === "Job Fair" ? (
+                  <>
+                    {job.jobFairDetails?.venue && (
+                      <div className="flex items-center">
+                        <MapPinIcon className="w-4 h-4 mr-2 text-gray-400" />
+                        <span>{job.jobFairDetails.venue}</span>
+                      </div>
+                    )}
+                    {job.jobFairDetails?.eventDate && (
+                      <div className="flex items-center text-teal-600 font-medium">
+                        <ClockIcon className="w-4 h-4 mr-2" />
+                        <span>Event: {new Date(job.jobFairDetails.eventDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {job.jobFairDetails?.organizer && (
+                      <div className="flex items-center">
+                        <span>Organized by {job.jobFairDetails.organizer}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center">
+                      <MapPinIcon className="w-4 h-4 mr-2 text-gray-400" />
+                      <span>{job.location || "Remote"}</span>
+                    </div>
+                    {job.salary && (
+                      <div className="flex items-center">
+                        <CurrencyRupeeIcon className="w-4 h-4 mr-2 text-gray-400" />
+                        <span className="font-medium">{job.salary}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center">
+                      <ClockIcon className="w-4 h-4 mr-2 text-gray-400" />
+                      <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    {job.deadline && (
+                      <div className="flex items-center text-red-600 font-medium">
+                        <ClockIcon className="w-4 h-4 mr-2" />
+                        <span>Apply by {new Date(job.deadline).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <button
-                className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors shadow-sm hover:shadow-md flex items-center justify-center gap-2 group-hover:scale-105 transform transition-transform"
+                className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 group-hover:scale-105 transform"
               >
                 View Details
                 <ChevronRightIcon className="w-4 h-4" />
@@ -289,12 +376,27 @@ const Careers = () => {
     setError(null);
 
     try {
+      const participatingCompanies = jobFormData.jobFairDetails?.participatingCompanies
+        ? jobFormData.jobFairDetails.participatingCompanies
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
       const submitData = {
         ...jobFormData,
         submitterName: jobFormData.submitterName,
         submitterEmail: jobFormData.submitterEmail,
         submitterPhone: jobFormData.submitterPhone,
         submitterOrganization: jobFormData.submitterOrganization,
+        category: jobFormData.category || "Job",
+        jobFairDetails: jobFormData.category === "Job Fair" ? {
+          eventDate: jobFormData.jobFairDetails?.eventDate || null,
+          venue: jobFormData.jobFairDetails?.venue || "",
+          organizer: jobFormData.jobFairDetails?.organizer || "",
+          registrationLink: jobFormData.jobFairDetails?.registrationLink || "",
+          participatingCompanies,
+        } : {},
         ageLimit: {
           minAge: jobFormData.ageLimit.minAge ? Number(jobFormData.ageLimit.minAge) : null,
           maxAge: jobFormData.ageLimit.maxAge ? Number(jobFormData.ageLimit.maxAge) : null,
@@ -322,7 +424,15 @@ const Careers = () => {
         ageLimit: { minAge: "", maxAge: "" },
         qualification: "Any",
         careerGrowth: "",
-        selectionCriteria: "Other",
+        selectionCriteria: [],
+        category: "Job",
+        jobFairDetails: {
+          eventDate: "",
+          venue: "",
+          organizer: "",
+          registrationLink: "",
+          participatingCompanies: "",
+        },
         submitterName: "",
         submitterEmail: "",
         submitterPhone: "",
@@ -400,6 +510,7 @@ const Careers = () => {
                     filters.search ? 1 : 0,
                     filters.qualification !== "All" ? 1 : 0,
                     filters.selectionCriteria !== "All" ? 1 : 0,
+                    filters.category !== "All" ? 1 : 0,
                     filters.ageRange.min !== 18 || filters.ageRange.max !== 60 ? 1 : 0,
                   ].reduce((a, b) => a + b, 0)}
                 </span>
@@ -426,13 +537,14 @@ const Careers = () => {
                   Filters
                   {hasActiveFilters() && (
                     <span className="ml-2 px-2 py-0.5 bg-primary text-white text-xs font-semibold rounded-full">
-                      {[
-                        filters.type !== "All" ? 1 : 0,
-                        filters.search ? 1 : 0,
-                        filters.qualification !== "All" ? 1 : 0,
-                        filters.selectionCriteria !== "All" ? 1 : 0,
-                        filters.ageRange.min !== 18 || filters.ageRange.max !== 60 ? 1 : 0,
-                      ].reduce((a, b) => a + b, 0)}
+                  {[
+                    filters.type !== "All" ? 1 : 0,
+                    filters.search ? 1 : 0,
+                    filters.qualification !== "All" ? 1 : 0,
+                    filters.selectionCriteria !== "All" ? 1 : 0,
+                    filters.category !== "All" ? 1 : 0,
+                    filters.ageRange.min !== 18 || filters.ageRange.max !== 60 ? 1 : 0,
+                  ].reduce((a, b) => a + b, 0)}
                     </span>
                   )}
                 </h2>
@@ -446,6 +558,32 @@ const Careers = () => {
                 </button>
               </div>
 
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <div className="flex flex-wrap gap-2">
+                  {["All", "Job", "Job Fair"].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => handleCategoryChange(cat)}
+                      className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        filters.category === cat
+                          ? "bg-primary text-white shadow-md"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+                {filters.category === "Job Fair" && (
+                  <p className="text-xs text-gray-500 mt-2">Job fairs only. Job-specific filters are hidden.</p>
+                )}
+              </div>
+
+              {/* Job-specific filters - only show when viewing Jobs (or All), not Job Fairs */}
+              {filters.category !== "Job Fair" && (
+                <>
               {/* Job Type Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
@@ -491,6 +629,7 @@ const Careers = () => {
                   <option value="10th Pass">10th Pass</option>
                   <option value="12th Pass">12th Pass</option>
                   <option value="Diploma">Diploma</option>
+                  <option value="Ongoing Degree">Ongoing Degree</option>
                   <option value="Graduate">Graduate</option>
                   <option value="Post Graduate">Post Graduate</option>
                   <option value="PhD">PhD</option>
@@ -500,8 +639,8 @@ const Careers = () => {
               {/* Selection Criteria */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Selection Criteria</label>
-                <div className="flex flex-wrap gap-2">
-                  {["All", "Written Exam", "Interview", "Both", "Degree Marks", "Walk-in", "Online Assessment"].map((criteria) => (
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                  {["All", ...SELECTION_CRITERIA_OPTIONS].map((criteria) => (
                     <button
                       key={criteria}
                       onClick={() => handleSelectionCriteriaChange(criteria)}
@@ -516,6 +655,8 @@ const Careers = () => {
                   ))}
                 </div>
               </div>
+                </>
+              )}
 
               {/* Clear Filters Button */}
               {hasActiveFilters() && (
@@ -549,6 +690,7 @@ const Careers = () => {
                     filters.search ? 1 : 0,
                     filters.qualification !== "All" ? 1 : 0,
                     filters.selectionCriteria !== "All" ? 1 : 0,
+                    filters.category !== "All" ? 1 : 0,
                     filters.ageRange.min !== 18 || filters.ageRange.max !== 60 ? 1 : 0,
                   ].reduce((a, b) => a + b, 0)}</span> active filter(s)
                 </div>
@@ -718,6 +860,113 @@ const Careers = () => {
               {/* Job Information */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Details</h3>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value="Job"
+                        checked={jobFormData.category === "Job"}
+                        onChange={(e) => setJobFormData({ ...jobFormData, category: e.target.value })}
+                        className="border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span>Job</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value="Job Fair"
+                        checked={jobFormData.category === "Job Fair"}
+                        onChange={(e) => setJobFormData({ ...jobFormData, category: e.target.value })}
+                        className="border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span>Job Fair</span>
+                    </label>
+                  </div>
+                </div>
+                {jobFormData.category === "Job Fair" && (
+                  <div className="mb-4 p-4 border border-amber-200 rounded-lg bg-amber-50/50 space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-900">Job Fair Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Event Date</label>
+                        <input
+                          type="date"
+                          value={jobFormData.jobFairDetails?.eventDate || ""}
+                          onChange={(e) =>
+                            setJobFormData({
+                              ...jobFormData,
+                              jobFairDetails: { ...jobFormData.jobFairDetails, eventDate: e.target.value },
+                            })
+                          }
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+                        <input
+                          type="text"
+                          value={jobFormData.jobFairDetails?.venue || ""}
+                          onChange={(e) =>
+                            setJobFormData({
+                              ...jobFormData,
+                              jobFairDetails: { ...jobFormData.jobFairDetails, venue: e.target.value },
+                            })
+                          }
+                          placeholder="e.g. Convention Center"
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Organizer</label>
+                        <input
+                          type="text"
+                          value={jobFormData.jobFairDetails?.organizer || ""}
+                          onChange={(e) =>
+                            setJobFormData({
+                              ...jobFormData,
+                              jobFairDetails: { ...jobFormData.jobFairDetails, organizer: e.target.value },
+                            })
+                          }
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
+                        <input
+                          type="url"
+                          value={jobFormData.jobFairDetails?.registrationLink || ""}
+                          onChange={(e) =>
+                            setJobFormData({
+                              ...jobFormData,
+                              jobFairDetails: { ...jobFormData.jobFairDetails, registrationLink: e.target.value },
+                            })
+                          }
+                          placeholder="https://..."
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Participating Companies (one per line)</label>
+                      <textarea
+                        rows={2}
+                        value={jobFormData.jobFairDetails?.participatingCompanies || ""}
+                        onChange={(e) =>
+                          setJobFormData({
+                            ...jobFormData,
+                            jobFairDetails: { ...jobFormData.jobFairDetails, participatingCompanies: e.target.value },
+                          })
+                        }
+                        placeholder="Company A&#10;Company B"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
@@ -871,26 +1120,31 @@ const Careers = () => {
                       <option value="10th Pass">10th Pass</option>
                       <option value="12th Pass">12th Pass</option>
                       <option value="Diploma">Diploma</option>
+                      <option value="Ongoing Degree">Ongoing Degree</option>
                       <option value="Graduate">Graduate</option>
                       <option value="Post Graduate">Post Graduate</option>
                       <option value="PhD">PhD</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Selection Criteria</label>
-                    <select
-                      value={jobFormData.selectionCriteria}
-                      onChange={(e) => setJobFormData({ ...jobFormData, selectionCriteria: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
-                    >
-                      <option value="Written Exam">Written Exam</option>
-                      <option value="Interview">Interview</option>
-                      <option value="Both">Both</option>
-                      <option value="Degree Marks">Degree Marks</option>
-                      <option value="Walk-in">Walk-in</option>
-                      <option value="Online Assessment">Online Assessment</option>
-                      <option value="Other">Other</option>
-                    </select>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Selection Criteria (select all that apply)</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {SELECTION_CRITERIA_OPTIONS.map((opt) => (
+                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={jobFormData.selectionCriteria?.includes(opt) || false}
+                            onChange={(e) => {
+                              const prev = jobFormData.selectionCriteria || [];
+                              const next = e.target.checked ? [...prev, opt] : prev.filter((c) => c !== opt);
+                              setJobFormData({ ...jobFormData, selectionCriteria: next });
+                            }}
+                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <span className="text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

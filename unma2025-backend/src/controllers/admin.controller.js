@@ -127,9 +127,7 @@ export const createSubAdmin = async (req, res) => {
 // Get all sub-admins (only for super admin)
 export const getSubAdmins = async (req, res) => {
   try {
- 
-
-    const subAdmins = await Admin.find({ role: "school_admin" })
+    const subAdmins = await Admin.find({ role: { $ne: "super_admin" } })
       .select("-password")
       .populate("createdBy", "name email")
       .sort({ createdAt: -1 });
@@ -150,33 +148,18 @@ export const getSubAdmins = async (req, res) => {
 // Update sub-admin
 export const updateSubAdmin = async (req, res) => {
   try {
-    
     const { id } = req.params;
-    const { assignedSchools, permissions, isActive, sidebarAccess, role } = req.body;
+    const {
+      name,
+      assignedSchools,
+      permissions,
+      isActive,
+      sidebarAccess,
+      role,
+      password,
+    } = req.body;
 
-    
-
-    const updateData = {};
-    if (assignedSchools) updateData.assignedSchools = assignedSchools;
-    if (permissions)
-      updateData.permissions = {
-        ...permissions,
-        canViewAllSchools: false,
-        canManageAdmins: false,
-      };
-    if (typeof isActive === "boolean") updateData.isActive = isActive;
-    if (sidebarAccess !== undefined) updateData.sidebarAccess = sidebarAccess;
-    if (role) {
-      const validRoles = ["school_admin", "career_admin", "registration_desk"];
-      if (validRoles.includes(role)) {
-        updateData.role = role;
-      }
-    }
-
-    const subAdmin = await Admin.findByIdAndUpdate(id, updateData, {
-      new: true,
-    }).select("-password");
-
+    const subAdmin = await Admin.findById(id);
     if (!subAdmin) {
       return res.status(404).json({
         status: "error",
@@ -184,13 +167,119 @@ export const updateSubAdmin = async (req, res) => {
       });
     }
 
+    if (subAdmin.role === "super_admin") {
+      return res.status(403).json({
+        status: "error",
+        message: "Cannot modify super admin",
+      });
+    }
+
+    if (name && name.trim()) subAdmin.name = name.trim();
+    if (assignedSchools) subAdmin.assignedSchools = assignedSchools;
+    if (permissions) {
+      const current = subAdmin.permissions || {};
+      subAdmin.permissions = {
+        canViewAllSchools: false,
+        canManageAdmins: false,
+        canViewAnalytics: permissions.canViewAnalytics ?? current.canViewAnalytics ?? true,
+        canExportData: permissions.canExportData ?? current.canExportData ?? false,
+        canManageSettings: false,
+      };
+    }
+    if (typeof isActive === "boolean") subAdmin.isActive = isActive;
+    if (sidebarAccess !== undefined) subAdmin.sidebarAccess = sidebarAccess;
+    if (role) {
+      const validRoles = ["school_admin", "career_admin", "registration_desk"];
+      if (validRoles.includes(role)) subAdmin.role = role;
+    }
+    if (password && password.length >= 6) subAdmin.password = password;
+
+    await subAdmin.save();
+    const response = subAdmin.toObject();
+    delete response.password;
+
     res.status(200).json({
       status: "success",
       message: "Sub-admin updated successfully",
-      data: subAdmin,
+      data: response,
     });
   } catch (error) {
     logger.error(`Error updating sub-admin: ${error.message}`);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+};
+
+// Delete sub-admin (super admin only, cannot delete super_admin)
+export const deleteSubAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const target = await Admin.findById(id);
+
+    if (!target) {
+      return res.status(404).json({
+        status: "error",
+        message: "Sub-admin not found",
+      });
+    }
+
+    if (target.role === "super_admin") {
+      return res.status(403).json({
+        status: "error",
+        message: "Cannot delete super admin",
+      });
+    }
+
+    await Admin.findByIdAndDelete(id);
+
+    res.status(200).json({
+      status: "success",
+      message: "Sub-admin deleted successfully",
+    });
+  } catch (error) {
+    logger.error(`Error deleting sub-admin: ${error.message}`);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+};
+
+// Toggle sub-admin active status (super admin only)
+export const toggleSubAdminStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const target = await Admin.findById(id);
+
+    if (!target) {
+      return res.status(404).json({
+        status: "error",
+        message: "Sub-admin not found",
+      });
+    }
+
+    if (target.role === "super_admin") {
+      return res.status(403).json({
+        status: "error",
+        message: "Cannot modify super admin status",
+      });
+    }
+
+    const subAdmin = await Admin.findByIdAndUpdate(
+      id,
+      { isActive: !target.isActive },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({
+      status: "success",
+      message: `Sub-admin ${subAdmin.isActive ? "activated" : "deactivated"} successfully`,
+      data: subAdmin,
+    });
+  } catch (error) {
+    logger.error(`Error toggling sub-admin status: ${error.message}`);
     res.status(500).json({
       status: "error",
       message: "Internal server error",

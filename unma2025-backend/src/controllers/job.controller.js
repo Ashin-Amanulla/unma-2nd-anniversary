@@ -14,6 +14,7 @@ export const getActiveJobs = async (req, res) => {
             search,
             qualification,
             selectionCriteria,
+            category,
             minAge,
             maxAge,
             sortBy = "createdAt",
@@ -30,24 +31,39 @@ export const getActiveJobs = async (req, res) => {
             ],
         };
 
-        // Filter by job type
-        if (type && type !== "All") {
-            query.type = type;
+        // Filter by category - jobs and job fairs are different; when Job Fair, only return job fairs (no job-specific filters)
+        if (category && category !== "All") {
+            if (category === "Job Fair") {
+                query.category = "Job Fair";
+                // Do not apply job-specific filters (type, qualification, selectionCriteria, age) for job fairs
+            } else {
+                query.$and = query.$and || [];
+                query.$and.push({
+                    $or: [
+                        { category: "Job" },
+                        { category: { $exists: false } },
+                        { category: null },
+                    ],
+                });
+            }
         }
 
-        // Filter by qualification
-        if (qualification && qualification !== "All" && qualification !== "Any") {
-            query.qualification = qualification;
+        // Job-specific filters - only apply when viewing jobs (not job fairs)
+        const isJobFairOnly = category === "Job Fair";
+        if (!isJobFairOnly) {
+            if (type && type !== "All") {
+                query.type = type;
+            }
+            if (qualification && qualification !== "All" && qualification !== "Any") {
+                query.qualification = qualification;
+            }
+            if (selectionCriteria && selectionCriteria !== "All") {
+                query.selectionCriteria = { $in: [selectionCriteria] };
+            }
         }
 
-        // Filter by selection criteria
-        if (selectionCriteria && selectionCriteria !== "All") {
-            query.selectionCriteria = selectionCriteria;
-        }
-
-        // Filter by age range - find jobs where age range overlaps with filter range
-        // Job age range overlaps if: job.minAge <= filter.maxAge AND job.maxAge >= filter.minAge
-        if (minAge || maxAge) {
+        // Filter by age range - only for jobs (job fairs use event date, not age eligibility)
+        if (!isJobFairOnly && (minAge || maxAge)) {
             const ageConditions = [];
 
             if (minAge && maxAge) {
@@ -159,6 +175,7 @@ export const getAllJobs = async (req, res) => {
             isActive,
             qualification,
             selectionCriteria,
+            category,
             minAge,
             maxAge,
             sortBy = "createdAt",
@@ -167,9 +184,21 @@ export const getAllJobs = async (req, res) => {
 
         const query = {};
 
-        // Filter by job type
-        if (type && type !== "All") {
-            query.type = type;
+        // Filter by category - jobs and job fairs are different
+        const isJobFairOnly = category === "Job Fair";
+        if (category && category !== "All") {
+            if (category === "Job Fair") {
+                query.category = "Job Fair";
+            } else {
+                query.$and = query.$and || [];
+                query.$and.push({
+                    $or: [
+                        { category: "Job" },
+                        { category: { $exists: false } },
+                        { category: null },
+                    ],
+                });
+            }
         }
 
         // Filter by active status
@@ -177,18 +206,21 @@ export const getAllJobs = async (req, res) => {
             query.isActive = isActive === "true";
         }
 
-        // Filter by qualification
-        if (qualification && qualification !== "All" && qualification !== "Any") {
-            query.qualification = qualification;
+        // Job-specific filters - only for jobs, not job fairs
+        if (!isJobFairOnly) {
+            if (type && type !== "All") {
+                query.type = type;
+            }
+            if (qualification && qualification !== "All" && qualification !== "Any") {
+                query.qualification = qualification;
+            }
+            if (selectionCriteria && selectionCriteria !== "All") {
+                query.selectionCriteria = { $in: [selectionCriteria] };
+            }
         }
 
-        // Filter by selection criteria
-        if (selectionCriteria && selectionCriteria !== "All") {
-            query.selectionCriteria = selectionCriteria;
-        }
-
-        // Filter by age range - find jobs where age range overlaps with filter range
-        if (minAge || maxAge) {
+        // Filter by age range - only for jobs
+        if (!isJobFairOnly && (minAge || maxAge)) {
             const ageConditions = [];
 
             if (minAge && maxAge) {
@@ -513,11 +545,25 @@ export const getJobStats = async (req, res) => {
             },
         ]);
 
-        // Get jobs by selection criteria
+        // Get jobs by selection criteria (unwind array to count per value)
         const jobsBySelectionCriteria = await Job.aggregate([
+            { $unwind: { path: "$selectionCriteria", preserveNullAndEmptyArrays: false } },
             {
                 $group: {
                     _id: "$selectionCriteria",
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $sort: { count: -1 },
+            },
+        ]);
+
+        // Get jobs by category
+        const jobsByCategory = await Job.aggregate([
+            {
+                $group: {
+                    _id: { $ifNull: ["$category", "Job"] },
                     count: { $sum: 1 },
                 },
             },
@@ -537,6 +583,7 @@ export const getJobStats = async (req, res) => {
                 jobsByType,
                 jobsByQualification,
                 jobsBySelectionCriteria,
+                jobsByCategory,
             },
         });
     } catch (error) {
@@ -572,6 +619,8 @@ export const submitPublicJob = async (req, res) => {
             qualification,
             careerGrowth,
             selectionCriteria,
+            category,
+            jobFairDetails,
             image,
             notificationPdf,
             poster,
@@ -614,6 +663,14 @@ export const submitPublicJob = async (req, res) => {
                 : responsibilities.split("\n").filter((r) => r.trim());
         }
 
+        // Normalize selectionCriteria to array (legacy may be string)
+        let selectionCriteriaArray = [];
+        if (selectionCriteria) {
+            selectionCriteriaArray = Array.isArray(selectionCriteria)
+                ? selectionCriteria.filter(Boolean)
+                : [selectionCriteria].filter(Boolean);
+        }
+
         const jobData = {
             title,
             company,
@@ -631,7 +688,9 @@ export const submitPublicJob = async (req, res) => {
             ageLimit: ageLimit || { minAge: null, maxAge: null },
             qualification: qualification || "Any",
             careerGrowth: careerGrowth || "",
-            selectionCriteria: selectionCriteria || "Other",
+            selectionCriteria: selectionCriteriaArray,
+            category: category || "Job",
+            jobFairDetails: jobFairDetails || {},
             image: image || "",
             notificationPdf: notificationPdf || "",
             poster: poster || "",

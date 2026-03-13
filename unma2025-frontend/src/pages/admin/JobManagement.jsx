@@ -42,6 +42,19 @@ const JobManagement = () => {
   const [posterFile, setPosterFile] = useState(null);
   const [posterPreview, setPosterPreview] = useState(null);
 
+  const SELECTION_CRITERIA_OPTIONS = [
+    "Objective Examination",
+    "Descriptive Examination",
+    "Interview",
+    "Group Discussion",
+    "Degree Marks",
+    "12th Marks",
+    "10th Marks",
+    "Field Experience",
+    "Medical Examination",
+    "Physical Examination",
+  ];
+
   // Form Initial State
   const initialFormState = {
     title: "",
@@ -64,7 +77,15 @@ const JobManagement = () => {
     },
     qualification: "Any",
     careerGrowth: "",
-    selectionCriteria: "Other",
+    selectionCriteria: [],
+    category: "Job",
+    jobFairDetails: {
+      eventDate: "",
+      venue: "",
+      organizer: "",
+      registrationLink: "",
+      participatingCompanies: "", // textarea, converted to array on submit
+    },
     notificationPdf: "",
     poster: "",
   };
@@ -112,6 +133,8 @@ const JobManagement = () => {
   const openModal = (job = null) => {
     if (job) {
       setCurrentJob(job);
+      const sc = job.selectionCriteria;
+      const selectionCriteriaArray = Array.isArray(sc) ? sc : sc ? [sc] : [];
       setFormData({
         ...job,
         requirements: job.requirements?.join("\n") || "",
@@ -123,7 +146,17 @@ const JobManagement = () => {
         },
         qualification: job.qualification || "Any",
         careerGrowth: job.careerGrowth || "",
-        selectionCriteria: job.selectionCriteria || "Other",
+        selectionCriteria: selectionCriteriaArray,
+        category: job.category || "Job",
+        jobFairDetails: {
+          eventDate: job.jobFairDetails?.eventDate ? job.jobFairDetails.eventDate.split("T")[0] : "",
+          venue: job.jobFairDetails?.venue || "",
+          organizer: job.jobFairDetails?.organizer || "",
+          registrationLink: job.jobFairDetails?.registrationLink || "",
+          participatingCompanies: Array.isArray(job.jobFairDetails?.participatingCompanies)
+            ? job.jobFairDetails.participatingCompanies.join("\n")
+            : job.jobFairDetails?.participatingCompanies || "",
+        },
         notificationPdf: job.notificationPdf || "",
         poster: job.poster || "",
       });
@@ -207,6 +240,13 @@ const JobManagement = () => {
         posterUrl = uploadResponse.fileUrl;
       }
 
+      const participatingCompanies = formData.jobFairDetails?.participatingCompanies
+        ? formData.jobFairDetails.participatingCompanies
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
       const payload = {
         ...formData,
         image: imageUrl,
@@ -216,6 +256,13 @@ const JobManagement = () => {
           minAge: formData.ageLimit.minAge ? Number(formData.ageLimit.minAge) : null,
           maxAge: formData.ageLimit.maxAge ? Number(formData.ageLimit.maxAge) : null,
         },
+        jobFairDetails: formData.category === "Job Fair" ? {
+          eventDate: formData.jobFairDetails.eventDate || null,
+          venue: formData.jobFairDetails.venue || "",
+          organizer: formData.jobFairDetails.organizer || "",
+          registrationLink: formData.jobFairDetails.registrationLink || "",
+          participatingCompanies,
+        } : {},
         requirements: formData.requirements
           .split("\n")
           .filter((item) => item.trim() !== ""),
@@ -376,7 +423,7 @@ const JobManagement = () => {
                     Location
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Deadline
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -431,23 +478,42 @@ const JobManagement = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                          {job.selectionCriteria || "Other"}
-                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {Array.isArray(job.selectionCriteria) && job.selectionCriteria.length > 0
+                            ? job.selectionCriteria.slice(0, 2).map((c) => (
+                                <span key={c} className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                  {c}
+                                </span>
+                              ))
+                            : <span className="text-xs text-gray-400">-</span>}
+                          {Array.isArray(job.selectionCriteria) && job.selectionCriteria.length > 2 && (
+                            <span className="text-xs text-gray-500">+{job.selectionCriteria.length - 2}</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {job.location || "Remote"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            job.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {job.isActive ? "Active" : "Inactive"}
-                        </span>
+                        {job.deadline ? (() => {
+                          const d = new Date(job.deadline);
+                          const now = new Date();
+                          const daysLeft = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+                          const isExpired = daysLeft < 0;
+                          const isSoon = daysLeft >= 0 && daysLeft <= 7;
+                          return (
+                            <span
+                              className={`text-sm font-medium ${
+                                isExpired ? "text-red-600" : isSoon ? "text-amber-600" : "text-green-600"
+                              }`}
+                            >
+                              {d.toLocaleDateString()}
+                              {isExpired && <span className="ml-1 px-1.5 py-0.5 text-xs rounded bg-red-100 text-red-700">Expired</span>}
+                            </span>
+                          );
+                        })() : (
+                          <span className="text-sm text-gray-400">No deadline</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -577,6 +643,119 @@ const JobManagement = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Category Toggle */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="category"
+                          value="Job"
+                          checked={formData.category === "Job"}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          className="border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span>Job</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="category"
+                          value="Job Fair"
+                          checked={formData.category === "Job Fair"}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          className="border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span>Job Fair</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Job Fair Details - shown when category is Job Fair */}
+                  {formData.category === "Job Fair" && (
+                    <div className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 space-y-4">
+                      <h4 className="text-sm font-semibold text-gray-900">Job Fair Details</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Event Date</label>
+                          <input
+                            type="date"
+                            value={formData.jobFairDetails.eventDate}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                jobFairDetails: { ...formData.jobFairDetails, eventDate: e.target.value },
+                              })
+                            }
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Venue</label>
+                          <input
+                            type="text"
+                            value={formData.jobFairDetails.venue}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                jobFairDetails: { ...formData.jobFairDetails, venue: e.target.value },
+                              })
+                            }
+                            placeholder="e.g. Convention Center, Bangalore"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Organizer</label>
+                          <input
+                            type="text"
+                            value={formData.jobFairDetails.organizer}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                jobFairDetails: { ...formData.jobFairDetails, organizer: e.target.value },
+                              })
+                            }
+                            placeholder="Organizing body/company"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Registration Link</label>
+                          <input
+                            type="url"
+                            value={formData.jobFairDetails.registrationLink}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                jobFairDetails: { ...formData.jobFairDetails, registrationLink: e.target.value },
+                              })
+                            }
+                            placeholder="https://..."
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Participating Companies (one per line)</label>
+                        <textarea
+                          rows={3}
+                          value={formData.jobFairDetails.participatingCompanies}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              jobFairDetails: { ...formData.jobFairDetails, participatingCompanies: e.target.value },
+                            })
+                          }
+                          placeholder="Company A&#10;Company B&#10;Company C"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.category !== "Job Fair" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Job Title *</label>
@@ -599,7 +778,10 @@ const JobManagement = () => {
                       />
                     </div>
                   </div>
+                  )}
 
+                  {formData.category !== "Job Fair" && (
+                    <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Job Type *</label>
@@ -639,6 +821,8 @@ const JobManagement = () => {
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                     />
                   </div>
+                    </>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Description *</label>
@@ -651,6 +835,7 @@ const JobManagement = () => {
                     />
                   </div>
 
+                  {formData.category !== "Job Fair" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -676,6 +861,7 @@ const JobManagement = () => {
                       />
                     </div>
                   </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -698,6 +884,8 @@ const JobManagement = () => {
                     </div>
                   </div>
 
+                  {formData.category !== "Job Fair" && (
+                   <>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Application URL (Optional)</label>
@@ -785,26 +973,33 @@ const JobManagement = () => {
                           <option value="10th Pass">10th Pass</option>
                           <option value="12th Pass">12th Pass</option>
                           <option value="Diploma">Diploma</option>
+                          <option value="Ongoing Degree">Ongoing Degree</option>
                           <option value="Graduate">Graduate</option>
                           <option value="Post Graduate">Post Graduate</option>
                           <option value="PhD">PhD</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Selection Criteria *</label>
-                        <select
-                          value={formData.selectionCriteria}
-                          onChange={(e) => setFormData({ ...formData, selectionCriteria: e.target.value })}
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                        >
-                          <option value="Written Exam">Written Exam</option>
-                          <option value="Interview">Interview</option>
-                          <option value="Both">Both</option>
-                          <option value="Degree Marks">Degree Marks</option>
-                          <option value="Walk-in">Walk-in</option>
-                          <option value="Online Assessment">Online Assessment</option>
-                          <option value="Other">Other</option>
-                        </select>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Selection Criteria (multi-select)</label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {SELECTION_CRITERIA_OPTIONS.map((opt) => (
+                            <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={formData.selectionCriteria?.includes(opt) || false}
+                                onChange={(e) => {
+                                  const prev = formData.selectionCriteria || [];
+                                  const next = e.target.checked
+                                    ? [...prev, opt]
+                                    : prev.filter((c) => c !== opt);
+                                  setFormData({ ...formData, selectionCriteria: next });
+                                }}
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm">{opt}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="mt-4">
@@ -818,6 +1013,8 @@ const JobManagement = () => {
                       />
                     </div>
                   </div>
+                   </>
+                  )}
 
                   {/* Documents Section */}
                   <div className="border-t border-gray-200 pt-4 mt-6">

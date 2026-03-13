@@ -20,6 +20,8 @@ import {
   createSubAdmin,
   getSubAdmins,
   updateSubAdmin,
+  deleteSubAdmin,
+  toggleSubAdminStatus,
   getAvailableSchools,
 } from "../controllers/admin.controller.js";
 import { logUserActivity } from "../middleware/userLogger.js";
@@ -49,6 +51,18 @@ router.put(
   logUserActivity(),
   verifySuperAdmin,
   updateSubAdmin
+);
+router.delete(
+  "/sub-admins/:id",
+  logUserActivity(),
+  verifySuperAdmin,
+  deleteSubAdmin
+);
+router.patch(
+  "/sub-admins/:id/toggle-status",
+  logUserActivity(),
+  verifySuperAdmin,
+  toggleSubAdminStatus
 );
 
 // Admin CRUD routes

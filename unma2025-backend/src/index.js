@@ -41,6 +41,7 @@ import { errorHandler, notFoundHandler } from "./middleware/error.js";
 
 // Import configurations
 import { connectDB } from "./config/database.js";
+import { startCronJobs } from "./utils/cronJobs.js";
 import { setupSwagger } from "./config/swagger.js";
 import { logger, stream } from "./utils/logger.js";
 import { logUserActivity } from "./middleware/userLogger.js";
@@ -55,6 +56,8 @@ connectDB().then(() => {
   seedUpdates();
   seedActivities();
   seedEvents();
+  // Start cron jobs (e.g., deactivate expired jobs daily at midnight IST)
+  startCronJobs();
 });
 
 // Setup security middlewares

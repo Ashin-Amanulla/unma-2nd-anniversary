@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
+import { Eye, EyeOff } from "lucide-react";
 import loginSchema from "../../zod-form-validators/loginForm";
 import useAuthStore from "../../store/authStore";
 
 // Validation schema
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, user } = useAuthStore();
@@ -105,15 +107,30 @@ const Login = () => {
                 Forgot password?
               </a>
             </div>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              className={`form-input w-full ${
-                errors.password ? "border-red-500" : ""
-              }`}
-              {...register("password")}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                className={`form-input w-full pr-10 ${
+                  errors.password ? "border-red-500" : ""
+                }`}
+                {...register("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="mt-1 text-xs text-red-500">
                 {errors.password.message}

@@ -263,6 +263,42 @@ export const useAdmin = () => {
     });
   };
 
+  // Delete sub-admin
+  const useDeleteSubAdmin = () => {
+    return useMutation({
+      mutationFn: async (id) => {
+        const response = await adminApi.deleteSubAdmin(id);
+        if (!response) throw new Error("Failed to delete sub-admin");
+        return response;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([ADMIN_KEYS.SUB_ADMINS]);
+        toast.success("Sub-admin deleted successfully");
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to delete sub-admin");
+      },
+    });
+  };
+
+  // Toggle sub-admin status
+  const useToggleSubAdminStatus = () => {
+    return useMutation({
+      mutationFn: async (id) => {
+        const response = await adminApi.toggleSubAdminStatus(id);
+        if (!response) throw new Error("Failed to toggle sub-admin status");
+        return response;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([ADMIN_KEYS.SUB_ADMINS]);
+        toast.success("Sub-admin status updated");
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to toggle sub-admin status");
+      },
+    });
+  };
+
   return {
     // Data
     dashboardStats,
@@ -285,6 +321,8 @@ export const useAdmin = () => {
     deleteRegistrationMutation,
     useCreateSubAdmin,
     useUpdateSubAdmin,
+    useDeleteSubAdmin,
+    useToggleSubAdminStatus,
 
     // Export functions
     exportAllRegistrations,

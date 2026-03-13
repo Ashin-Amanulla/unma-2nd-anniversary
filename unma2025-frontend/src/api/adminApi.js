@@ -251,6 +251,36 @@ const adminApi = {
   },
 
   /**
+   * Delete sub-admin
+   * @param {string} id - Sub-admin ID
+   * @returns {Promise} - Promise with delete result
+   */
+  deleteSubAdmin: async (id) => {
+    try {
+      const response = await axios.delete(`/admin/sub-admins/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to delete sub-admin" };
+    }
+  },
+
+  /**
+   * Toggle sub-admin active status
+   * @param {string} id - Sub-admin ID
+   * @returns {Promise} - Promise with updated sub-admin
+   */
+  toggleSubAdminStatus: async (id) => {
+    try {
+      const response = await axios.patch(`/admin/sub-admins/${id}/toggle-status`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || {
+        message: "Failed to toggle sub-admin status",
+      };
+    }
+  },
+
+  /**
    * Get available schools
    * @returns {Promise} - Promise with schools list
    */
