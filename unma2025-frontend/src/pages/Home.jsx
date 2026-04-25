@@ -10,7 +10,11 @@ import {
   HeartIcon,
   AcademicCapIcon,
   NewspaperIcon,
+  PlayCircleIcon,
+  VideoCameraIcon,
 } from "@heroicons/react/24/outline";
+import WebinarAnnouncementModal from "../components/WebinarAnnouncementModal";
+import { FEATURED_WEBINAR } from "../data/webinars";
 import { SITE_CONTENT } from "../data/siteContent";
 import { MEMBER_ASSOCIATIONS, getActiveAssociationsCount } from "../data/memberAssociations";
 import { ACTIVITIES, getUpcomingActivities } from "../data/activities";
@@ -33,6 +37,7 @@ const Home = () => {
 
   return (
     <LazyMotion features={domAnimation}>
+      <WebinarAnnouncementModal />
       {/* Hero Section */}
       <section className="relative min-h-[80vh] pt-24 pb-16 overflow-hidden">
         {/* Background Image */}
@@ -385,7 +390,73 @@ const Home = () => {
         </div>
       </section>
 
-     
+      {/* UNMA Webinars */}
+      <section className="py-20 bg-white">
+        <div className="container">
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-900 rounded-full text-sm font-semibold mb-4">
+              <VideoCameraIcon className="w-5 h-5" />
+              Webinars
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              UNMA <span className="text-primary">Webinars</span>
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Catch up on recordings from live sessions — careers, creative fields, and guidance for
+              students and alumni.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ y: 24, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden shadow-sm md:flex md:items-stretch"
+          >
+            <div className="md:w-2/5 shrink-0">
+              <img
+                src={FEATURED_WEBINAR.posterSrc}
+                alt={FEATURED_WEBINAR.posterAlt}
+                className="w-full h-full object-cover min-h-[200px] md:min-h-[280px]"
+                loading="lazy"
+              />
+            </div>
+            <div className="p-6 md:p-8 flex flex-col justify-center flex-1 text-left">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                {FEATURED_WEBINAR.title}
+              </h3>
+              <p className="text-sm font-semibold text-gray-800 mb-1">{FEATURED_WEBINAR.speaker}</p>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-3">{FEATURED_WEBINAR.speakerRole}</p>
+              <p className="text-sm text-gray-500 mb-6">{FEATURED_WEBINAR.dateLabel}</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={FEATURED_WEBINAR.recordingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-gray-900 px-5 py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-yellow-600 transition-all"
+                >
+                  <PlayCircleIcon className="w-5 h-5" />
+                  Watch recording
+                </a>
+                <Link
+                  to="/webinars"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-primary text-primary px-5 py-3 rounded-xl font-semibold hover:bg-primary hover:text-white transition-all"
+                >
+                  All webinars
+                  <ArrowRightIcon className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </LazyMotion>
   );
 };

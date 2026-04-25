@@ -80,6 +80,7 @@ const AboutUnma = lazy(() => import("./pages/AboutUnma"));
 const CoordinationTeam = lazy(() => import("./pages/CoordinationTeam"));
 const Events = lazy(() => import("./pages/Events"));
 const NewsUpdates = lazy(() => import("./pages/NewsUpdates"));
+const Webinars = lazy(() => import("./pages/Webinars"));
 
 
 function App() {
@@ -148,6 +149,7 @@ function App() {
                 <Route path="/team" element={<CoordinationTeam />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/news-updates" element={<NewsUpdates />} />
+                <Route path="/webinars" element={<Webinars />} />
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}
