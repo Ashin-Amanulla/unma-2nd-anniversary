@@ -1,17 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
-import { XMarkIcon, PlayCircleIcon } from "@heroicons/react/24/outline";
-import {
-  FEATURED_WEBINAR,
-  WEBINAR_ANNOUNCEMENT_SESSION_KEY,
-} from "../data/webinars";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { WEBINAR_ANNOUNCEMENT_SESSION_KEY } from "../data/webinars";
+import webinarApi from "../api/webinarApi";
 
 const OPEN_DELAY_MS = 1000;
 
 const WebinarAnnouncementModal = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [featured, setFeatured] = useState(null);
 
   const dismiss = useCallback(() => {
     try {
@@ -22,15 +23,38 @@ const WebinarAnnouncementModal = () => {
     setIsOpen(false);
   }, []);
 
+  const goToWebinars = useCallback(() => {
+    dismiss();
+    navigate("/webinars");
+  }, [dismiss, navigate]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await webinarApi.getRecentWebinar();
+        if (cancelled) return;
+        const item = res?.data ?? null;
+        setFeatured(item);
+      } catch {
+        if (!cancelled) setFeatured(null);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     let timerId;
 
     const run = () => {
+      if (!featured?.posterUrl) return;
       try {
         if (sessionStorage.getItem(WEBINAR_ANNOUNCEMENT_SESSION_KEY)) {
           return;
@@ -39,17 +63,16 @@ const WebinarAnnouncementModal = () => {
         // ignore
       }
       timerId = window.setTimeout(() => {
-        if (!cancelled) setIsOpen(true);
+        setIsOpen(true);
       }, OPEN_DELAY_MS);
     };
 
     run();
 
     return () => {
-      cancelled = true;
       if (timerId) window.clearTimeout(timerId);
     };
-  }, []);
+  }, [featured]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -62,7 +85,7 @@ const WebinarAnnouncementModal = () => {
     }
   }, [mounted, isOpen]);
 
-  if (!mounted) return null;
+  if (!mounted || !featured?.posterUrl) return null;
 
   const modal = (
     <LazyMotion features={domAnimation}>
@@ -80,73 +103,99 @@ const WebinarAnnouncementModal = () => {
           >
             <button
               type="button"
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
               aria-label="Close announcement"
               onClick={dismiss}
             />
             <motion.div
               key="webinar-announcement"
-              className="relative z-[101] w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-gray-100"
-              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              className="relative z-[101] w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-lg border border-gray-200"
+              initial={{ opacity: 0, scale: 0.98, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 8 }}
-              transition={{ type: "spring", damping: 26, stiffness: 320 }}
+              exit={{ opacity: 0, scale: 0.98, y: 4 }}
+              transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={dismiss}
-                className="absolute top-3 right-3 z-10 p-2 rounded-full bg-gray-900/80 text-white hover:bg-gray-900 transition-colors"
+                className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                 aria-label="Close"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
 
-              <div className="p-4 pt-12 sm:p-6 sm:pt-14">
-                <div className="rounded-xl overflow-hidden border border-gray-200 shadow-inner mb-4">
+              <button
+                type="button"
+                onClick={goToWebinars}
+                className="w-full text-left"
+              >
+                <div className="overflow-hidden border-b border-gray-100">
                   <img
-                    src={FEATURED_WEBINAR.posterSrc}
-                    alt={FEATURED_WEBINAR.posterAlt}
+                    src={featured.posterUrl}
+                    alt={featured.posterAlt || featured.title || "Webinar poster"}
                     className="w-full h-auto object-cover"
                     loading="eager"
                   />
                 </div>
 
-                <span className="inline-block px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-semibold mb-3">
-                  UNMA Webinar
-                </span>
-                <h2
-                  id="webinar-announcement-title"
-                  className="text-xl sm:text-2xl font-bold text-gray-900 mb-2"
-                >
-                  {FEATURED_WEBINAR.title}
-                </h2>
-                <p className="text-sm font-semibold text-gray-800 mb-1">
-                  {FEATURED_WEBINAR.speaker}
-                </p>
-                <p className="text-xs text-gray-600 mb-2 leading-relaxed">
-                  {FEATURED_WEBINAR.speakerRole}
-                </p>
-                <p className="text-sm text-gray-500 mb-6">{FEATURED_WEBINAR.dateLabel}</p>
+                <div className="p-4 pt-3">
+                  <p className="text-xs text-gray-400 mb-1">Webinar</p>
+                  <h2
+                    id="webinar-announcement-title"
+                    className="text-base font-medium text-gray-900 pr-6"
+                  >
+                    {featured.title}
+                  </h2>
+                  {featured.speaker ? (
+                    <p className="text-sm text-gray-600 mt-1">{featured.speaker}</p>
+                  ) : null}
+                  {featured.dateLabel ? (
+                    <p className="text-xs text-gray-400 mt-2">{featured.dateLabel}</p>
+                  ) : null}
+                </div>
+              </button>
 
-                <div className="flex flex-col sm:flex-row gap-3">
+              <div className="px-4 pb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm border-t border-gray-100 pt-3">
+                {featured.recordingUrl ? (
                   <a
-                    href={FEATURED_WEBINAR.recordingUrl}
+                    href={featured.recordingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex flex-1 items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-gray-900 px-4 py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-yellow-600 transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-gray-700 hover:text-primary transition-colors"
                   >
-                    <PlayCircleIcon className="w-6 h-6 shrink-0" />
                     Watch recording
                   </a>
-                  <button
-                    type="button"
-                    onClick={dismiss}
-                    className="inline-flex flex-1 items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                ) : null}
+                {featured.recordingUrl && featured.registrationUrl ? (
+                  <span className="text-gray-300" aria-hidden="true">
+                    ·
+                  </span>
+                ) : null}
+                {featured.registrationUrl ? (
+                  <a
+                    href={featured.registrationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-gray-700 hover:text-primary transition-colors"
                   >
-                    Close
-                  </button>
-                </div>
+                    Register / join link
+                  </a>
+                ) : null}
+                {(featured.recordingUrl || featured.registrationUrl) ? (
+                  <span className="text-gray-300" aria-hidden="true">
+                    ·
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={goToWebinars}
+                  className="text-gray-500 hover:text-primary transition-colors"
+                >
+                  All webinars
+                </button>
               </div>
             </motion.div>
           </motion.div>

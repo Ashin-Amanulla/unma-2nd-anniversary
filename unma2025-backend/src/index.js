@@ -36,6 +36,7 @@ import activityRoutes from "./routes/activity.js";
 import documentRequestRoutes from "./routes/documentRequest.js";
 import updateRoutes from "./routes/update.js";
 import eventRoutes from "./routes/event.js";
+import webinarRoutes from "./routes/webinar.js";
 // Import middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 
@@ -133,6 +134,7 @@ app.use(`${baseRoutes}/activities`, activityRoutes);
 app.use(`${baseRoutes}/document-request`, documentRequestRoutes);
 app.use(`${baseRoutes}/updates`, updateRoutes);
 app.use(`${baseRoutes}/events`, eventRoutes);
+app.use(`${baseRoutes}/webinars`, webinarRoutes);
 
 // Setup Swagger documentation
 // setupSwagger(app);

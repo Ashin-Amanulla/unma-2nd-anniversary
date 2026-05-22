@@ -1,434 +1,372 @@
-import { Outlet, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import {
-  HomeIcon,
   UserGroupIcon,
-  ChartBarIcon,
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   ExclamationTriangleIcon,
   ChatBubbleLeftEllipsisIcon,
   DocumentTextIcon,
-  CurrencyDollarIcon,
   ChatBubbleBottomCenterTextIcon,
   BriefcaseIcon,
   CalendarDaysIcon,
   ClockIcon,
+  VideoCameraIcon,
+  ChevronDownIcon,
+  FlagIcon,
+  GlobeAltIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 import { useAdminStore } from "../../store";
 import logo from "../../assets/logo.png";
 
+const RepublicDayIcon = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-5 h-5 shrink-0"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    {...props}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+    />
+  </svg>
+);
+
+const SidebarGroup = ({ group, isExpanded, onToggle, onNavigate, pathname }) => {
+  if (!group.items.length) return null;
+
+  const hasActiveChild = group.items.some(
+    (item) => pathname === item.to || pathname.startsWith(`${item.to}/`)
+  );
+
+  return (
+    <li className="list-none">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold transition-colors ${
+          hasActiveChild
+            ? "bg-white/15 text-white"
+            : "text-white/90 hover:bg-white/10"
+        }`}
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <group.icon className="h-5 w-5 shrink-0 opacity-90" />
+          <span className="truncate">{group.label}</span>
+        </span>
+        <ChevronDownIcon
+          className={`h-4 w-4 shrink-0 opacity-80 transition-transform duration-200 ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      <div
+        className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+          isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <ul className="overflow-hidden">
+          <div className="space-y-0.5 py-1 pl-3">
+            {group.items.map((item) => {
+              const isActive =
+                pathname === item.to || pathname.startsWith(`${item.to}/`);
+              const Icon = item.icon;
+
+              return (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    onClick={onNavigate}
+                    className={`flex items-center gap-2.5 rounded-lg py-2 pl-8 pr-3 text-sm transition-colors ${
+                      isActive
+                        ? "bg-white text-primary font-medium shadow-sm"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0 opacity-90" />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </div>
+        </ul>
+      </div>
+    </li>
+  );
+};
+
 const AdminLayout = () => {
   const navigate = useNavigate();
-
-  // Use our custom hooks
+  const location = useLocation();
   const { logout, user, isSuperAdmin, isCareerAdmin } = useAuthStore();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useAdminStore();
+  const [expandedGroups, setExpandedGroups] = useState({});
 
-  // Handle logout
   const handleLogout = () => {
     logout();
     navigate("/admin/login");
   };
 
-  const canViewAnalytics = user?.permissions?.canViewAnalytics !== false; // Default to true
   const canManageSettings =
     user?.permissions?.canManageSettings || isSuperAdmin;
 
-  // Helper function to check if user has access to a sidebar item
   const hasSidebarAccess = (itemKey) => {
-    // Super admin always has access
     if (isSuperAdmin) return true;
-    
-    // If sidebarAccess is not set or empty, fall back to role-based defaults
+
     if (!user?.sidebarAccess || user.sidebarAccess.length === 0) {
-      return null; // Return null to use role-based defaults
+      return null;
     }
-    
-    // Check if item is in sidebarAccess array
+
     return user.sidebarAccess.includes(itemKey);
   };
 
-  // Get school-specific label for school admins
-  const getSchoolLabel = () => {
-    if (!isSuperAdmin && user?.assignedSchools?.length > 0) {
-      if (user.assignedSchools.length === 1) {
-        return user.assignedSchools[0];
-      } else {
-        return `${user.assignedSchools.length} Schools`;
-      }
+  const canShow = (itemKey, roleDefault) => {
+    const access = hasSidebarAccess(itemKey);
+    if (access === true) return true;
+    if (access === false) return false;
+    return roleDefault;
+  };
+
+  const menuGroups = useMemo(() => {
+    const groups = [
+      {
+        id: "live-events",
+        label: "Live events",
+        icon: FlagIcon,
+        items: [
+          canShow("event_dashboard", user?.role !== "career_admin") && {
+            key: "event_dashboard",
+            label: "Registration dashboard",
+            to: "/admin/republic-day-event/dashboard",
+            icon: RepublicDayIcon,
+          },
+          canShow("event_registrations", user?.role !== "career_admin") && {
+            key: "event_registrations",
+            label: "Event registrations",
+            to: "/admin/republic-day-event/registrations",
+            icon: UserGroupIcon,
+          },
+        ].filter(Boolean),
+      },
+      {
+        id: "website",
+        label: "Website content",
+        icon: GlobeAltIcon,
+        items: [
+          canShow("team_management", isSuperAdmin) && {
+            key: "team_management",
+            label: "Coordination team",
+            to: "/admin/team",
+            icon: UserGroupIcon,
+          },
+          canShow("updates_management", isSuperAdmin) && {
+            key: "updates_management",
+            label: "News & updates",
+            to: "/admin/updates",
+            icon: ChatBubbleLeftEllipsisIcon,
+          },
+          canShow("webinars_management", isSuperAdmin) && {
+            key: "webinars_management",
+            label: "Webinars",
+            to: "/admin/webinars",
+            icon: VideoCameraIcon,
+          },
+          canShow("event_management", isSuperAdmin) && {
+            key: "event_management",
+            label: "Event timeline",
+            to: "/admin/events",
+            icon: CalendarDaysIcon,
+          },
+        ].filter(Boolean),
+      },
+      {
+        id: "careers",
+        label: "Careers",
+        icon: BriefcaseIcon,
+        items: [
+          canShow("careers_jobs", isCareerAdmin || isSuperAdmin) && {
+            key: "careers_jobs",
+            label: "Job listings",
+            to: "/admin/jobs",
+            icon: BriefcaseIcon,
+          },
+          canShow("pending_jobs", isCareerAdmin || isSuperAdmin) && {
+            key: "pending_jobs",
+            label: "Pending approvals",
+            to: "/admin/pending-jobs",
+            icon: ClockIcon,
+          },
+        ].filter(Boolean),
+      },
+      {
+        id: "communications",
+        label: "Communications",
+        icon: ChatBubbleBottomCenterTextIcon,
+        items: [
+          canShow("feedback", canManageSettings) && {
+            key: "feedback",
+            label: "Feedback",
+            to: "/admin/feedback",
+            icon: ChatBubbleBottomCenterTextIcon,
+          },
+          canShow("issues", canManageSettings) && {
+            key: "issues",
+            label: "Reported issues",
+            to: "/admin/issues",
+            icon: ExclamationTriangleIcon,
+          },
+          canShow("contact_messages", canManageSettings) && {
+            key: "contact_messages",
+            label: "Contact inbox",
+            to: "/admin/contact-messages",
+            icon: ChatBubbleLeftEllipsisIcon,
+          },
+        ].filter(Boolean),
+      },
+      {
+        id: "system",
+        label: "System",
+        icon: WrenchScrewdriverIcon,
+        items: [
+          canShow("settings", canManageSettings) && {
+            key: "settings",
+            label: "Settings",
+            to: "/admin/settings",
+            icon: Cog6ToothIcon,
+          },
+          canShow("user_logs", isSuperAdmin) && {
+            key: "user_logs",
+            label: "Activity logs",
+            to: "/admin/user-logs",
+            icon: DocumentTextIcon,
+          },
+        ].filter(Boolean),
+      },
+    ];
+
+    return groups.filter((group) => group.items.length > 0);
+  }, [user, isSuperAdmin, isCareerAdmin, canManageSettings]);
+
+  useEffect(() => {
+    const activeGroup = menuGroups.find((group) =>
+      group.items.some(
+        (item) =>
+          location.pathname === item.to ||
+          location.pathname.startsWith(`${item.to}/`)
+      )
+    );
+
+    if (activeGroup) {
+      setExpandedGroups((prev) => ({ ...prev, [activeGroup.id]: true }));
     }
-    return "UNMA 2026";
+  }, [location.pathname, menuGroups]);
+
+  const toggleGroup = (groupId) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
+
+  const closeMobileSidebar = () => {
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   };
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed inset-y-0 left-0 z-30 w-64 bg-primary text-white transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}
+        } fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-primary text-white transition-transform duration-300 ease-in-out md:static md:inset-0 md:translate-x-0`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-primary-dark">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="flex-col justify-center items-center space-y-2">
-              <img src={logo} alt="UNMA 2026" className="w-20 h-7" />
-            </div>
-          </div>
+        <div className="flex shrink-0 items-center justify-between border-b border-primary-dark p-4">
+          <img src={logo} alt="UNMA 2026" className="h-7 w-20" />
           <button
+            type="button"
             onClick={toggleSidebar}
-            className="p-1 rounded-md md:hidden hover:bg-primary-dark"
+            className="rounded-md p-1 hover:bg-primary-dark md:hidden"
+            aria-label="Close sidebar"
           >
             <svg
-              className="w-6 h-6"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
                 d="M6 18L18 6M6 6l12 12"
-              ></path>
+              />
             </svg>
           </button>
         </div>
 
-        <nav className="p-4">
-          <ul className="space-y-2">
-            {/* <li>
-              <Link
-                to="/admin/dashboard"
-                className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-              >
-                <HomeIcon className="w-5 h-5 mr-3" />
-                <span>Dashboard</span>
-              </Link>
-            </li> */}
-            {/* <li>
-              <Link
-                to="/admin/registrations"
-                className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-              >
-                <UserGroupIcon className="w-5 h-5 mr-3" />
-                <span>Registrations</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/admin/entry"
-                className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-              >
-                <DocumentTextIcon className="w-5 h-5 mr-3" />
-                <span>Entry</span>
-              </Link>
-            </li> */}
-            
-            {/* Events Section */}
-            {(hasSidebarAccess("event_dashboard") !== false && user?.role !== "career_admin") && (
-              <>
-                <li className="pt-2">
-                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
-                    Events
-                  </div>
-                </li>
-                {(hasSidebarAccess("event_dashboard") || (hasSidebarAccess("event_dashboard") === null && user?.role !== "career_admin")) && (
-                  <li>
-                    <Link
-                      to="/admin/republic-day-event/dashboard"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-5 h-5 mr-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-                        />
-                      </svg>
-                      <span>Event Dashboard</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("event_registrations") || (hasSidebarAccess("event_registrations") === null && user?.role !== "career_admin")) && (
-                  <li>
-                    <Link
-                      to="/admin/republic-day-event/registrations"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <UserGroupIcon className="w-5 h-5 mr-3" />
-                      <span>Event Registrations</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("event_management") || (hasSidebarAccess("event_management") === null && isSuperAdmin)) && (
-                  <li>
-                    <Link
-                      to="/admin/events"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <CalendarDaysIcon className="w-5 h-5 mr-3" />
-                      <span>Event Management</span>
-                    </Link>
-                  </li>
-                )}
-              </>
-            )}
-            
-            {/* Website Content Section */}
-            {((hasSidebarAccess("team_management") !== false || hasSidebarAccess("updates_management") !== false || hasSidebarAccess("careers_jobs") !== false || hasSidebarAccess("pending_jobs") !== false) || 
-              (hasSidebarAccess("team_management") === null && hasSidebarAccess("updates_management") === null && hasSidebarAccess("careers_jobs") === null && hasSidebarAccess("pending_jobs") === null && (isSuperAdmin || isCareerAdmin))) && (
-              <>
-                <li className="pt-4">
-                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
-                    Website Content
-                  </div>
-                </li>
-                {(hasSidebarAccess("team_management") || (hasSidebarAccess("team_management") === null && isSuperAdmin)) && (
-                  <li>
-                    <Link
-                      to="/admin/team"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <UserGroupIcon className="w-5 h-5 mr-3" />
-                      <span>Team Management</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("updates_management") || (hasSidebarAccess("updates_management") === null && isSuperAdmin)) && (
-                  <li>
-                    <Link
-                      to="/admin/updates"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
-                      <span>Updates Management</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("careers_jobs") || (hasSidebarAccess("careers_jobs") === null && (isCareerAdmin || isSuperAdmin))) && (
-                  <li>
-                    <Link
-                      to="/admin/jobs"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <BriefcaseIcon className="w-5 h-5 mr-3" />
-                      <span>Careers / Jobs</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("pending_jobs") || (hasSidebarAccess("pending_jobs") === null && (isCareerAdmin || isSuperAdmin))) && (
-                  <li>
-                    <Link
-                      to="/admin/pending-jobs"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <ClockIcon className="w-5 h-5 mr-3" />
-                      <span>Pending Jobs</span>
-                    </Link>
-                  </li>
-                )}
-              </>
-            )}
-            
-            {/* {isSuperAdmin && (
-              <>
-                <li>
-                  <Link
-                    to="/admin/accommodation"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5 mr-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-3 4h1m-1 4h1"
-                      />
-                    </svg>
-                    <span>Accommodation</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/transportation"
-                    className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5 mr-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m6.75 4.5v-3.375c0-.621.504-1.125 1.125-1.125h2.25c0 .621.504 1.125 1.125 1.125v3.375c0 .621-.504 1.125-1.125 1.125H9.375c-.621 0-1.125-.504-1.125-1.125zM21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-                      />
-                    </svg>
-                    <span>Transportation</span>
-                  </Link>
-                </li>
-              </>
-            )} */}
-            {/* {canViewAnalytics && (
-              <li>
-                <Link
-                  to="/admin/analytics"
-                  className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                >
-                  <ChartBarIcon className="w-5 h-5 mr-3" />
-                  <span>Analytics</span>
-                </Link>
-              </li>
-            )} */}
-
-            {/* User Communications Section */}
-            {((hasSidebarAccess("feedback") !== false || hasSidebarAccess("issues") !== false || hasSidebarAccess("contact_messages") !== false) ||
-              (hasSidebarAccess("feedback") === null && hasSidebarAccess("issues") === null && hasSidebarAccess("contact_messages") === null && canManageSettings)) && (
-              <>
-                <li className="pt-4">
-                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
-                    User Communications
-                  </div>
-                </li>
-                {(hasSidebarAccess("feedback") || (hasSidebarAccess("feedback") === null && canManageSettings)) && (
-                  <li>
-                    <Link
-                      to="/admin/feedback"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <ChatBubbleBottomCenterTextIcon className="w-5 h-5 mr-3" />
-                      <span>Feedback</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("issues") || (hasSidebarAccess("issues") === null && canManageSettings)) && (
-                  <li>
-                    <Link
-                      to="/admin/issues"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <ExclamationTriangleIcon className="w-5 h-5 mr-3" />
-                      <span>Issues</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("contact_messages") || (hasSidebarAccess("contact_messages") === null && canManageSettings)) && (
-                  <li>
-                    <Link
-                      to="/admin/contact-messages"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <ChatBubbleLeftEllipsisIcon className="w-5 h-5 mr-3" />
-                      <span>Contact Messages</span>
-                    </Link>
-                  </li>
-                )}
-              </>
-            )}
-
-            {/* {isSuperAdmin && (
-              <li>
-                <Link
-                  to="/admin/payment-history"
-                  className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                >
-                  <CurrencyDollarIcon className="w-5 h-5 mr-3" />
-                  <span>Payment History</span>
-                </Link>
-              </li>
-            )} */}
-
-            {/* System Section */}
-            {((hasSidebarAccess("settings") !== false || hasSidebarAccess("user_logs") !== false) ||
-              (hasSidebarAccess("settings") === null && hasSidebarAccess("user_logs") === null && (canManageSettings || isSuperAdmin))) && (
-              <>
-                <li className="pt-4">
-                  <div className="px-2 pb-1 text-xs uppercase text-primary-light opacity-75">
-                    System
-                  </div>
-                </li>
-                {(hasSidebarAccess("settings") || (hasSidebarAccess("settings") === null && canManageSettings)) && (
-                  <li>
-                    <Link
-                      to="/admin/settings"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <Cog6ToothIcon className="w-5 h-5 mr-3" />
-                      <span>Settings</span>
-                    </Link>
-                  </li>
-                )}
-                {(hasSidebarAccess("user_logs") || (hasSidebarAccess("user_logs") === null && isSuperAdmin)) && (
-                  <li>
-                    <Link
-                      to="/admin/user-logs"
-                      className="flex items-center p-2 rounded-md hover:bg-primary-dark"
-                    >
-                      <DocumentTextIcon className="w-5 h-5 mr-3" />
-                      <span>User Logs</span>
-                    </Link>
-                  </li>
-                )}
-              </>
-            )}
+        <nav className="flex min-h-0 flex-1 flex-col">
+          <ul className="flex-1 space-y-1 overflow-y-auto p-3 pb-24">
+            {menuGroups.map((group) => (
+              <SidebarGroup
+                key={group.id}
+                group={group}
+                pathname={location.pathname}
+                isExpanded={Boolean(expandedGroups[group.id])}
+                onToggle={() => toggleGroup(group.id)}
+                onNavigate={closeMobileSidebar}
+              />
+            ))}
           </ul>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className="shrink-0 border-t border-primary-dark p-3">
             <button
+              type="button"
               onClick={handleLogout}
-              className="flex items-center w-full p-2 rounded-md hover:bg-primary-dark"
+              className="flex w-full items-center rounded-lg p-2.5 text-sm hover:bg-primary-dark"
             >
-              <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-3" />
+              <ArrowLeftOnRectangleIcon className="mr-3 h-5 w-5" />
               <span>Logout</span>
             </button>
           </div>
         </nav>
       </div>
 
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Top Navigation */}
-        <header className="bg-white shadow-sm z-10">
-          <div className="px-4 py-3 flex items-center justify-between">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <header className="z-10 bg-white shadow-sm">
+          <div className="flex items-center justify-between px-4 py-3">
             <button
+              type="button"
               onClick={toggleSidebar}
-              className="p-1 rounded-md md:hidden hover:bg-gray-100"
+              className="rounded-md p-1 hover:bg-gray-100 md:hidden"
+              aria-label="Open sidebar"
             >
               <svg
-                className="w-6 h-6"
+                className="h-6 w-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M4 6h16M4 12h16M4 18h16"
-                ></path>
+                />
               </svg>
             </button>
 
-            <div className="flex justify-end w-full">
+            <div className="ml-auto flex items-center">
               <div className="mr-2 text-right">
                 <div className="text-sm font-medium text-gray-900">
                   {user?.name || "Admin"}
@@ -443,7 +381,7 @@ const AdminLayout = () => {
                   )}
                 </div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
                 <span className="text-xs font-medium">
                   {user?.name?.charAt(4)?.toUpperCase() || "A"}
                 </span>
@@ -452,11 +390,10 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-auto p-4">
           <Outlet />
-          <footer className=" shadow-sm z-10">
-            <div className="px-4 py-3 flex items-center justify-center">
+          <footer className="z-10 shadow-sm">
+            <div className="flex items-center justify-center px-4 py-3">
               <p className="text-sm text-gray-500">
                 &copy; {new Date().getFullYear()} UNMA . All rights reserved. |
                 Proudly connecting alumni across generations.
