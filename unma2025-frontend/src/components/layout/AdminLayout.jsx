@@ -16,6 +16,8 @@ import {
   FlagIcon,
   GlobeAltIcon,
   WrenchScrewdriverIcon,
+  SparklesIcon,
+  TrophyIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 import { useAdminStore } from "../../store";
@@ -108,7 +110,7 @@ const SidebarGroup = ({ group, isExpanded, onToggle, onNavigate, pathname }) => 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, user, isSuperAdmin, isCareerAdmin } = useAuthStore();
+  const { logout, user, isSuperAdmin, isCareerAdmin, isFifaAdmin } = useAuthStore();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useAdminStore();
   const [expandedGroups, setExpandedGroups] = useState({});
 
@@ -234,6 +236,19 @@ const AdminLayout = () => {
         ].filter(Boolean),
       },
       {
+        id: "engagement",
+        label: "Engagement",
+        icon: SparklesIcon,
+        items: [
+          canShow("fifa", isFifaAdmin || isSuperAdmin) && {
+            key: "fifa",
+            label: "FIFA Predictions",
+            to: "/admin/fifa",
+            icon: TrophyIcon,
+          },
+        ].filter(Boolean),
+      },
+      {
         id: "system",
         label: "System",
         icon: WrenchScrewdriverIcon,
@@ -255,7 +270,7 @@ const AdminLayout = () => {
     ];
 
     return groups.filter((group) => group.items.length > 0);
-  }, [user, isSuperAdmin, isCareerAdmin, canManageSettings]);
+  }, [user, isSuperAdmin, isCareerAdmin, isFifaAdmin, canManageSettings]);
 
   useEffect(() => {
     const activeGroup = menuGroups.find((group) =>

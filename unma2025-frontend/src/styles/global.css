@@ -10,6 +10,11 @@
     --color-secondary: 242 153 74;
     --color-text: 51 51 51;
     --color-text-light: 102 102 102;
+    --fifa-green: #1a472a;
+    --fifa-gold: #d4af37;
+    --fifa-field: #2d6a4f;
+    --fifa-dark: #0f2818;
+    --fifa-light: #f0f7f4;
   }
 
   html {
@@ -296,3 +301,78 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+
+/* FIFA prediction theme */
+.fifa-page {
+  background-color: var(--fifa-light);
+  min-height: 100vh;
+}
+
+.fifa-header {
+  background: linear-gradient(135deg, var(--fifa-green) 0%, var(--fifa-field) 50%, var(--fifa-dark) 100%);
+  color: white;
+}
+
+.fifa-btn-primary {
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-semibold transition-colors;
+  background-color: var(--fifa-gold);
+  color: var(--fifa-dark);
+}
+
+.fifa-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.fifa-btn-outline {
+  @apply inline-flex items-center justify-center rounded-lg border-2 px-4 py-2 font-semibold transition-colors;
+  border-color: var(--fifa-green);
+  color: var(--fifa-green);
+}
+
+.fifa-btn-outline:hover {
+  background-color: rgba(26, 71, 42, 0.08);
+}
+
+.fifa-card {
+  @apply rounded-xl border bg-white shadow-sm overflow-hidden;
+  border-color: rgba(26, 71, 42, 0.15);
+}
+
+.fifa-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  background-color: rgba(212, 175, 55, 0.2);
+  color: var(--fifa-dark);
+}
+
+/* FIFA home strip banner (jnvtaa-style) */
+.fifa-banner-fade-in {
+  animation: fifa-banner-fade-in 0.5s ease-in-out;
+}
+
+.fifa-banner-ball-float {
+  animation: fifa-banner-ball-float 4s ease-in-out infinite;
+}
+
+.fifa-banner-ball-float-slow {
+  animation: fifa-banner-ball-float 7s ease-in-out infinite;
+}
+
+@keyframes fifa-banner-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fifa-banner-ball-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+

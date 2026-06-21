@@ -83,9 +83,14 @@ const Events = lazy(() => import("./pages/Events"));
 const NewsUpdates = lazy(() => import("./pages/NewsUpdates"));
 const Webinars = lazy(() => import("./pages/Webinars"));
 
+const FifaLanding = lazy(() => import("./pages/fifa/FifaLanding"));
+const FifaPlay = lazy(() => import("./pages/fifa/FifaPlay"));
+const FifaLeaderboard = lazy(() => import("./pages/fifa/FifaLeaderboard"));
+const FifaAdmin = lazy(() => import("./pages/admin/FifaAdmin"));
+
 
 function App() {
-  const { logout, user, isSuperAdmin, isRegistrationDesk } = useAuthStore();
+  const { logout, user, isSuperAdmin, isRegistrationDesk, isFifaAdmin } = useAuthStore();
   useEffect(() => {
     console.log(isRegistrationDesk);
   }, [isRegistrationDesk]);
@@ -151,6 +156,10 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/news-updates" element={<NewsUpdates />} />
                 <Route path="/webinars" element={<Webinars />} />
+
+                <Route path="/fifa" element={<FifaLanding />} />
+                <Route path="/fifa/play" element={<FifaPlay />} />
+                <Route path="/fifa/leaderboard" element={<FifaLeaderboard />} />
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}
@@ -213,6 +222,9 @@ function App() {
                       <Route path="events" element={<EventManagement />} />
                       <Route path="webinars" element={<WebinarManagement />} />
                     </>
+                  )}
+                  {(isSuperAdmin || isFifaAdmin) && (
+                    <Route path="fifa" element={<FifaAdmin />} />
                   )}
                 </>
               </Route>

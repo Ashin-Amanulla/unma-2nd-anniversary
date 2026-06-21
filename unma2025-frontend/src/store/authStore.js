@@ -18,6 +18,7 @@ const useAuthStore = create(
             isLoading: false,
             isRegistrationDesk: false,
             isCareerAdmin: false,
+            isFifaAdmin: false,
             error: null,
 
             // Actions
@@ -42,6 +43,7 @@ const useAuthStore = create(
                         isSuperAdmin: user.role === 'super_admin',
                         isRegistrationDesk: user.role === 'registration_desk',
                         isCareerAdmin: user.role === 'career_admin' || user.role === 'super_admin',
+                        isFifaAdmin: user.role === 'fifa_admin' || user.role === 'super_admin',
                         isLoading: false,
                         error: null
                     }));
@@ -119,6 +121,8 @@ const useAuthStore = create(
                     set({
                         user: data.user,
                         isAuthenticated: true,
+                        isSuperAdmin: data.user?.role === 'super_admin',
+                        isFifaAdmin: data.user?.role === 'fifa_admin' || data.user?.role === 'super_admin',
                         isLoading: false,
                         error: null
                     });

@@ -20,6 +20,7 @@ const ROLE_PRESETS = {
     "feedback",
   ],
   registration_desk: ["event_dashboard", "event_registrations"],
+  fifa_admin: ["fifa"],
 };
 
 const SIDEBAR_LABELS = {
@@ -35,18 +36,21 @@ const SIDEBAR_LABELS = {
   contact_messages: "Contact",
   settings: "Settings",
   user_logs: "User Logs",
+  fifa: "FIFA Predictions",
 };
 
 const ROLE_BADGE_CLASSES = {
   career_admin: "bg-blue-100 text-blue-800",
   school_admin: "bg-green-100 text-green-800",
   registration_desk: "bg-amber-100 text-amber-800",
+  fifa_admin: "bg-emerald-100 text-emerald-800",
 };
 
 const ROLE_DISPLAY_NAMES = {
   career_admin: "Career Admin",
   school_admin: "School Admin",
   registration_desk: "Registration Desk",
+  fifa_admin: "FIFA Admin",
 };
 
 const SIDEBAR_ITEMS = [
@@ -56,6 +60,7 @@ const SIDEBAR_ITEMS = [
     items: ["team_management", "updates_management", "careers_jobs", "pending_jobs"],
   },
   { group: "User Communications", items: ["feedback", "issues", "contact_messages"] },
+  { group: "Engagement", items: ["fifa"] },
   { group: "System", items: ["settings", "user_logs"] },
 ];
 
@@ -303,6 +308,7 @@ const Settings = () => {
           <option value="career_admin">Career Admin</option>
           <option value="school_admin">School Admin</option>
           <option value="registration_desk">Registration Desk</option>
+          <option value="fifa_admin">FIFA Admin</option>
         </select>
       </div>
 
@@ -553,6 +559,7 @@ const Settings = () => {
                     <option value="school_admin">School Admin</option>
                     <option value="career_admin">Career Admin</option>
                     <option value="registration_desk">Registration Desk</option>
+          <option value="fifa_admin">FIFA Admin</option>
                   </select>
                   <p className="mt-1 text-xs text-gray-500">
                     Role determines default page access. You can customize below.

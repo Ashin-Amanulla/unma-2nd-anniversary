@@ -73,7 +73,7 @@ export const createSubAdmin = async (req, res) => {
     }
 
     // Validate role
-    const validRoles = ["school_admin", "career_admin", "registration_desk"];
+    const validRoles = ["school_admin", "career_admin", "registration_desk", "fifa_admin"];
     const adminRole = validRoles.includes(role) ? role : "school_admin";
 
     const subAdminData = {
@@ -189,7 +189,7 @@ export const updateSubAdmin = async (req, res) => {
     if (typeof isActive === "boolean") subAdmin.isActive = isActive;
     if (sidebarAccess !== undefined) subAdmin.sidebarAccess = sidebarAccess;
     if (role) {
-      const validRoles = ["school_admin", "career_admin", "registration_desk"];
+      const validRoles = ["school_admin", "career_admin", "registration_desk", "fifa_admin"];
       if (validRoles.includes(role)) subAdmin.role = role;
     }
     if (password && password.length >= 6) subAdmin.password = password;

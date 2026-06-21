@@ -79,6 +79,7 @@ const Header = () => {
   const navItems = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
+    { to: "/fifa", label: "FIFA ⚽" },
     { to: "/gallery", label: "Gallery" },
     { to: "/careers", label: "Careers" },
     { to: "/contact", label: "Contact" },

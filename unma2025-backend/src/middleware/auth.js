@@ -98,6 +98,22 @@ export const verifyCareerAccess = (req, res, next) => {
     }
 };
 
+export const verifyFifaAdmin = (req, res, next) => {
+    if (
+        req.admin &&
+        (req.admin.role === 'super_admin' || req.admin.role === 'fifa_admin')
+    ) {
+        logger.info(`FIFA admin access granted for user ${req.admin.email}`);
+        next();
+    } else {
+        logger.warn(`FIFA admin access denied for user ${req.admin ? req.admin.email : 'unknown'}`);
+        return res.status(403).json({
+            status: 'error',
+            message: 'Access denied: FIFA admin privileges required'
+        });
+    }
+};
+
 export const authenticateToken = (req, res, next) => {
     next();
 
