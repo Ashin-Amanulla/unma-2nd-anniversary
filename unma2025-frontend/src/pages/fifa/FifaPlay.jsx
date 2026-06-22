@@ -105,15 +105,7 @@ function writeLastEmail(email) {
 function FifaOrganizerCredit({ className = "" }) {
   return (
     <p className={`text-center text-xs leading-relaxed ${className}`}>
-      Organised by alumni from{" "}
-      <a
-        href="https://jnvtaa.in"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="underline underline-offset-2 hover:opacity-80 transition-opacity"
-      >
-        jnvtaa.in
-      </a>
+      Organised by alumni from JNV Trivandrum
     </p>
   );
 }
