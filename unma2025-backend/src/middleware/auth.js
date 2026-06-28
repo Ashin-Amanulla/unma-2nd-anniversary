@@ -99,9 +99,15 @@ export const verifyCareerAccess = (req, res, next) => {
 };
 
 export const verifyFifaAdmin = (req, res, next) => {
+    const hasFifaSidebar =
+        Array.isArray(req.admin?.sidebarAccess) &&
+        req.admin.sidebarAccess.includes("fifa");
+
     if (
         req.admin &&
-        (req.admin.role === 'super_admin' || req.admin.role === 'fifa_admin')
+        (req.admin.role === "super_admin" ||
+            req.admin.role === "fifa_admin" ||
+            hasFifaSidebar)
     ) {
         logger.info(`FIFA admin access granted for user ${req.admin.email}`);
         next();

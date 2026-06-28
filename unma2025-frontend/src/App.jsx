@@ -223,7 +223,9 @@ function App() {
                       <Route path="webinars" element={<WebinarManagement />} />
                     </>
                   )}
-                  {(isSuperAdmin || isFifaAdmin) && (
+                  {(isSuperAdmin ||
+                    isFifaAdmin ||
+                    user?.sidebarAccess?.includes("fifa")) && (
                     <Route path="fifa" element={<FifaAdmin />} />
                   )}
                 </>
