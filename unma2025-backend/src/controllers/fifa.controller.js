@@ -7,6 +7,7 @@ import FifaPrediction from "../models/FifaPrediction.js";
 import { AppError } from "../middleware/error.js";
 import { sendFifaCodeEmail } from "../templates/email/fifaCode.js";
 import { gradeAnswer } from "../utils/fifaGrading.js";
+import { validateWinnerAnswer } from "../utils/fifaStages.js";
 import { logger } from "../utils/logger.js";
 
 async function resolveActiveCampaign() {
@@ -548,6 +549,13 @@ export const submitPrediction = async (req, res, next) => {
     }
 
     const qMap = new Map(match.questions.map((q) => [String(q._id), q]));
+    for (const a of answers || []) {
+      const q = qMap.get(String(a.questionId));
+      if (!q || q.type !== "winner") continue;
+      const err = validateWinnerAnswer(match.stage, a.value);
+      if (err) return next(new AppError(err, 400));
+    }
+
     const validAnswers = (answers || [])
       .filter((a) => qMap.has(String(a.questionId)))
       .map((a) => ({
@@ -763,6 +771,10 @@ export const enterMatchResult = async (req, res, next) => {
     for (const u of updates) {
       const q = match.questions.id(u.questionId);
       if (!q) continue;
+      if (q.type === "winner") {
+        const err = validateWinnerAnswer(match.stage, u.correctAnswer);
+        if (err) return next(new AppError(err, 400));
+      }
       q.correctAnswer = u.correctAnswer;
       q.resultEntered = true;
     }

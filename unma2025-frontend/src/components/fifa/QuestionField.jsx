@@ -3,11 +3,17 @@ import {
   readScoreAnswer,
   readNumberAnswer,
 } from "../../utils/fifaAnswers";
+import {
+  getWinnerChoices,
+  winnerQuestionHint,
+  scoreQuestionHint,
+} from "../../utils/fifaStages";
 
 export default function QuestionField({
   question,
   teamA,
   teamB,
+  stage = "group",
   flagA = "⚽",
   flagB = "⚽",
   value,
@@ -28,13 +34,11 @@ export default function QuestionField({
     `${pillBase} ${active ? pillActive : pillIdle} ${locked ? pillLocked : ""}`;
 
   let input = null;
+  let typeHint = null;
 
   if (type === "winner") {
-    const choices = [
-      { value: "teamA", label: teamA, icon: flagA },
-      { value: "draw", label: "Draw", icon: "🤝" },
-      { value: "teamB", label: teamB, icon: flagB },
-    ];
+    const choices = getWinnerChoices(stage, teamA, teamB, { flagA, flagB });
+    typeHint = winnerQuestionHint(stage);
     input = (
       <div className="flex flex-wrap gap-2">
         {choices.map((c) => (
@@ -51,6 +55,7 @@ export default function QuestionField({
       </div>
     );
   } else if (type === "score") {
+    typeHint = scoreQuestionHint(stage);
     const sv = readScoreAnswer(value);
     input = (
       <div className="flex items-center gap-2">
@@ -145,6 +150,7 @@ export default function QuestionField({
           )}
         </div>
       </div>
+      {typeHint ? <p className="text-xs text-gray-500">{typeHint}</p> : null}
       {input}
       {locked && !hasAnswer && (
         <p className="text-xs text-gray-500 italic">Not answered</p>

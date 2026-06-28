@@ -899,6 +899,7 @@ function MatchCard({ match, slotLocked, creds, onSaved }) {
               question={q}
               teamA={match.teamA}
               teamB={match.teamB}
+              stage={match.stage || "group"}
               flagA={flagA}
               flagB={flagB}
               value={answers[answerKey(q._id)]}

@@ -13,6 +13,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import adminFifaApi from "../../api/adminFifaApi";
+import {
+  getWinnerChoices,
+  winnerQuestionHint,
+  scoreQuestionHint,
+} from "../../utils/fifaStages";
 import fifaApi from "../../api/fifaApi";
 import { fifaKeys } from "../../hooks/useFifa";
 import FifaLeaderboardPanel from "../../components/fifa/FifaLeaderboardPanel";
@@ -830,6 +835,7 @@ function MatchesTab({ campaign, onChanged }) {
                 key={qi}
                 q={q}
                 index={qi}
+                stage={form.stage || "group"}
                 teamA={form.teamA}
                 teamB={form.teamB}
                 onChange={(updated) => {
@@ -879,7 +885,7 @@ function MatchesTab({ campaign, onChanged }) {
   );
 }
 
-function QuestionBuilder({ q, index, teamA, teamB, onChange, onRemove }) {
+function QuestionBuilder({ q, index, stage, teamA, teamB, onChange, onRemove }) {
   return (
     <div className="rounded-xl border border-[var(--fifa-green)]/15 p-4 space-y-3 bg-[var(--fifa-green)]/5">
       <div className="flex items-center justify-between gap-2">
@@ -944,9 +950,11 @@ function QuestionBuilder({ q, index, teamA, teamB, onChange, onRemove }) {
       </div>
 
       {q.type === "winner" && (
-        <p className="text-xs text-gray-500">
-          Options: {teamA || "Team A"} / Draw / {teamB || "Team B"}
-        </p>
+        <p className="text-xs text-gray-500">{winnerQuestionHint(stage)}</p>
+      )}
+
+      {q.type === "score" && scoreQuestionHint(stage) && (
+        <p className="text-xs text-gray-500">{scoreQuestionHint(stage)}</p>
       )}
 
       {q.type === "choice" && (
@@ -1057,6 +1065,7 @@ function ResultDialog({ match, open, onClose, onSaved }) {
           <CorrectAnswerField
             key={q._id}
             question={q}
+            stage={match.stage || "group"}
             teamA={match.teamA}
             teamB={match.teamB}
             value={answers[q._id]}
@@ -1076,7 +1085,7 @@ function ResultDialog({ match, open, onClose, onSaved }) {
   );
 }
 
-function CorrectAnswerField({ question, teamA, teamB, value, onChange }) {
+function CorrectAnswerField({ question, stage, teamA, teamB, value, onChange }) {
   const { type, text, points, options } = question;
 
   const pillClass = (active) =>
@@ -1087,12 +1096,14 @@ function CorrectAnswerField({ question, teamA, teamB, value, onChange }) {
     }`;
 
   let input = null;
+  let typeHint = null;
+
   if (type === "winner") {
-    const choices = [
-      { v: "teamA", l: teamA },
-      { v: "draw", l: "Draw" },
-      { v: "teamB", l: teamB },
-    ];
+    typeHint = winnerQuestionHint(stage);
+    const choices = getWinnerChoices(stage, teamA || "Team A", teamB || "Team B").map((c) => ({
+      v: c.value,
+      l: c.label,
+    }));
     input = (
       <div className="flex flex-wrap gap-2">
         {choices.map((c) => (
@@ -1103,6 +1114,7 @@ function CorrectAnswerField({ question, teamA, teamB, value, onChange }) {
       </div>
     );
   } else if (type === "score") {
+    typeHint = scoreQuestionHint(stage);
     const v = readScoreAnswer(value);
     input = (
       <div className="flex items-center gap-2">
@@ -1163,6 +1175,7 @@ function CorrectAnswerField({ question, teamA, teamB, value, onChange }) {
         <span className="text-sm font-medium">{text}</span>
         <span className="text-xs text-gray-500">{points} pts</span>
       </div>
+      {typeHint ? <p className="text-xs text-gray-500">{typeHint}</p> : null}
       {input}
     </div>
   );
