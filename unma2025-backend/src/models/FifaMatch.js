@@ -60,7 +60,7 @@ const matchSchema = new mongoose.Schema(
     },
     stage: {
       type: String,
-      enum: ["group", "r16", "qf", "sf", "final"],
+      enum: ["group", "r32", "r16", "qf", "sf", "final"],
       default: "group",
     },
     questions: {

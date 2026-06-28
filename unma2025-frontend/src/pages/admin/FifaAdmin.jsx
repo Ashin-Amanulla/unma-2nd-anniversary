@@ -91,6 +91,7 @@ function prepareMatchQuestionsForSave(questions) {
 
 const STAGES = [
   { value: "group", label: "Group" },
+  { value: "r32", label: "Round of 32" },
   { value: "r16", label: "Round of 16" },
   { value: "qf", label: "Quarterfinal" },
   { value: "sf", label: "Semifinal" },

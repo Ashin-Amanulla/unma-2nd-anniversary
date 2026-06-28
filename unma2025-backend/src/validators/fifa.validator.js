@@ -129,7 +129,7 @@ export const matchSchema = Joi.object({
   teamA: Joi.string().min(1).max(60).required(),
   teamB: Joi.string().min(1).max(60).required(),
   kickoffAt: Joi.date().allow(null),
-  stage: Joi.string().valid("group", "r16", "qf", "sf", "final"),
+  stage: Joi.string().valid("group", "r32", "r16", "qf", "sf", "final"),
   questions: Joi.array().items(questionSchema).min(1).required(),
   order: Joi.number().integer().min(0),
 });
@@ -138,7 +138,7 @@ export const updateMatchSchema = Joi.object({
   teamA: Joi.string().min(1).max(60),
   teamB: Joi.string().min(1).max(60),
   kickoffAt: Joi.date().allow(null),
-  stage: Joi.string().valid("group", "r16", "qf", "sf", "final"),
+  stage: Joi.string().valid("group", "r32", "r16", "qf", "sf", "final"),
   questions: Joi.array().items(questionSchema).min(1),
   order: Joi.number().integer().min(0),
 });
