@@ -17,7 +17,7 @@ import { SITE_CONTENT } from "../data/siteContent";
 import { MEMBER_ASSOCIATIONS, getActiveAssociationsCount } from "../data/memberAssociations";
 import { ACTIVITIES, getUpcomingActivities } from "../data/activities";
 import { getRecentUpdates, getNews } from "../data/updates";
-import FifaHomeBanner from "../components/fifa/FifaHomeBanner";
+import FifaAnnouncementModal from "../components/fifa/FifaAnnouncementModal";
 
 // Lazy load the Globe component for better performance
 const GlobalVolunteerGlobe = lazy(() => import("../components/home/GlobalVolunteerGlobe"));
@@ -55,6 +55,7 @@ const Home = () => {
   return (
     <LazyMotion features={domAnimation}>
       <WebinarAnnouncementModal />
+      <FifaAnnouncementModal />
       {/* Hero Section */}
       <section className="relative min-h-[80vh] pt-24 pb-16 overflow-hidden">
         {/* Background Image */}
@@ -127,8 +128,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      <FifaHomeBanner />
 
       {/* What is UNMA Section */}
       <section className="py-20 bg-white">
