@@ -13,11 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import adminFifaApi from "../../api/adminFifaApi";
-import {
-  getWinnerChoices,
-  winnerQuestionHint,
-  scoreQuestionHint,
-} from "../../utils/fifaStages";
+import { getWinnerChoices } from "../../utils/fifaStages";
 import fifaApi from "../../api/fifaApi";
 import { fifaKeys } from "../../hooks/useFifa";
 import FifaLeaderboardPanel from "../../components/fifa/FifaLeaderboardPanel";
@@ -949,14 +945,6 @@ function QuestionBuilder({ q, index, stage, teamA, teamB, onChange, onRemove }) 
         </div>
       </div>
 
-      {q.type === "winner" && (
-        <p className="text-xs text-gray-500">{winnerQuestionHint(stage)}</p>
-      )}
-
-      {q.type === "score" && scoreQuestionHint(stage) && (
-        <p className="text-xs text-gray-500">{scoreQuestionHint(stage)}</p>
-      )}
-
       {q.type === "choice" && (
         <div className="space-y-2">
           <FieldLabel>Options</FieldLabel>
@@ -1096,10 +1084,8 @@ function CorrectAnswerField({ question, stage, teamA, teamB, value, onChange }) 
     }`;
 
   let input = null;
-  let typeHint = null;
 
   if (type === "winner") {
-    typeHint = winnerQuestionHint(stage);
     const choices = getWinnerChoices(stage, teamA || "Team A", teamB || "Team B").map((c) => ({
       v: c.value,
       l: c.label,
@@ -1114,7 +1100,6 @@ function CorrectAnswerField({ question, stage, teamA, teamB, value, onChange }) 
       </div>
     );
   } else if (type === "score") {
-    typeHint = scoreQuestionHint(stage);
     const v = readScoreAnswer(value);
     input = (
       <div className="flex items-center gap-2">
@@ -1175,7 +1160,6 @@ function CorrectAnswerField({ question, stage, teamA, teamB, value, onChange }) 
         <span className="text-sm font-medium">{text}</span>
         <span className="text-xs text-gray-500">{points} pts</span>
       </div>
-      {typeHint ? <p className="text-xs text-gray-500">{typeHint}</p> : null}
       {input}
     </div>
   );

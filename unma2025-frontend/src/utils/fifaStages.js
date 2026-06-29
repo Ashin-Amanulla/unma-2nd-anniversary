@@ -14,17 +14,3 @@ export function getWinnerChoices(stage, teamA, teamB, { flagA = "⚽", flagB = "
   }
   return choices;
 }
-
-export function winnerQuestionHint(stage) {
-  if (isKnockoutStage(stage)) {
-    return "Pick who advances (includes win on penalties).";
-  }
-  return "Team A / Draw / Team B";
-}
-
-export function scoreQuestionHint(stage) {
-  if (isKnockoutStage(stage)) {
-    return "90-minute score (regulation time).";
-  }
-  return null;
-}
