@@ -27,6 +27,9 @@ import {
   listParticipants,
   updateParticipantPoints,
   deleteParticipant,
+  getChatMessages,
+  postChatMessage,
+  deleteChatMessage,
 } from "../controllers/fifa.controller.js";
 import { verifyToken, verifyFifaAdmin } from "../middleware/auth.js";
 import { logUserActivity } from "../middleware/userLogger.js";
@@ -47,6 +50,7 @@ import {
   enterResultSchema,
   gradeOverrideSchema,
   updateParticipantPointsSchema,
+  chatSendSchema,
 } from "../validators/fifa.validator.js";
 
 const router = express.Router();
@@ -62,6 +66,9 @@ router.patch("/school", validateFifa(updateSchoolSchema), updateMySchool);
 router.post("/predictions", validateFifa(myPredictionsSchema), getMyPredictions);
 router.post("/predict", validateFifa(predictSchema), submitPrediction);
 router.get("/slots/:slotId/predictions", getSlotPredictions);
+
+router.get("/chat/messages", getChatMessages);
+router.post("/chat/messages", validateFifa(chatSendSchema), postChatMessage);
 
 const fifaAdmin = [verifyToken, verifyFifaAdmin, logUserActivity()];
 
@@ -107,5 +114,7 @@ router.patch(
   updateParticipantPoints
 );
 router.delete("/admin/participants/:id", ...fifaAdmin, deleteParticipant);
+
+router.delete("/admin/chat/messages/:id", ...fifaAdmin, deleteChatMessage);
 
 export default router;

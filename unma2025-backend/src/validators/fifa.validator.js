@@ -87,6 +87,15 @@ export const predictSchema = Joi.object({
   answers: Joi.array().items(answerSchema).min(1).required(),
 });
 
+export const chatSendSchema = Joi.object({
+  email: Joi.string().email().required(),
+  code: Joi.string().min(6).max(12).required(),
+  text: Joi.string().trim().min(1).max(500).required().messages({
+    "string.empty": "Message cannot be empty",
+    "string.max": "Message is too long (max 500 characters)",
+  }),
+});
+
 export const campaignSchema = Joi.object({
   name: Joi.string().min(2).max(150).required(),
   description: Joi.string().max(2000).allow("", null),

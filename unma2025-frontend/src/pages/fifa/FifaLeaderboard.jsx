@@ -10,9 +10,14 @@ export default function FifaLeaderboard() {
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-12">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-3xl font-bold text-[var(--fifa-dark)]">Leaderboard</h1>
-          <Link to="/fifa/play" className="fifa-btn-outline text-sm px-4 py-2">
-            My Predictions →
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/fifa/chat" className="fifa-btn-outline text-sm px-4 py-2">
+              💬 Chat
+            </Link>
+            <Link to="/fifa/play" className="fifa-btn-outline text-sm px-4 py-2">
+              My Predictions →
+            </Link>
+          </div>
         </div>
 
         <FifaLeaderboardPanel

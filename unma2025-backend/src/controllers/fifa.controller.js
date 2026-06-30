@@ -4,6 +4,7 @@ import FifaSlot from "../models/FifaSlot.js";
 import FifaMatch from "../models/FifaMatch.js";
 import FifaParticipant from "../models/FifaParticipant.js";
 import FifaPrediction from "../models/FifaPrediction.js";
+import FifaChatMessage from "../models/FifaChatMessage.js";
 import { AppError } from "../middleware/error.js";
 import { sendFifaCodeEmail } from "../templates/email/fifaCode.js";
 import { gradeAnswer } from "../utils/fifaGrading.js";
@@ -1105,6 +1106,115 @@ export const deleteParticipant = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       message: "Participant removed",
+      data: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* ===================== Group chat ===================== */
+
+const CHAT_MAX_FETCH = 100;
+const CHAT_RATE_WINDOW_MS = 60 * 1000;
+const CHAT_RATE_MAX_PER_WINDOW = 5;
+const CHAT_MIN_GAP_MS = 3 * 1000;
+
+export const getChatMessages = async (req, res, next) => {
+  try {
+    const campaign = await resolveActiveCampaign();
+    if (!campaign) {
+      return res
+        .status(200)
+        .json({ status: "success", message: "No active campaign", data: { messages: [] } });
+    }
+
+    // Fetch the most recent messages, then return ascending (oldest first).
+    const recent = await FifaChatMessage.find({
+      campaign: campaign._id,
+      deleted: false,
+    })
+      .sort({ createdAt: -1 })
+      .limit(CHAT_MAX_FETCH)
+      .select("senderName jnvSchool text createdAt")
+      .lean();
+
+    res.status(200).json({
+      status: "success",
+      message: "Chat messages",
+      data: { messages: recent.reverse() },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const postChatMessage = async (req, res, next) => {
+  try {
+    const campaign = await resolveActiveCampaign();
+    if (!campaign) return next(new AppError("No active campaign", 400));
+
+    const { email, code, text } = req.body;
+    const participant = await resolveParticipant(campaign, email, code);
+    if (!participant) return next(new AppError("Invalid email or code", 401));
+
+    // Basic anti-spam: cap messages per minute and enforce a minimum gap.
+    const since = new Date(Date.now() - CHAT_RATE_WINDOW_MS);
+    const recentCount = await FifaChatMessage.countDocuments({
+      participant: participant._id,
+      createdAt: { $gte: since },
+    });
+    if (recentCount >= CHAT_RATE_MAX_PER_WINDOW) {
+      return next(
+        new AppError("You're sending messages too fast. Please wait a moment.", 429)
+      );
+    }
+
+    const last = await FifaChatMessage.findOne({ participant: participant._id })
+      .sort({ createdAt: -1 })
+      .select("createdAt")
+      .lean();
+    if (last && Date.now() - new Date(last.createdAt).getTime() < CHAT_MIN_GAP_MS) {
+      return next(new AppError("Slow down a little before sending again.", 429));
+    }
+
+    const message = await FifaChatMessage.create({
+      campaign: campaign._id,
+      participant: participant._id,
+      senderName: participant.name,
+      jnvSchool: participant.jnvSchool,
+      text,
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Message sent",
+      data: {
+        message: {
+          _id: message._id,
+          senderName: message.senderName,
+          jnvSchool: message.jnvSchool,
+          text: message.text,
+          createdAt: message.createdAt,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteChatMessage = async (req, res, next) => {
+  try {
+    const message = await FifaChatMessage.findByIdAndUpdate(
+      req.params.id,
+      { deleted: true },
+      { new: true }
+    );
+    if (!message) return next(new AppError("Message not found", 404));
+    res.status(200).json({
+      status: "success",
+      message: "Message removed",
       data: {},
     });
   } catch (error) {

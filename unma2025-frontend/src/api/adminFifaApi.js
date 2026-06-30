@@ -82,6 +82,14 @@ const adminFifaApi = {
     const response = await api.delete(`/fifa/admin/participants/${id}`);
     return unwrap(response);
   },
+  getChatMessages: async () => {
+    const response = await api.get("/fifa/chat/messages");
+    return unwrap(response);
+  },
+  deleteChatMessage: async (id) => {
+    const response = await api.delete(`/fifa/admin/chat/messages/${id}`);
+    return unwrap(response);
+  },
 };
 
 export default adminFifaApi;

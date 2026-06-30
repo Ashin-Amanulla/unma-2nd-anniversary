@@ -51,6 +51,14 @@ const fifaApi = {
     const response = await fifaAxios.get(`/fifa/slots/${slotId}/predictions`);
     return unwrap(response);
   },
+  getChatMessages: async () => {
+    const response = await fifaAxios.get("/fifa/chat/messages");
+    return unwrap(response);
+  },
+  sendChatMessage: async (data) => {
+    const response = await fifaAxios.post("/fifa/chat/messages", data);
+    return unwrap(response);
+  },
 };
 
 export default fifaApi;

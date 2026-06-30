@@ -119,6 +119,7 @@ const TABS = [
   { value: "grading", label: "Results & Grading" },
   { value: "leaderboard", label: "Leaderboard" },
   { value: "participants", label: "Participants" },
+  { value: "chat", label: "Chat" },
   { value: "campaign", label: "Campaign" },
 ];
 
@@ -277,6 +278,7 @@ export default function FifaAdmin() {
             {activeTab === "grading" && <GradingTab onChanged={invalidateAll} />}
             {activeTab === "leaderboard" && <LeaderboardTab />}
             {activeTab === "participants" && <ParticipantsTab onChanged={invalidateAll} />}
+            {activeTab === "chat" && <ChatTab />}
             {activeTab === "campaign" && <CampaignForm campaign={campaign} onSaved={invalidateAll} />}
           </div>
         </>
@@ -1181,6 +1183,84 @@ function LeaderboardTab() {
       schools={data?.schools ?? []}
       slots={data?.slots ?? []}
     />
+  );
+}
+
+/* ======================================================= */
+/*  Chat moderation tab                                     */
+/* ======================================================= */
+function ChatTab() {
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: fifaKeys.chat,
+    queryFn: () => fifaApi.getChatMessages(),
+    refetchInterval: 8000,
+  });
+  const messages = data?.messages ?? [];
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => adminFifaApi.deleteChatMessage(id),
+    onSuccess: () => {
+      toast.success("Message removed");
+      queryClient.invalidateQueries({ queryKey: fifaKeys.chat });
+    },
+    onError: (err) => toast.error(apiError(err)),
+  });
+
+  return (
+    <div className="rounded-lg border overflow-hidden bg-white">
+      <table className="w-full border-collapse text-sm">
+        <thead className="bg-gray-50 border-b">
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Sender</th>
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Message</th>
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Sent</th>
+            <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading && <LoadingRow colSpan={4} />}
+          {!isLoading && messages.length === 0 && (
+            <EmptyRow colSpan={4} message="No messages yet." />
+          )}
+          {!isLoading &&
+            messages.map((m) => (
+              <tr key={m._id} className="border-b last:border-0 hover:bg-gray-50 align-top">
+                <td className="px-4 py-2 whitespace-nowrap">
+                  <div className="font-medium">{m.senderName}</div>
+                  <div className="text-[10px] text-gray-500">{m.jnvSchool ?? "—"}</div>
+                </td>
+                <td className="px-4 py-2 text-gray-800 break-words max-w-md">{m.text}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-gray-500">
+                  {new Date(m.createdAt).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
+                <td className="px-4 py-2">
+                  <div className="flex items-center justify-end">
+                    <button
+                      type="button"
+                      title="Delete message"
+                      className="p-1 hover:bg-red-50 rounded text-red-600"
+                      onClick={() => {
+                        if (window.confirm("Delete this message?")) {
+                          deleteMutation.mutate(m._id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

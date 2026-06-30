@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { Clock, Trophy, ChevronRight, Users, ChevronDown, Pencil } from "lucide-react";
+import { Clock, Trophy, ChevronRight, Users, ChevronDown, Pencil, MessageCircle } from "lucide-react";
 import fifaApi from "../../api/fifaApi";
 import { useFifaCampaign, fifaKeys } from "../../hooks/useFifa";
 import { JNV_SCHOOLS } from "../../constants/jnvSchools";
@@ -19,6 +19,13 @@ import {
   answerKey,
 } from "../../utils/fifaAnswers";
 import { getActiveFifaSlot } from "../../utils/fifaSlots";
+import {
+  readSavedParticipant,
+  writeSavedParticipant,
+  clearSavedParticipant,
+  readLastEmail,
+  writeLastEmail,
+} from "../../utils/fifaParticipant";
 
 /* ---------- FIFA code helpers ---------- */
 const FIFA_CODE_PREFIX = "FIFA-";
@@ -59,56 +66,11 @@ function getErrorMessage(err, fallback = "Something went wrong") {
   return err?.response?.data?.message || err?.message || fallback;
 }
 
-/* ---------- localStorage helpers ---------- */
-const LS_KEY = "fifaParticipant";
-const LS_EMAIL_KEY = "fifaLastEmail";
-
-function readSaved() {
-  try {
-    return JSON.parse(localStorage.getItem(LS_KEY)) || null;
-  } catch {
-    return null;
-  }
-}
-
-function writeSaved(val) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(val));
-  } catch {
-    /* ignore */
-  }
-}
-
-function clearSaved() {
-  try {
-    localStorage.removeItem(LS_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-function readLastEmail() {
-  try {
-    return localStorage.getItem(LS_EMAIL_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
-function writeLastEmail(email) {
-  try {
-    localStorage.setItem(LS_EMAIL_KEY, email);
-  } catch {
-    /* ignore */
-  }
-}
-
-
 /* ========================================== */
 /*  Root                                       */
 /* ========================================== */
 export default function FifaPlay() {
-  const saved = readSaved();
+  const saved = readSavedParticipant();
   const [step, setStep] = useState(saved ? "loading" : "code");
   const [creds, setCreds] = useState(saved || { email: readLastEmail(), code: "" });
   const [participant, setParticipant] = useState(null);
@@ -131,7 +93,7 @@ export default function FifaPlay() {
   useEffect(() => {
     if (saved) {
       loadPredictions(saved).catch(() => {
-        clearSaved();
+        clearSavedParticipant();
         setStep("code");
         setCreds({ email: readLastEmail(), code: "" });
       });
@@ -167,7 +129,7 @@ export default function FifaPlay() {
   const verifyMutation = useMutation({
     mutationFn: (data) => fifaApi.verify(data),
     onSuccess: () => {
-      writeSaved(creds);
+      writeSavedParticipant(creds);
       loadPredictions(creds).catch(() => toast.error("Could not load predictions."));
     },
     onError: () => toast.error("Invalid code. Please try again."),
@@ -506,6 +468,13 @@ export default function FifaPlay() {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              to="/fifa/chat"
+              className="inline-flex items-center rounded-lg bg-white/15 px-3 py-1.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-white/25 active:scale-95"
+            >
+              <MessageCircle className="h-3.5 w-3.5 mr-1.5 inline" />
+              Chat
+            </Link>
+            <Link
               to="/fifa/leaderboard"
               className="inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-bold shadow-sm transition-all hover:brightness-105 active:scale-95"
               style={{ background: "#e0a431", color: "#1a1a1a" }}
@@ -517,7 +486,7 @@ export default function FifaPlay() {
               type="button"
               className="text-xs text-white/50 underline hover:text-white/80 transition-colors"
               onClick={() => {
-                clearSaved();
+                clearSavedParticipant();
                 setCreds({ email: creds.email, code: "" });
                 setSlots(null);
                 setParticipant(null);

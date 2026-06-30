@@ -86,6 +86,7 @@ const Webinars = lazy(() => import("./pages/Webinars"));
 const FifaLanding = lazy(() => import("./pages/fifa/FifaLanding"));
 const FifaPlay = lazy(() => import("./pages/fifa/FifaPlay"));
 const FifaLeaderboard = lazy(() => import("./pages/fifa/FifaLeaderboard"));
+const FifaChat = lazy(() => import("./pages/fifa/FifaChat"));
 const FifaAdmin = lazy(() => import("./pages/admin/FifaAdmin"));
 
 
@@ -160,6 +161,7 @@ function App() {
                 <Route path="/fifa" element={<FifaLanding />} />
                 <Route path="/fifa/play" element={<FifaPlay />} />
                 <Route path="/fifa/leaderboard" element={<FifaLeaderboard />} />
+                <Route path="/fifa/chat" element={<FifaChat />} />
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}

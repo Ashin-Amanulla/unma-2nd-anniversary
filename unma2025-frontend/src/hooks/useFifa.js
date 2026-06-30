@@ -7,6 +7,7 @@ export const fifaKeys = {
   leaderboard: ["fifa", "leaderboard"],
   predictions: (email) => ["fifa", "predictions", email],
   slotPredictions: (slotId) => ["fifa", "slotPredictions", slotId],
+  chat: ["fifa", "chat"],
   adminSlots: ["fifa", "admin", "slots"],
   adminMatches: (slotId) => ["fifa", "admin", "matches", slotId ?? "all"],
   adminParticipants: ["fifa", "admin", "participants"],
