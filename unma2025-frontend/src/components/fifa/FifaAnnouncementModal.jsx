@@ -8,6 +8,7 @@ import { useFifaCampaign, useFifaLeaderboard } from "../../hooks/useFifa";
 import { getActiveFifaSlot } from "../../utils/fifaSlots";
 import { teamFlag } from "../../utils/fifaTeams";
 import FifaSlotCountdown from "./FifaSlotCountdown";
+import FifaOrganizerCredit from "./FifaOrganizerCredit";
 
 const OPEN_DELAY_MS = 1200;
 const ROTATE_MS = 4000;
@@ -281,6 +282,8 @@ export default function FifaAnnouncementModal() {
                     View leaderboard →
                   </button>
                 </div>
+
+                <FifaOrganizerCredit variant="light" compact className="mt-5" />
               </div>
             </motion.div>
           </motion.div>

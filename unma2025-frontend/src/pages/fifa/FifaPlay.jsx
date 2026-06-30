@@ -8,6 +8,7 @@ import { useFifaCampaign, fifaKeys } from "../../hooks/useFifa";
 import { JNV_SCHOOLS } from "../../constants/jnvSchools";
 import FifaSlotCountdown from "../../components/fifa/FifaSlotCountdown";
 import QuestionField from "../../components/fifa/QuestionField";
+import FifaOrganizerCredit from "../../components/fifa/FifaOrganizerCredit";
 import { teamFlag, teamDisplayLabels } from "../../utils/fifaTeams";
 import {
   defaultScoreAnswer,
@@ -102,20 +103,13 @@ function writeLastEmail(email) {
   }
 }
 
-function FifaOrganizerCredit({ className = "" }) {
-  return (
-    <p className={`text-center text-xs leading-relaxed ${className}`}>
-      Organised by alumni from JNV Trivandrum
-    </p>
-  );
-}
 
 /* ========================================== */
 /*  Root                                       */
 /* ========================================== */
 export default function FifaPlay() {
   const saved = readSaved();
-  const [step, setStep] = useState(saved ? "loading" : "join");
+  const [step, setStep] = useState(saved ? "loading" : "code");
   const [creds, setCreds] = useState(saved || { email: readLastEmail(), code: "" });
   const [participant, setParticipant] = useState(null);
   const [slots, setSlots] = useState(null);
@@ -138,7 +132,7 @@ export default function FifaPlay() {
     if (saved) {
       loadPredictions(saved).catch(() => {
         clearSaved();
-        setStep("join");
+        setStep("code");
         setCreds({ email: readLastEmail(), code: "" });
       });
     }
@@ -218,9 +212,9 @@ export default function FifaPlay() {
         <div className="mx-auto max-w-md px-4 py-14">
           <div className="mb-8 text-center space-y-2">
             <div className="text-5xl mb-3">⚽</div>
-            <h1 className="text-3xl font-bold text-[var(--fifa-dark)]">Join the Contest</h1>
+            <h1 className="text-3xl font-bold text-[var(--fifa-dark)]">Register for the Contest</h1>
             <p className="text-gray-600 text-sm max-w-xs mx-auto">
-              Enter once — we&apos;ll email a code you can reuse all tournament.
+              New here? Enter your details once — we&apos;ll email a code you can reuse all tournament.
             </p>
           </div>
 
@@ -302,7 +296,7 @@ export default function FifaPlay() {
               </button>
             </p>
           </div>
-          <FifaOrganizerCredit className="text-gray-400 mt-8" />
+          <FifaOrganizerCredit className="mt-8" />
         </div>
       </div>
     );
@@ -368,7 +362,7 @@ export default function FifaPlay() {
               ← Use a different email
             </button>
           </div>
-          <FifaOrganizerCredit className="text-gray-400 mt-8" />
+          <FifaOrganizerCredit className="mt-8" />
         </div>
       </div>
     );
@@ -381,9 +375,9 @@ export default function FifaPlay() {
         <div className="mx-auto max-w-md px-4 py-14">
           <div className="mb-8 text-center space-y-2">
             <div className="text-5xl mb-3">📩</div>
-            <h1 className="text-3xl font-bold text-[var(--fifa-dark)]">Enter your code</h1>
+            <h1 className="text-3xl font-bold text-[var(--fifa-dark)]">Sign in</h1>
             <p className="text-gray-600 text-sm">
-              Enter the 4-character code from your email —{" "}
+              Enter your email and the 4-character code from your registration email —{" "}
               <span className="font-mono font-bold text-gray-900 tracking-widest">FIFA-</span>
               is already filled in.
             </p>
@@ -439,14 +433,7 @@ export default function FifaPlay() {
             <div className="flex items-center justify-between pt-1">
               <button
                 type="button"
-                className="text-sm underline text-gray-600"
-                onClick={() => setStep("join")}
-              >
-                ← Register instead
-              </button>
-              <button
-                type="button"
-                className="text-sm underline text-gray-600"
+                className="text-sm text-gray-600"
                 disabled={!creds.email || resendMutation.isPending}
                 onClick={() => {
                   if (creds.email) resendMutation.mutate({ email: creds.email });
@@ -455,8 +442,18 @@ export default function FifaPlay() {
                 {resendMutation.isPending ? "Sending…" : "Re-send code"}
               </button>
             </div>
+            <p className="text-center text-sm text-gray-600 pt-1">
+              New user?{" "}
+              <button
+                type="button"
+                className="text-[var(--fifa-green)] underline font-medium"
+                onClick={() => setStep("join")}
+              >
+                Register here
+              </button>
+            </p>
           </div>
-          <FifaOrganizerCredit className="text-gray-400 mt-8" />
+          <FifaOrganizerCredit className="mt-8" />
         </div>
       </div>
     );
@@ -533,6 +530,12 @@ export default function FifaPlay() {
         </div>
       </div>
 
+      <div className="border-b border-[rgba(26,71,42,0.12)] bg-[rgba(26,71,42,0.06)] px-4 py-2">
+        <div className="mx-auto max-w-2xl">
+          <FifaOrganizerCredit compact variant="page" />
+        </div>
+      </div>
+
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-10">
         {!slots && (
           <p className="text-center text-gray-600 py-16">Loading…</p>
@@ -567,7 +570,7 @@ export default function FifaPlay() {
       </div>
 
       <div className="mx-auto max-w-2xl px-4 pb-10">
-        <FifaOrganizerCredit className="text-gray-400" />
+        <FifaOrganizerCredit />
       </div>
 
       <EditSchoolDialog
