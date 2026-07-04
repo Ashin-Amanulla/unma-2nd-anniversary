@@ -57,6 +57,9 @@ export default function FifaLanding() {
           <Link to="/fifa/play" className="fifa-btn-primary px-8 py-3 text-base">
             Join &amp; Play ⚽
           </Link>
+          <Link to="/fifa/bracket" className="fifa-btn-outline px-8 py-3 text-base">
+            Road to the Final (100 pts)
+          </Link>
           <Link to="/fifa/leaderboard" className="fifa-btn-outline px-8 py-3 text-base">
             Leaderboard
           </Link>

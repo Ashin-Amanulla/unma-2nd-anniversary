@@ -468,6 +468,12 @@ export default function FifaPlay() {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              to="/fifa/bracket/play"
+              className="inline-flex items-center rounded-lg bg-white/15 px-3 py-1.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-white/25 active:scale-95"
+            >
+              Road to the Final
+            </Link>
+            <Link
               to="/fifa/chat"
               className="inline-flex items-center rounded-lg bg-white/15 px-3 py-1.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-white/25 active:scale-95"
             >

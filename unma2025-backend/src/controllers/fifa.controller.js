@@ -5,11 +5,13 @@ import FifaMatch from "../models/FifaMatch.js";
 import FifaParticipant from "../models/FifaParticipant.js";
 import FifaPrediction from "../models/FifaPrediction.js";
 import FifaChatMessage from "../models/FifaChatMessage.js";
+import { FifaBracketEntry } from "../models/FifaBracket.js";
 import { AppError } from "../middleware/error.js";
 import { sendFifaCodeEmail } from "../templates/email/fifaCode.js";
 import { gradeAnswer } from "../utils/fifaGrading.js";
 import { validateWinnerAnswer } from "../utils/fifaStages.js";
 import { logger } from "../utils/logger.js";
+import { resolveParticipant } from "../utils/fifaAuth.js";
 
 async function resolveActiveCampaign() {
   return FifaCampaign.resolveActiveCampaign();
@@ -25,24 +27,6 @@ function generateFifaCode() {
   let code = "FIFA-";
   for (const b of bytes) code += chars[b % chars.length];
   return code;
-}
-
-function normalizeFifaCode(code) {
-  if (!code) return code;
-  const upper = String(code).toUpperCase().trim();
-  const suffix = upper.startsWith("FIFA-")
-    ? upper.slice(5)
-    : upper.replace(/^FIFA-?/, "");
-  return `FIFA-${suffix}`;
-}
-
-async function resolveParticipant(campaign, email, code) {
-  const p = await FifaParticipant.findOne({
-    campaign: campaign._id,
-    email: email.toLowerCase(),
-    code: normalizeFifaCode(code),
-  });
-  return p || null;
 }
 
 function sanitizeQuestions(questions) {
@@ -84,11 +68,13 @@ function buildMatchView(matches, predictionsByMatch) {
   });
 }
 
-function buildLeaderboard(participants, predictionsByParticipant) {
+function buildLeaderboard(participants, predictionsByParticipant, bracketByParticipant = new Map()) {
   const rows = [];
 
   for (const p of participants) {
     const preds = predictionsByParticipant.get(String(p._id)) || [];
+    const bracketPoints = bracketByParticipant.get(String(p._id)) ?? 0;
+    let matchPoints = 0;
     let points = p.startingPoints ?? 0;
     let exactHits = 0;
     let correctCount = 0;
@@ -101,7 +87,7 @@ function buildLeaderboard(participants, predictionsByParticipant) {
 
     for (const pred of sorted) {
       const earned = pred.totalPoints;
-      points += earned;
+      matchPoints += earned;
       if (earned > 0) {
         correctCount++;
         currentStreak++;
@@ -114,11 +100,15 @@ function buildLeaderboard(participants, predictionsByParticipant) {
       }
     }
 
+    points += matchPoints + bracketPoints;
+
     rows.push({
       participantId: p._id,
       name: p.name,
       jnvSchool: p.jnvSchool,
       points,
+      matchPoints,
+      bracketPoints,
       exactHits,
       correctCount,
       hotStreak: currentStreak >= 3,
@@ -239,6 +229,11 @@ export const getLeaderboard = async (req, res, next) => {
 
     const predictions = await FifaPrediction.find({ campaign: campaign._id });
 
+    const bracketEntries = await FifaBracketEntry.find({ campaign: campaign._id }).lean();
+    const bracketByParticipant = new Map(
+      bracketEntries.map((e) => [String(e.participant), e.bracketPoints ?? 0])
+    );
+
     const predsByParticipant = new Map();
     for (const pred of predictions) {
       const key = String(pred.participant);
@@ -246,7 +241,11 @@ export const getLeaderboard = async (req, res, next) => {
       predsByParticipant.get(key).push(pred);
     }
 
-    const { leaderboard, schools } = buildLeaderboard(participants, predsByParticipant);
+    const { leaderboard, schools } = buildLeaderboard(
+      participants,
+      predsByParticipant,
+      bracketByParticipant
+    );
     const slotSummary = slots.map((s) => ({ _id: s._id, title: s.title, order: s.order }));
 
     const slotPointsByParticipant = new Map();
@@ -1054,14 +1053,21 @@ export const listParticipants = async (req, res, next) => {
       earnedAgg.map((row) => [String(row._id), row.earnedPoints])
     );
 
+    const bracketEntries = await FifaBracketEntry.find({ campaign: campaign._id }).lean();
+    const bracketMap = new Map(
+      bracketEntries.map((e) => [String(e.participant), e.bracketPoints ?? 0])
+    );
+
     const enriched = participants.map((p) => {
       const earnedPoints = earnedMap.get(String(p._id)) ?? 0;
+      const bracketPoints = bracketMap.get(String(p._id)) ?? 0;
       const startingPoints = p.startingPoints ?? 0;
       return {
         ...p,
         startingPoints,
         earnedPoints,
-        totalPoints: startingPoints + earnedPoints,
+        bracketPoints,
+        totalPoints: startingPoints + earnedPoints + bracketPoints,
       };
     });
 

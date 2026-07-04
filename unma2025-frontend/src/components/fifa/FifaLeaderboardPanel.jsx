@@ -36,16 +36,29 @@ function SchoolCell({ jnvSchool }) {
   );
 }
 
-function PointsCell({ points, mutedZero = false }) {
+function PointsCell({ points, matchPoints, bracketPoints, mutedZero = false }) {
   if (points === null || points === undefined) {
     return <td className="px-3 py-3 w-20 text-right text-gray-300">—</td>;
   }
+
+  const hasBreakdown =
+    (matchPoints !== undefined && matchPoints !== null) ||
+    (bracketPoints !== undefined && bracketPoints !== null && bracketPoints > 0);
+
   return (
-    <td className="px-3 py-3 w-20 text-right tabular-nums font-bold">
+    <td className="px-3 py-3 w-28 text-right tabular-nums font-bold">
       {mutedZero && points === 0 ? (
         <span className="text-gray-400 font-normal">0</span>
       ) : (
-        points
+        <div className="inline-flex flex-col items-end gap-0.5">
+          <span>{points}</span>
+          {hasBreakdown && (
+            <span className="text-[10px] font-normal text-gray-400 leading-tight">
+              {matchPoints ?? 0} match
+              {bracketPoints > 0 ? ` · ${bracketPoints} final` : ""}
+            </span>
+          )}
+        </div>
       )}
     </td>
   );
@@ -165,7 +178,11 @@ export default function FifaLeaderboardPanel({
                 <RankCell rank={row.rank} />
                 <NameCell name={row.name} hotStreak={row.hotStreak} />
                 <SchoolCell jnvSchool={row.jnvSchool} />
-                <PointsCell points={row.points} />
+                <PointsCell
+                  points={row.points}
+                  matchPoints={row.matchPoints}
+                  bracketPoints={row.bracketPoints}
+                />
               </tr>
             ))}
           </tbody>

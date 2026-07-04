@@ -17,6 +17,7 @@ import { getWinnerChoices } from "../../utils/fifaStages";
 import fifaApi from "../../api/fifaApi";
 import { fifaKeys } from "../../hooks/useFifa";
 import FifaLeaderboardPanel from "../../components/fifa/FifaLeaderboardPanel";
+import FifaBracketAdminTab from "./FifaBracketAdminTab";
 import {
   emptyScoreAnswer,
   isFifaAnswerProvided,
@@ -117,6 +118,7 @@ const TABS = [
   { value: "slots", label: "Slots" },
   { value: "matches", label: "Matches & Questions" },
   { value: "grading", label: "Results & Grading" },
+  { value: "bracket", label: "Road to the Final" },
   { value: "leaderboard", label: "Leaderboard" },
   { value: "participants", label: "Participants" },
   { value: "chat", label: "Chat" },
@@ -276,6 +278,7 @@ export default function FifaAdmin() {
             {activeTab === "slots" && <SlotsTab campaign={campaign} onChanged={invalidateAll} />}
             {activeTab === "matches" && <MatchesTab campaign={campaign} onChanged={invalidateAll} />}
             {activeTab === "grading" && <GradingTab onChanged={invalidateAll} />}
+            {activeTab === "bracket" && <FifaBracketAdminTab />}
             {activeTab === "leaderboard" && <LeaderboardTab />}
             {activeTab === "participants" && <ParticipantsTab onChanged={invalidateAll} />}
             {activeTab === "chat" && <ChatTab />}

@@ -151,6 +151,11 @@ export default function FifaAnnouncementModal() {
     navigate("/fifa/leaderboard");
   }, [dismiss, navigate]);
 
+  const goRoadToFinal = useCallback(() => {
+    dismiss();
+    navigate("/fifa/bracket");
+  }, [dismiss, navigate]);
+
   if (!mounted || !isActive) return null;
 
   const eyebrow = activeSlot
@@ -249,6 +254,24 @@ export default function FifaAnnouncementModal() {
                 </div>
 
                 <p className="mt-1 text-sm text-white/80">{subline}</p>
+
+                <div className="mt-4 rounded-xl bg-black/20 backdrop-blur-sm border border-[#e0a431]/40 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-[#e0a431]">
+                    🏆 Road to the Final
+                  </p>
+                  <p className="mt-1.5 text-sm text-white/90 leading-snug">
+                    Pick every knockout winner from the Round of 16 through the Final — earn an
+                    extra <span className="font-bold text-[#e0a431]">100 bonus points</span> on
+                    the leaderboard if your full run is perfect.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={goRoadToFinal}
+                    className="mt-3 text-xs font-semibold text-white/90 hover:text-white underline underline-offset-2 transition-colors"
+                  >
+                    Enter Road to the Final →
+                  </button>
+                </div>
 
                 {activeSlot?.closesAt && !activeSlot.locked && (
                   <div className="mt-3">

@@ -11,6 +11,9 @@ export default function FifaLeaderboard() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-3xl font-bold text-[var(--fifa-dark)]">Leaderboard</h1>
           <div className="flex items-center gap-2">
+            <Link to="/fifa/bracket/board" className="fifa-btn-outline text-sm px-4 py-2">
+              Road to the Final
+            </Link>
             <Link to="/fifa/chat" className="fifa-btn-outline text-sm px-4 py-2">
               💬 Chat
             </Link>

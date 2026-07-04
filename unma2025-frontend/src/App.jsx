@@ -87,6 +87,9 @@ const FifaLanding = lazy(() => import("./pages/fifa/FifaLanding"));
 const FifaPlay = lazy(() => import("./pages/fifa/FifaPlay"));
 const FifaLeaderboard = lazy(() => import("./pages/fifa/FifaLeaderboard"));
 const FifaChat = lazy(() => import("./pages/fifa/FifaChat"));
+const FifaBracketLanding = lazy(() => import("./pages/fifa-bracket/FifaBracketLanding"));
+const FifaBracketPlay = lazy(() => import("./pages/fifa-bracket/FifaBracketPlay"));
+const FifaBracketBoard = lazy(() => import("./pages/fifa-bracket/FifaBracketBoard"));
 const FifaAdmin = lazy(() => import("./pages/admin/FifaAdmin"));
 
 
@@ -162,6 +165,9 @@ function App() {
                 <Route path="/fifa/play" element={<FifaPlay />} />
                 <Route path="/fifa/leaderboard" element={<FifaLeaderboard />} />
                 <Route path="/fifa/chat" element={<FifaChat />} />
+                <Route path="/fifa/bracket" element={<FifaBracketLanding />} />
+                <Route path="/fifa/bracket/play" element={<FifaBracketPlay />} />
+                <Route path="/fifa/bracket/board" element={<FifaBracketBoard />} />
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}
