@@ -6,10 +6,17 @@ function TeamSlot({
   onSelect,
   disabled,
   actualWinner,
+  matchPickedWinner = null,
+  viewMode = false,
   size = "default",
 }) {
   const isLarge = size === "large";
-  const isWinner = actualWinner ? team === actualWinner : selected;
+  const isPicked = selected;
+  const isActual = viewMode && actualWinner && team === actualWinner;
+  const isWrongPick = viewMode && actualWinner && isPicked && team !== actualWinner;
+  const isUnselected = viewMode
+    ? !isPicked && !isActual
+    : Boolean(matchPickedWinner && !isPicked);
 
   if (!team) {
     return (
@@ -28,6 +35,34 @@ function TeamSlot({
     );
   }
 
+  let ringClass =
+    "border-gray-200 bg-white group-hover:border-amber-300 group-hover:bg-amber-50/50";
+  if (viewMode) {
+    if (isWrongPick) {
+      ringClass = "border-red-500 bg-red-50 shadow-md";
+    } else if (isPicked && isActual) {
+      ringClass = "border-green-600 bg-green-50 shadow-md";
+    } else if (isPicked) {
+      ringClass = "border-[var(--fifa-gold)] bg-amber-50 shadow-md";
+    } else if (isActual) {
+      ringClass = "border-green-500 bg-green-50/80";
+    } else if (isUnselected) {
+      ringClass = "border-gray-200 bg-gray-100";
+    }
+  } else if (isPicked || (!viewMode && actualWinner && team === actualWinner)) {
+    ringClass = "border-[var(--fifa-gold)] bg-amber-50 shadow-md";
+  } else if (isUnselected) {
+    ringClass = "border-gray-200 bg-gray-100";
+  }
+
+  const labelClass = isWrongPick
+    ? "text-red-700"
+    : isPicked || isActual
+      ? "text-amber-700"
+      : isUnselected
+        ? "text-gray-400"
+        : "text-gray-700";
+
   return (
     <button
       type="button"
@@ -35,23 +70,31 @@ function TeamSlot({
       onClick={() => onSelect?.(team)}
       className={`group flex flex-col items-center gap-1.5 transition-all ${
         disabled ? "cursor-default" : "cursor-pointer hover:scale-105"
-      } ${isWinner ? "scale-105" : ""}`}
+      } ${isPicked || isActual ? "scale-105" : ""} ${
+        isUnselected ? "opacity-45 grayscale-[0.35] hover:opacity-70 hover:grayscale-0" : ""
+      }`}
     >
       <div
-        className={`flex items-center justify-center rounded-full border-2 transition-all ${
+        className={`relative flex items-center justify-center rounded-full border-2 transition-all ${
           isLarge ? "h-16 w-16 text-3xl" : "h-12 w-12 text-2xl"
-        } ${
-          isWinner
-            ? "border-[var(--fifa-gold)] bg-amber-50 shadow-md"
-            : "border-gray-200 bg-white group-hover:border-amber-300 group-hover:bg-amber-50/50"
-        }`}
+        } ${ringClass}`}
       >
         {teamFlag(team)}
+        {viewMode && isPicked && isActual && (
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-green-600 text-[9px] text-white">
+            ✓
+          </span>
+        )}
+        {viewMode && isWrongPick && (
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] text-white">
+            ✕
+          </span>
+        )}
       </div>
       <span
         className={`max-w-[100px] truncate text-center font-bold uppercase tracking-wide ${
           isLarge ? "text-xs" : "text-[10px]"
-        } ${isWinner ? "text-amber-700" : "text-gray-700"}`}
+        } ${labelClass}`}
       >
         {getTeam(team)?.short || team}
       </span>
@@ -83,6 +126,7 @@ export function BracketMatch({
   onPickWinner,
   disabled = false,
   actualWinner = null,
+  viewMode = false,
   variant = "default",
 }) {
   const isFinal = variant === "final";
@@ -92,7 +136,7 @@ export function BracketMatch({
     onPickWinner(bracketKey, team);
   };
 
-  const winner = actualWinner || pickedWinner;
+  const showcaseWinner = viewMode ? pickedWinner : actualWinner || pickedWinner;
 
   return (
     <div
@@ -106,6 +150,8 @@ export function BracketMatch({
         team={teamA}
         selected={pickedWinner === teamA}
         actualWinner={actualWinner}
+        matchPickedWinner={pickedWinner}
+        viewMode={viewMode}
         onSelect={handlePick}
         disabled={disabled || !teamA || !teamB}
         size={isFinal ? "large" : "default"}
@@ -117,11 +163,13 @@ export function BracketMatch({
         team={teamB}
         selected={pickedWinner === teamB}
         actualWinner={actualWinner}
+        matchPickedWinner={pickedWinner}
+        viewMode={viewMode}
         onSelect={handlePick}
         disabled={disabled || !teamA || !teamB}
         size={isFinal ? "large" : "default"}
       />
-      {isFinal && winner && <WinnerShowcase team={winner} />}
+      {isFinal && showcaseWinner && <WinnerShowcase team={showcaseWinner} />}
     </div>
   );
 }

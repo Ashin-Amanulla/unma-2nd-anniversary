@@ -139,6 +139,7 @@ export default function FifaBracketBoard() {
                     <th className="px-4 py-3 text-left font-semibold">Status</th>
                     <th className="px-4 py-3 text-left font-semibold">Last Round Survived</th>
                     <th className="px-4 py-3 text-right font-semibold">Pts</th>
+                    <th className="px-4 py-3 text-right font-semibold w-20" />
                   </tr>
                 </thead>
                 <tbody>
@@ -174,6 +175,18 @@ export default function FifaBracketBoard() {
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums font-semibold">
                           {entry.bracketPoints > 0 ? entry.bracketPoints : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEntryId(entry._id);
+                            }}
+                            className="fifa-btn-outline px-3 py-1 text-xs"
+                          >
+                            View
+                          </button>
                         </td>
                       </tr>
                     );

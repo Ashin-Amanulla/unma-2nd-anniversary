@@ -49,7 +49,10 @@ function PositionedMatch({
         teamA={teamA}
         teamB={teamB}
         pickedWinner={predictions[bracketKey] || null}
-        actualWinner={mode === "admin" ? apiMatch?.winner : null}
+        actualWinner={
+          mode === "admin" || mode === "view" ? apiMatch?.winner || null : null
+        }
+        viewMode={mode === "view"}
         onPickWinner={onPickWinner}
         disabled={disabled || !teamA || !teamB}
         variant={bracketKey === "final" ? "final" : "default"}
@@ -98,6 +101,7 @@ export function KnockoutBracket({
   mode = "play",
   entryClosesAt = null,
   entryOpen = false,
+  showHeader = true,
 }) {
   const r16Fixtures = {};
   const matchesByKey = {};
@@ -136,25 +140,48 @@ export function KnockoutBracket({
 
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-8">
-      <div className="mb-6 text-center space-y-3">
-        {entryClosesAt && mode === "play" && (
-          <div className="flex justify-center">
-            <FifaSlotCountdown
-              closesAt={entryClosesAt}
-              locked={!entryOpen}
-              variant="urgent"
-              layout="pill"
-              prefix="Entries close in"
-            />
-          </div>
-        )}
-        <h2 className="text-xl font-bold uppercase tracking-widest text-[var(--fifa-dark)] md:text-2xl">
-          FIFA World Cup Knockouts
-        </h2>
-        <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-amber-600">
-          Round of 16 → Final
-        </p>
-      </div>
+      {showHeader && (
+        <div className="mb-6 text-center space-y-3">
+          {entryClosesAt && mode === "play" && (
+            <div className="flex justify-center">
+              <FifaSlotCountdown
+                closesAt={entryClosesAt}
+                locked={!entryOpen}
+                variant="urgent"
+                layout="pill"
+                prefix="Entries close in"
+              />
+            </div>
+          )}
+          <h2 className="text-xl font-bold uppercase tracking-widest text-[var(--fifa-dark)] md:text-2xl">
+            FIFA World Cup Knockouts
+          </h2>
+          <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-amber-600">
+            Round of 16 → Final
+          </p>
+        </div>
+      )}
+
+      {mode === "view" && (
+        <div className="mb-4 flex flex-wrap justify-center gap-3 text-xs text-gray-600">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2 border-[var(--fifa-gold)] bg-amber-50" />
+            Their pick
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2 border-green-600 bg-green-50" />
+            Correct
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2 border-red-500 bg-red-50" />
+            Wrong
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2 border-gray-200 bg-gray-100 opacity-45" />
+            Not picked
+          </span>
+        </div>
+      )}
 
       <div className="flex min-w-[900px] items-start justify-center gap-2 md:gap-4">
         <div className="flex gap-2 md:gap-4">
