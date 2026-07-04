@@ -1,15 +1,29 @@
 import { Trophy } from "lucide-react";
 import { BracketMatch } from "./BracketMatch";
+import FifaSlotCountdown from "../fifa/FifaSlotCountdown";
 import {
   BRACKET_COLUMNS,
   ROUND_LABELS,
+  BRACKET_ROW_UNITS,
   resolveMatchTeams,
   getDescendantKeys,
+  getMatchVerticalIndex,
 } from "../../utils/fifaBracketTree";
 
-function MatchColumn({
-  keys,
-  stage,
+const TRACK_HEIGHT = 780;
+
+function ColumnHeader({ stage }) {
+  return (
+    <div className="mb-4 text-center shrink-0">
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
+        {ROUND_LABELS[stage]}
+      </span>
+    </div>
+  );
+}
+
+function PositionedMatch({
+  bracketKey,
   r16Fixtures,
   predictions,
   onPickWinner,
@@ -17,42 +31,61 @@ function MatchColumn({
   matchesByKey,
   mode,
 }) {
-  const gapClass =
-    stage === "r16" ? "gap-6" : stage === "qf" ? "gap-16 py-8" : stage === "sf" ? "py-20" : "";
+  const apiMatch = matchesByKey[bracketKey];
+  const { teamA, teamB } =
+    mode === "admin"
+      ? { teamA: apiMatch?.teamA, teamB: apiMatch?.teamB }
+      : resolveMatchTeams(bracketKey, r16Fixtures, predictions);
+
+  const topPct = (getMatchVerticalIndex(bracketKey) / BRACKET_ROW_UNITS) * 100;
 
   return (
-    <div className={`flex flex-col justify-center ${gapClass}`}>
-      {keys.map((key) => {
-        const apiMatch = matchesByKey[key];
-        const { teamA, teamB } =
-          mode === "admin"
-            ? { teamA: apiMatch?.teamA, teamB: apiMatch?.teamB }
-            : resolveMatchTeams(key, r16Fixtures, predictions);
-
-        return (
-          <BracketMatch
-            key={key}
-            bracketKey={key}
-            teamA={teamA}
-            teamB={teamB}
-            pickedWinner={predictions[key] || null}
-            actualWinner={mode === "admin" ? apiMatch?.winner : null}
-            onPickWinner={onPickWinner}
-            disabled={disabled || !teamA || !teamB}
-            variant={key === "final" ? "final" : "default"}
-          />
-        );
-      })}
+    <div
+      className="absolute left-1/2 z-[1] w-max max-w-[140px] -translate-x-1/2 -translate-y-1/2"
+      style={{ top: `${topPct}%` }}
+    >
+      <BracketMatch
+        bracketKey={bracketKey}
+        teamA={teamA}
+        teamB={teamB}
+        pickedWinner={predictions[bracketKey] || null}
+        actualWinner={mode === "admin" ? apiMatch?.winner : null}
+        onPickWinner={onPickWinner}
+        disabled={disabled || !teamA || !teamB}
+        variant={bracketKey === "final" ? "final" : "default"}
+      />
     </div>
   );
 }
 
-function ColumnHeader({ stage }) {
+function StageColumn({
+  stage,
+  keys,
+  r16Fixtures,
+  predictions,
+  onPickWinner,
+  disabled,
+  matchesByKey,
+  mode,
+  widthClass = "w-[132px]",
+}) {
   return (
-    <div className="mb-4 text-center">
-      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-        {ROUND_LABELS[stage]}
-      </span>
+    <div className={`flex shrink-0 flex-col ${widthClass}`}>
+      <ColumnHeader stage={stage} />
+      <div className="relative" style={{ height: TRACK_HEIGHT }}>
+        {keys.map((key) => (
+          <PositionedMatch
+            key={key}
+            bracketKey={key}
+            r16Fixtures={r16Fixtures}
+            predictions={predictions}
+            onPickWinner={onPickWinner}
+            disabled={disabled}
+            matchesByKey={matchesByKey}
+            mode={mode}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -63,6 +96,8 @@ export function KnockoutBracket({
   onPredictionsChange,
   disabled = false,
   mode = "play",
+  entryClosesAt = null,
+  entryOpen = false,
 }) {
   const r16Fixtures = {};
   const matchesByKey = {};
@@ -90,9 +125,29 @@ export function KnockoutBracket({
 
   const pickHandler = mode === "admin" ? handleAdminPick : handlePickWinner;
 
+  const columnProps = {
+    r16Fixtures,
+    predictions,
+    onPickWinner: pickHandler,
+    disabled,
+    matchesByKey,
+    mode,
+  };
+
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-8">
-      <div className="mb-6 text-center">
+      <div className="mb-6 text-center space-y-3">
+        {entryClosesAt && mode === "play" && (
+          <div className="flex justify-center">
+            <FifaSlotCountdown
+              closesAt={entryClosesAt}
+              locked={!entryOpen}
+              variant="urgent"
+              layout="pill"
+              prefix="Entries close in"
+            />
+          </div>
+        )}
         <h2 className="text-xl font-bold uppercase tracking-widest text-[var(--fifa-dark)] md:text-2xl">
           FIFA World Cup Knockouts
         </h2>
@@ -101,64 +156,49 @@ export function KnockoutBracket({
         </p>
       </div>
 
-      <div className="flex min-w-[900px] items-stretch justify-center gap-2 md:gap-4">
+      <div className="flex min-w-[900px] items-start justify-center gap-2 md:gap-4">
         <div className="flex gap-2 md:gap-4">
           {BRACKET_COLUMNS.left.map((col) => (
-            <div key={`${col.stage}-left`} className="flex flex-col">
-              <ColumnHeader stage={col.stage} />
-              <MatchColumn
-                keys={col.keys}
-                stage={col.stage}
-                r16Fixtures={r16Fixtures}
-                predictions={predictions}
-                onPickWinner={pickHandler}
-                disabled={disabled}
-                matchesByKey={matchesByKey}
-                mode={mode}
-              />
-            </div>
+            <StageColumn
+              key={`left-${col.stage}`}
+              stage={col.stage}
+              keys={col.keys}
+              {...columnProps}
+            />
           ))}
         </div>
 
-        <div className="flex flex-col items-center justify-center px-2">
+        <div className="flex w-[168px] shrink-0 flex-col items-center">
           <ColumnHeader stage="final" />
-          <div className="relative flex flex-col items-center gap-4">
-            <Trophy className="h-10 w-10 text-[var(--fifa-gold)]" />
-            <MatchColumn
-              keys={["final"]}
-              stage="final"
-              r16Fixtures={r16Fixtures}
-              predictions={predictions}
-              onPickWinner={pickHandler}
-              disabled={disabled}
-              matchesByKey={matchesByKey}
-              mode={mode}
-            />
+          <div className="relative w-full" style={{ height: TRACK_HEIGHT }}>
+            <div
+              className="absolute left-1/2 z-0 -translate-x-1/2 -translate-y-1/2"
+              style={{
+                top: `${(getMatchVerticalIndex("final") / BRACKET_ROW_UNITS) * 100}%`,
+              }}
+            >
+              <Trophy className="absolute -top-12 left-1/2 h-10 w-10 -translate-x-1/2 text-[var(--fifa-gold)]" />
+            </div>
+            <PositionedMatch bracketKey="final" {...columnProps} />
           </div>
         </div>
 
         <div className="flex gap-2 md:gap-4">
           {BRACKET_COLUMNS.right.map((col) => (
-            <div key={`${col.stage}-right`} className="flex flex-col">
-              <ColumnHeader stage={col.stage} />
-              <MatchColumn
-                keys={col.keys}
-                stage={col.stage}
-                r16Fixtures={r16Fixtures}
-                predictions={predictions}
-                onPickWinner={pickHandler}
-                disabled={disabled}
-                matchesByKey={matchesByKey}
-                mode={mode}
-              />
-            </div>
+            <StageColumn
+              key={`right-${col.stage}`}
+              stage={col.stage}
+              keys={col.keys}
+              {...columnProps}
+            />
           ))}
         </div>
       </div>
 
       {mode === "play" && !disabled && (
         <p className="mt-6 text-center text-xs text-gray-500">
-          Click a team to pick the winner. Your picks advance automatically on the road to the Final.
+          Click a team to pick the winner. Your picks advance automatically on the road to the
+          Final.
         </p>
       )}
     </div>

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TrophyIcon, UsersIcon } from "@heroicons/react/24/outline";
 import fifaBracketApi from "../../api/fifaBracketApi";
 import { fifaBracketKeys, fifaBracketStaleTime } from "../../hooks/useFifaBracket";
+import FifaSlotCountdown from "../../components/fifa/FifaSlotCountdown";
 
 function formatDate(value) {
   if (!value) return "";
@@ -43,7 +44,17 @@ export default function FifaBracketLanding() {
         {isLoading && <p className="text-gray-500 text-sm">Loading contest…</p>}
 
         {contest && (
-          <div className="fifa-card p-5 text-left space-y-2">
+          <div className="fifa-card p-5 text-left space-y-3">
+            {contest.entryClosesAt && contest.entryOpen && (
+              <FifaSlotCountdown
+                closesAt={contest.entryClosesAt}
+                locked={!contest.entryOpen}
+                variant="urgent"
+                layout="pill"
+                prefix="Entries close in"
+                className="w-full justify-center sm:w-auto"
+              />
+            )}
             <p className="font-semibold text-[var(--fifa-dark)]">Status: {contest.status}</p>
             {contest.entryClosesAt && (
               <p className="text-sm text-gray-600">

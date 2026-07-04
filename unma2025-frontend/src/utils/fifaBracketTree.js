@@ -65,6 +65,33 @@ export function isPredictionsComplete(predictions) {
   return ALL_BRACKET_KEYS.every((key) => predictions[key]);
 }
 
+/** Vertical scale — R16 leaf centers at 1, 5, 9, 13 (4-unit gaps for breathing room). */
+export const BRACKET_ROW_UNITS = 14;
+
+/**
+ * Row index for vertically centering a match between its feeder matches.
+ * QF sits between two R16 games, SF between two QF, Final between both SF.
+ */
+export function getMatchVerticalIndex(bracketKey) {
+  const slot = getSlotByKey(bracketKey);
+  if (!slot) return BRACKET_ROW_UNITS / 2;
+
+  if (slot.stage === "r16") {
+    return (slot.order - 1) * 4 + 1;
+  }
+
+  const children = getChildSlots(bracketKey);
+  if (children.length >= 2) {
+    const sum = children.reduce(
+      (acc, child) => acc + getMatchVerticalIndex(child.bracketKey),
+      0
+    );
+    return sum / children.length;
+  }
+
+  return BRACKET_ROW_UNITS / 2;
+}
+
 export const BRACKET_COLUMNS = {
   left: [
     { stage: "r16", keys: ["r16-l1", "r16-l2", "r16-l3", "r16-l4"] },

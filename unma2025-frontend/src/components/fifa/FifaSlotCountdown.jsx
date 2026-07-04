@@ -26,11 +26,18 @@ export default function FifaSlotCountdown({
   const countdown = formatCountdown(msLeft);
   const isClosed = msLeft <= 0;
 
-  const textClass = variant === "light" ? "text-white/90" : "text-gray-600";
+  const textClass =
+    variant === "light"
+      ? "text-white/90"
+      : variant === "urgent"
+        ? "text-white"
+        : "text-gray-600";
   const pillClass =
     variant === "light"
       ? "bg-black/20 text-white border-white/20"
-      : "bg-gray-100 text-gray-800 border-gray-200";
+      : variant === "urgent"
+        ? "bg-red-600 text-white border-red-700 shadow-sm"
+        : "bg-gray-100 text-gray-800 border-gray-200";
 
   const content = (
     <>
@@ -38,7 +45,11 @@ export default function FifaSlotCountdown({
       <span className="font-medium">{prefix}</span>
       <span
         className={`font-mono tabular-nums tracking-wide ${
-          isClosed ? "text-[var(--fifa-gold)]" : ""
+          isClosed
+            ? variant === "urgent"
+              ? "text-white font-bold"
+              : "text-[var(--fifa-gold)]"
+            : ""
         }`}
       >
         {isClosed ? "Closed" : countdown?.label}

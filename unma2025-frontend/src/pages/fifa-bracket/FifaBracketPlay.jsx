@@ -12,6 +12,7 @@ import {
   writeSavedParticipant,
   readLastEmail,
 } from "../../utils/fifaParticipant";
+import FifaSlotCountdown from "../../components/fifa/FifaSlotCountdown";
 
 const FIFA_CODE_PREFIX = "FIFA-";
 const FIFA_CODE_SUFFIX_PATTERN = /[^A-HJ-NP-Z2-9]/g;
@@ -258,12 +259,21 @@ export default function FifaBracketPlay() {
     <div className="fifa-page">
       <div className="mx-auto max-w-[1200px] px-4 py-8 space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="space-y-2">
             <h1 className="text-2xl font-bold text-[var(--fifa-dark)]">Road to the Final</h1>
             <p className="text-sm text-gray-600">
               {displayName}
               {participant?.jnvSchool ? ` · ${participant.jnvSchool}` : ""}
             </p>
+            {contest.entryClosesAt && contest.entryOpen && (
+              <FifaSlotCountdown
+                closesAt={contest.entryClosesAt}
+                locked={!contest.entryOpen}
+                variant="urgent"
+                layout="pill"
+                prefix="Entries close in"
+              />
+            )}
           </div>
           <div className="flex gap-2">
             <button
@@ -288,6 +298,8 @@ export default function FifaBracketPlay() {
           matches={contest.matches}
           predictions={predictions}
           onPredictionsChange={setPredictions}
+          entryClosesAt={contest.entryClosesAt}
+          entryOpen={contest.entryOpen}
         />
       </div>
     </div>

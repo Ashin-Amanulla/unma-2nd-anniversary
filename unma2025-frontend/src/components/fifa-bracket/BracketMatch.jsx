@@ -1,6 +1,13 @@
 import { teamFlag, getTeam } from "../../utils/fifaTeams";
 
-function TeamSlot({ team, selected, onSelect, disabled, actualWinner, size = "default" }) {
+function TeamSlot({
+  team,
+  selected,
+  onSelect,
+  disabled,
+  actualWinner,
+  size = "default",
+}) {
   const isLarge = size === "large";
   const isWinner = actualWinner ? team === actualWinner : selected;
 
@@ -14,7 +21,9 @@ function TeamSlot({ team, selected, onSelect, disabled, actualWinner, size = "de
         >
           ?
         </div>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">TBD</span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          TBD
+        </span>
       </div>
     );
   }
@@ -55,7 +64,9 @@ function WinnerShowcase({ team }) {
 
   return (
     <div className="mt-4 flex w-full flex-col items-center gap-2 rounded-xl border-2 border-[var(--fifa-gold)] bg-amber-50 px-4 py-5">
-      <span className="text-xs font-bold uppercase tracking-[0.25em] text-amber-600">Winner</span>
+      <span className="text-xs font-bold uppercase tracking-[0.25em] text-amber-600">
+        Winner
+      </span>
       <span className="text-5xl leading-none">{teamFlag(team)}</span>
       <span className="text-center text-lg font-bold text-[var(--fifa-dark)]">
         {teamInfo?.name || team}
@@ -86,7 +97,9 @@ export function BracketMatch({
   return (
     <div
       className={`relative flex flex-col items-center gap-2 rounded-lg border bg-white p-3 ${
-        isFinal ? "min-w-[160px] border-amber-300/60 shadow-sm" : "border-gray-200 min-w-[120px]"
+        isFinal
+          ? "min-w-[160px] border-amber-300/60 shadow-sm"
+          : "border-gray-200 min-w-[120px]"
       }`}
     >
       <TeamSlot
