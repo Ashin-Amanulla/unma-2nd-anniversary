@@ -39,6 +39,7 @@ import eventRoutes from "./routes/event.js";
 import webinarRoutes from "./routes/webinar.js";
 import fifaRoutes from "./routes/fifa.js";
 import fifaBracketRoutes from "./routes/fifaBracket.js";
+import pageViewRoutes from "./routes/pageView.js";
 // Import middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 
@@ -139,6 +140,7 @@ app.use(`${baseRoutes}/events`, eventRoutes);
 app.use(`${baseRoutes}/webinars`, webinarRoutes);
 app.use(`${baseRoutes}/fifa`, fifaRoutes);
 app.use(`${baseRoutes}/fifa-bracket`, fifaBracketRoutes);
+app.use(`${baseRoutes}/page-views`, pageViewRoutes);
 
 // Setup Swagger documentation
 // setupSwagger(app);

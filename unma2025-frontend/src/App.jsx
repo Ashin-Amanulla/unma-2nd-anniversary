@@ -55,6 +55,7 @@ import { useAuthStore } from "./store";
 import AlumniUpdate from "./pages/AlumniUpdate";
 import RegistrationEntry from "./pages/RegistrationEntry";
 import ProtectedRouteRegister from "./components/auth/ProtectedRout-register";
+import PageViewTracker from "./components/analytics/PageViewTracker";
 const Feedback = lazy(() => import("./pages/Feedback"));
 const RepublicDayEvent = lazy(() => import("./pages/RepublicDayEvent"));
 const RepublicDayEventSuccess = lazy(() =>
@@ -100,6 +101,7 @@ function App() {
   }, [isRegistrationDesk]);
   return (
     <Router>
+      <PageViewTracker />
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           <Suspense fallback={<Loading />}>

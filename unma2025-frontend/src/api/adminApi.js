@@ -305,6 +305,15 @@ const adminApi = {
       throw error.response?.data || { message: "Failed to export registrations" };
     }
   },
+
+  getPageViewStats: async (days = 30) => {
+    try {
+      const response = await axios.get(`/page-views/stats?days=${days}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to fetch page view stats" };
+    }
+  },
 };
 
 export default adminApi;

@@ -10,6 +10,8 @@ import {
   ArrowTrendingUpIcon,
   UserIcon,
   InformationCircleIcon,
+  EyeIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import {
   Chart as ChartJS,
@@ -82,10 +84,13 @@ const Dashboard = () => {
     isLoadingStats,
     useAnalytics,
     useRazorpayPaymentsBySchool,
+    usePageViewStats,
   } = useAdmin();
   const { data: analyticsData, isLoading: isLoadingAnalytics } = useAnalytics();
   const { data: razorpayPaymentsResponse, isLoading: isLoadingRazorpay } =
     useRazorpayPaymentsBySchool();
+  const { data: pageViewResponse, isLoading: isLoadingPageViews } =
+    usePageViewStats(30);
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/admin/login");
@@ -142,6 +147,8 @@ const Dashboard = () => {
   };
 
   const stats = buildStats();
+  const pageViewStats = pageViewResponse?.data;
+  const pageViewByPath = pageViewStats?.byPath || [];
 
   // Chart data - Top 5 JNV schools with successful registrations and attendee count
   const schoolData = analyticsData?.data?.schoolWise || [];
@@ -373,6 +380,85 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {isSuperAdmin && (
+            <div className="mt-8 bg-white p-6 rounded-lg shadow-sm">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Website Page Views
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Public site traffic over the last {pageViewStats?.days || 30} days
+                  </p>
+                </div>
+              </div>
+
+              {isLoadingPageViews ? (
+                <div className="flex h-32 items-center justify-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500" />
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <DashboardCard
+                      title="Total Page Views"
+                      value={pageViewStats?.summary?.totalHits || 0}
+                      icon={EyeIcon}
+                      color="bg-indigo-500"
+                      subtext="All public page hits"
+                    />
+                    <DashboardCard
+                      title="Unique Visitors"
+                      value={pageViewStats?.summary?.totalUniqueVisitors || 0}
+                      icon={UsersIcon}
+                      color="bg-teal-500"
+                      subtext="Distinct browsers/devices"
+                    />
+                  </div>
+
+                  {pageViewByPath.length === 0 ? (
+                    <p className="text-center text-sm text-gray-500 py-8">
+                      No page views recorded yet.
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b bg-gray-50">
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                              Page
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                              Total Hits
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                              Unique Visitors
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pageViewByPath.map((row) => (
+                            <tr key={row.path} className="border-b last:border-0">
+                              <td className="px-4 py-3 font-mono text-gray-800">
+                                {row.path}
+                              </td>
+                              <td className="px-4 py-3 text-right tabular-nums">
+                                {row.totalHits}
+                              </td>
+                              <td className="px-4 py-3 text-right tabular-nums">
+                                {row.uniqueVisitors}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>

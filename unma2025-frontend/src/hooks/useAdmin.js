@@ -10,6 +10,7 @@ const ADMIN_KEYS = {
   SUB_ADMINS: "sub-admins",
   ANALYTICS: "analytics",
   SCHOOLS: "schools",
+  PAGE_VIEWS: "page-views",
 };
 
 export const useAdmin = () => {
@@ -117,6 +118,18 @@ export const useAdmin = () => {
         return response;
       },
       refetchInterval: 300000, // Refetch every 5 minutes
+    });
+  };
+
+  const usePageViewStats = (days = 30) => {
+    return useQuery({
+      queryKey: [ADMIN_KEYS.PAGE_VIEWS, days],
+      queryFn: async () => {
+        const response = await adminApi.getPageViewStats(days);
+        if (!response) throw new Error("Failed to fetch page view stats");
+        return response;
+      },
+      refetchInterval: 60000,
     });
   };
 
@@ -312,6 +325,7 @@ export const useAdmin = () => {
     useDistrictAnalytics,
     usePaymentAnalytics,
     useRazorpayPaymentsBySchool,
+    usePageViewStats,
     useSubAdmins,
     useAvailableSchools,
 

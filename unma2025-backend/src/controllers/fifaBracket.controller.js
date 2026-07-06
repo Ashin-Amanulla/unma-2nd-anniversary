@@ -111,6 +111,33 @@ function formatEntry(entry, participant, contest) {
   };
 }
 
+function computePickStats(entry, resultsByKey) {
+  const preds = predictionsToObject(entry.predictions);
+  let correctPicks = 0;
+  let wrongPicks = 0;
+
+  for (const [key, actualWinner] of resultsByKey) {
+    const picked = preds[key];
+    if (!picked) continue;
+    if (picked === actualWinner) {
+      correctPicks += 1;
+    } else {
+      wrongPicks += 1;
+    }
+  }
+
+  let pickStatus = "pending";
+  if (entry.status === "champion") {
+    pickStatus = "champion";
+  } else if (wrongPicks > 0) {
+    pickStatus = "wrong";
+  } else if (correctPicks > 0) {
+    pickStatus = "correct";
+  }
+
+  return { pickStatus, correctPicks, wrongPicks };
+}
+
 export const getActiveContest = async (req, res, next) => {
   try {
     const contest = await resolveActiveContest();
@@ -288,7 +315,7 @@ export const getBoard = async (req, res, next) => {
       filter.participant = { $in: schoolParticipants.map((p) => p._id) };
     }
 
-    const [entries, total, summaryAgg] = await Promise.all([
+    const [entries, total, summaryAgg, resultMatches] = await Promise.all([
       FifaBracketEntry.find(filter)
         .populate("participant", "name jnvSchool email")
         .sort({ status: 1, submittedAt: 1 })
@@ -300,7 +327,19 @@ export const getBoard = async (req, res, next) => {
         { $match: { contest: contest._id } },
         { $group: { _id: "$status", count: { $sum: 1 } } },
       ]),
+      FifaBracketMatch.find({
+        contest: contest._id,
+        winner: { $ne: null, $exists: true },
+      })
+        .select("bracketKey winner")
+        .lean(),
     ]);
+
+    const resultsByKey = new Map(
+      resultMatches
+        .filter((m) => m.winner)
+        .map((m) => [m.bracketKey, m.winner])
+    );
 
     const summary = { active: 0, knocked_out: 0, champion: 0, total: 0 };
     for (const row of summaryAgg) {
@@ -308,9 +347,10 @@ export const getBoard = async (req, res, next) => {
       summary.total += row.count;
     }
 
-    let formatted = entries.map((e) =>
-      formatEntry(e, e.participant, contest)
-    );
+    let formatted = entries.map((e) => ({
+      ...formatEntry(e, e.participant, contest),
+      ...computePickStats(e, resultsByKey),
+    }));
 
     res.status(200).json({
       status: "success",

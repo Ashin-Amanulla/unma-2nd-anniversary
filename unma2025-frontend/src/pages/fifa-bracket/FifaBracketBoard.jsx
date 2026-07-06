@@ -29,6 +29,24 @@ function StatusBadge({ status, knockedOutRound }) {
   );
 }
 
+function getRowClasses(pickStatus, isMe) {
+  const base =
+    "cursor-pointer border-b last:border-0 transition-colors hover:opacity-95";
+
+  let tint = "hover:bg-gray-50";
+  if (pickStatus === "wrong") {
+    tint = "bg-red-50 hover:bg-red-100";
+  } else if (pickStatus === "correct") {
+    tint = "bg-green-50 hover:bg-green-100";
+  } else if (pickStatus === "champion") {
+    tint = "bg-amber-50 hover:bg-amber-100";
+  }
+
+  const youAccent = isMe ? "border-l-4 border-l-amber-500" : "";
+
+  return `${base} ${tint} ${youAccent}`.trim();
+}
+
 export default function FifaBracketBoard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [schoolFilter, setSchoolFilter] = useState("");
@@ -130,6 +148,20 @@ export default function FifaBracketBoard() {
             <p className="text-center text-xs text-gray-500">
               Click a row to view that participant&apos;s Road to the Final picks
             </p>
+            <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-600">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-3 w-8 rounded bg-green-50 border border-green-200" />
+                On track (all picks correct so far)
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-3 w-8 rounded bg-red-50 border border-red-200" />
+                Has a wrong pick
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-3 w-8 rounded bg-amber-50 border border-amber-200" />
+                Champion
+              </span>
+            </div>
             <div className="overflow-x-auto rounded-lg border bg-white">
               <table className="w-full text-sm">
                 <thead>
@@ -151,9 +183,7 @@ export default function FifaBracketBoard() {
                       <tr
                         key={entry._id}
                         onClick={() => setSelectedEntryId(entry._id)}
-                        className={`cursor-pointer border-b last:border-0 hover:bg-gray-50 transition-colors ${
-                          isMe ? "bg-amber-50" : ""
-                        }`}
+                        className={getRowClasses(entry.pickStatus, isMe)}
                       >
                         <td className="px-4 py-3 font-medium">
                           {entry.name}
