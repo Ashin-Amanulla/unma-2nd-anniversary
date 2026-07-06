@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import pageViewApi from "../api/pageViewApi";
-import { getVisitorId } from "../utils/visitorId";
+import pageViewApi from "../../api/pageViewApi";
+import { getVisitorId } from "../../utils/visitorId";
 
 export default function PageViewTracker() {
   const location = useLocation();
