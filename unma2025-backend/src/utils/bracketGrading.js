@@ -1,4 +1,7 @@
-import { FifaBracketMatch, FifaBracketEntry } from "../models/FifaBracket.js";
+import { FifaBracketV2Match, FifaBracketV2Entry } from "../models/FifaBracketV2.js";
+
+const FifaBracketMatch = FifaBracketV2Match;
+const FifaBracketEntry = FifaBracketV2Entry;
 import { BRACKET_MAX_POINTS } from "./bracketTree.js";
 
 export async function advanceWinnerToParent(match) {

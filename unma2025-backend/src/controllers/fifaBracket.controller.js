@@ -1,10 +1,10 @@
 import FifaCampaign from "../models/FifaCampaign.js";
 import FifaParticipant from "../models/FifaParticipant.js";
 import {
-  FifaBracketContest,
-  FifaBracketMatch,
-  FifaBracketEntry,
-} from "../models/FifaBracket.js";
+  FifaBracketV2Contest as FifaBracketContest,
+  FifaBracketV2Match as FifaBracketMatch,
+  FifaBracketV2Entry as FifaBracketEntry,
+} from "../models/FifaBracketV2.js";
 import { AppError } from "../middleware/error.js";
 import { resolveParticipant } from "../utils/fifaAuth.js";
 import {
@@ -205,8 +205,10 @@ export const checkEntry = async (req, res, next) => {
     }
 
     const existing = await FifaBracketEntry.findOne({
-      contest: contest._id,
-      participant: participant._id,
+      $or: [
+        { contest: contest._id, participant: participant._id },
+        { campaign: campaign._id, participant: participant._id },
+      ],
     });
 
     res.status(200).json({
@@ -253,8 +255,10 @@ export const submitEntry = async (req, res, next) => {
     }
 
     const existing = await FifaBracketEntry.findOne({
-      contest: contest._id,
-      participant: participant._id,
+      $or: [
+        { contest: contest._id, participant: participant._id },
+        { campaign: campaign._id, participant: participant._id },
+      ],
     });
     if (existing) {
       return next(new AppError("You have already submitted your Road to the Final picks", 409));
@@ -297,6 +301,9 @@ export const submitEntry = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return next(new AppError("You have already submitted your Road to the Final picks", 409));
+    }
     next(error);
   }
 };

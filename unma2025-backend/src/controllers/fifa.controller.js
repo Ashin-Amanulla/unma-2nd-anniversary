@@ -5,7 +5,7 @@ import FifaMatch from "../models/FifaMatch.js";
 import FifaParticipant from "../models/FifaParticipant.js";
 import FifaPrediction from "../models/FifaPrediction.js";
 import FifaChatMessage from "../models/FifaChatMessage.js";
-import { FifaBracketEntry } from "../models/FifaBracket.js";
+import { FifaBracketV2Entry as FifaBracketEntry } from "../models/FifaBracketV2.js";
 import { AppError } from "../middleware/error.js";
 import { sendFifaCodeEmail } from "../templates/email/fifaCode.js";
 import { gradeAnswer } from "../utils/fifaGrading.js";
