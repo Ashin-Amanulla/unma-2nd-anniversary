@@ -15,8 +15,8 @@ const adminFifaBracketApi = {
     const response = await api.put(`/fifa-bracket/admin/contest/${id}`, data);
     return unwrap(response);
   },
-  setupR16: async (data) => {
-    const response = await api.put("/fifa-bracket/admin/r16", data);
+  setupQF: async (data) => {
+    const response = await api.put("/fifa-bracket/admin/qf", data);
     return unwrap(response);
   },
   enterResult: async (matchId, data) => {

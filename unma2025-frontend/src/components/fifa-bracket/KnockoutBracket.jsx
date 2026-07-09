@@ -10,7 +10,7 @@ import {
   getMatchVerticalIndex,
 } from "../../utils/fifaBracketTree";
 
-const TRACK_HEIGHT = 780;
+const TRACK_HEIGHT = 480;
 
 function ColumnHeader({ stage }) {
   return (
@@ -24,9 +24,12 @@ function ColumnHeader({ stage }) {
 
 function PositionedMatch({
   bracketKey,
-  r16Fixtures,
+  qfFixtures,
   predictions,
+  scores,
   onPickWinner,
+  onScoreChange,
+  showScores,
   disabled,
   matchesByKey,
   mode,
@@ -35,13 +38,14 @@ function PositionedMatch({
   const { teamA, teamB } =
     mode === "admin"
       ? { teamA: apiMatch?.teamA, teamB: apiMatch?.teamB }
-      : resolveMatchTeams(bracketKey, r16Fixtures, predictions);
+      : resolveMatchTeams(bracketKey, qfFixtures, predictions);
 
   const topPct = (getMatchVerticalIndex(bracketKey) / BRACKET_ROW_UNITS) * 100;
+  const matchScore = scores?.[bracketKey];
 
   return (
     <div
-      className="absolute left-1/2 z-[1] w-max max-w-[140px] -translate-x-1/2 -translate-y-1/2"
+      className="absolute left-1/2 z-[1] w-max max-w-[160px] -translate-x-1/2 -translate-y-1/2"
       style={{ top: `${topPct}%` }}
     >
       <BracketMatch
@@ -52,6 +56,12 @@ function PositionedMatch({
         actualWinner={
           mode === "admin" || mode === "view" ? apiMatch?.winner || null : null
         }
+        scoreA={matchScore?.a}
+        scoreB={matchScore?.b}
+        actualScoreA={apiMatch?.scoreA}
+        actualScoreB={apiMatch?.scoreB}
+        onScoreChange={onScoreChange}
+        showScores={showScores}
         viewMode={mode === "view"}
         onPickWinner={onPickWinner}
         disabled={disabled || !teamA || !teamB}
@@ -64,13 +74,16 @@ function PositionedMatch({
 function StageColumn({
   stage,
   keys,
-  r16Fixtures,
+  qfFixtures,
   predictions,
+  scores,
   onPickWinner,
+  onScoreChange,
+  showScores,
   disabled,
   matchesByKey,
   mode,
-  widthClass = "w-[132px]",
+  widthClass = "w-[148px]",
 }) {
   return (
     <div className={`flex shrink-0 flex-col ${widthClass}`}>
@@ -80,9 +93,12 @@ function StageColumn({
           <PositionedMatch
             key={key}
             bracketKey={key}
-            r16Fixtures={r16Fixtures}
+            qfFixtures={qfFixtures}
             predictions={predictions}
+            scores={scores}
             onPickWinner={onPickWinner}
+            onScoreChange={onScoreChange}
+            showScores={showScores}
             disabled={disabled}
             matchesByKey={matchesByKey}
             mode={mode}
@@ -97,20 +113,24 @@ export function KnockoutBracket({
   matches = [],
   predictions = {},
   onPredictionsChange,
+  scores = {},
+  onScoresChange,
   disabled = false,
   mode = "play",
   entryClosesAt = null,
   entryOpen = false,
   showHeader = true,
 }) {
-  const r16Fixtures = {};
+  const qfFixtures = {};
   const matchesByKey = {};
   for (const m of matches) {
     matchesByKey[m.bracketKey] = m;
-    if (m.stage === "r16") {
-      r16Fixtures[m.bracketKey] = { teamA: m.teamA, teamB: m.teamB };
+    if (m.stage === "qf") {
+      qfFixtures[m.bracketKey] = { teamA: m.teamA, teamB: m.teamB };
     }
   }
+
+  const showScores = mode === "play" || mode === "admin" || mode === "view";
 
   const handlePickWinner = (matchKey, team) => {
     if (disabled || !onPredictionsChange) return;
@@ -120,6 +140,14 @@ export function KnockoutBracket({
       delete next[desc];
     }
     onPredictionsChange(next);
+
+    if (onScoresChange) {
+      const nextScores = { ...scores };
+      for (const desc of getDescendantKeys(matchKey)) {
+        delete nextScores[desc];
+      }
+      onScoresChange(nextScores);
+    }
   };
 
   const handleAdminPick = (matchKey, team) => {
@@ -127,12 +155,24 @@ export function KnockoutBracket({
     onPredictionsChange(matchKey, team);
   };
 
+  const handleScoreChange = (matchKey, side, value) => {
+    if (!onScoresChange) return;
+    const current = scores[matchKey] || { a: "", b: "" };
+    onScoresChange({
+      ...scores,
+      [matchKey]: { ...current, [side]: value },
+    });
+  };
+
   const pickHandler = mode === "admin" ? handleAdminPick : handlePickWinner;
 
   const columnProps = {
-    r16Fixtures,
+    qfFixtures,
     predictions,
+    scores,
     onPickWinner: pickHandler,
+    onScoreChange: handleScoreChange,
+    showScores,
     disabled,
     matchesByKey,
     mode,
@@ -157,7 +197,7 @@ export function KnockoutBracket({
             FIFA World Cup Knockouts
           </h2>
           <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-amber-600">
-            Round of 16 → Final
+            Quarter-finals → Final
           </p>
         </div>
       )}
@@ -183,7 +223,7 @@ export function KnockoutBracket({
         </div>
       )}
 
-      <div className="flex min-w-[900px] items-start justify-center gap-2 md:gap-4">
+      <div className="flex min-w-[760px] items-start justify-center gap-2 md:gap-4">
         <div className="flex gap-2 md:gap-4">
           {BRACKET_COLUMNS.left.map((col) => (
             <StageColumn
@@ -195,7 +235,7 @@ export function KnockoutBracket({
           ))}
         </div>
 
-        <div className="flex w-[168px] shrink-0 flex-col items-center">
+        <div className="flex w-[180px] shrink-0 flex-col items-center">
           <ColumnHeader stage="final" />
           <div className="relative w-full" style={{ height: TRACK_HEIGHT }}>
             <div
@@ -224,8 +264,7 @@ export function KnockoutBracket({
 
       {mode === "play" && !disabled && (
         <p className="mt-6 text-center text-xs text-gray-500">
-          Click a team to pick the winner. Your picks advance automatically on the road to the
-          Final.
+          Click a team to pick the winner (including penalty winners) and enter the score beside each flag.
         </p>
       )}
     </div>

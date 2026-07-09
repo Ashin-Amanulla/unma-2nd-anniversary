@@ -8,6 +8,10 @@ import { fifaBracketKeys, fifaBracketStaleTime } from "../../hooks/useFifaBracke
 import { KnockoutBracket } from "../../components/fifa-bracket/KnockoutBracket";
 import { isPredictionsComplete, ALL_BRACKET_KEYS } from "../../utils/fifaBracketTree";
 import {
+  isScoresComplete,
+  validateScoresClient,
+} from "../../components/fifa-bracket/BracketScoreEntry";
+import {
   readSavedParticipant,
   writeSavedParticipant,
   readLastEmail,
@@ -41,6 +45,7 @@ export default function FifaBracketPlay() {
   const [creds, setCreds] = useState(saved || { email: readLastEmail(), code: "" });
   const [participant, setParticipant] = useState(null);
   const [predictions, setPredictions] = useState({});
+  const [scores, setScores] = useState({});
   const [submitted, setSubmitted] = useState(null);
 
   const { data, isLoading } = useQuery({
@@ -107,7 +112,16 @@ export default function FifaBracketPlay() {
       toast.error(`Please pick winners for all ${ALL_BRACKET_KEYS.length} matches`);
       return;
     }
-    enterMutation.mutate({ ...creds, predictions });
+    if (!isScoresComplete(scores)) {
+      toast.error("Please enter scores for all matches");
+      return;
+    }
+    const scoreErrors = validateScoresClient(scores, predictions, contest.matches);
+    if (scoreErrors.length) {
+      toast.error(scoreErrors[0]);
+      return;
+    }
+    enterMutation.mutate({ ...creds, predictions, scores });
   };
 
   if (isLoading || step === "loading") {
@@ -161,10 +175,10 @@ export default function FifaBracketPlay() {
     );
   }
 
-  if (!contest.r16Ready) {
+  if (!contest.qfReady) {
     return (
       <div className="fifa-page mx-auto max-w-lg px-4 py-16 text-center space-y-4">
-        <p className="text-gray-500">R16 matchups are not ready yet. Please check back soon.</p>
+        <p className="text-gray-500">QF matchups are not ready yet. Please check back soon.</p>
         <Link to="/fifa/bracket" className="fifa-btn-primary inline-block px-6 py-2">
           Back
         </Link>
@@ -253,6 +267,9 @@ export default function FifaBracketPlay() {
   }
 
   const picksCount = Object.keys(predictions).length;
+  const scoresCount = Object.keys(scores).filter(
+    (k) => scores[k]?.a !== "" && scores[k]?.a !== undefined && scores[k]?.b !== "" && scores[k]?.b !== undefined
+  ).length;
   const displayName = participant?.name || creds.email;
 
   return (
@@ -286,10 +303,16 @@ export default function FifaBracketPlay() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!isPredictionsComplete(predictions) || enterMutation.isPending}
+              disabled={
+                !isPredictionsComplete(predictions) ||
+                !isScoresComplete(scores) ||
+                enterMutation.isPending
+              }
               className="fifa-btn-primary px-6 py-2 text-sm disabled:opacity-50"
             >
-              {enterMutation.isPending ? "Submitting…" : `Submit (${picksCount}/15)`}
+              {enterMutation.isPending
+                ? "Submitting…"
+                : `Submit (${picksCount}/7 picks, ${scoresCount}/7 scores)`}
             </button>
           </div>
         </div>
@@ -298,6 +321,8 @@ export default function FifaBracketPlay() {
           matches={contest.matches}
           predictions={predictions}
           onPredictionsChange={setPredictions}
+          scores={scores}
+          onScoresChange={setScores}
           entryClosesAt={contest.entryClosesAt}
           entryOpen={contest.entryOpen}
         />

@@ -170,6 +170,7 @@ export default function FifaBracketBoard() {
                     <th className="px-4 py-3 text-left font-semibold">JNV School</th>
                     <th className="px-4 py-3 text-left font-semibold">Status</th>
                     <th className="px-4 py-3 text-left font-semibold">Last Round Survived</th>
+                    <th className="px-4 py-3 text-right font-semibold">Score pts</th>
                     <th className="px-4 py-3 text-right font-semibold">Pts</th>
                     <th className="px-4 py-3 text-right font-semibold w-20" />
                   </tr>
@@ -202,6 +203,9 @@ export default function FifaBracketBoard() {
                           {entry.lastRoundSurvived
                             ? ROUND_LABELS[entry.lastRoundSurvived] || entry.lastRoundSurvived
                             : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums font-semibold">
+                          {entry.scoreAccuracyPoints > 0 ? entry.scoreAccuracyPoints : "—"}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums font-semibold">
                           {entry.bracketPoints > 0 ? entry.bracketPoints : "—"}

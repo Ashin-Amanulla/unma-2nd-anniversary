@@ -37,7 +37,7 @@ export default function FifaBracketLanding() {
           </h1>
           <p className="text-gray-600 max-w-lg mx-auto">
             {contest?.description ||
-              "Pick your winners from the Round of 16 through the Final. A perfect run earns 100 bonus points on the main leaderboard!"}
+              "Pick winners and scores from the Quarter-finals through the Final. Survive each round — score accuracy breaks ties. A perfect run earns 100 bonus points!"}
           </p>
         </div>
 
@@ -62,9 +62,12 @@ export default function FifaBracketLanding() {
                 {formatDate(contest.entryClosesAt)}
               </p>
             )}
-            {!contest.r16Ready && (
-              <p className="text-sm text-amber-600">R16 matchups are being set up. Check back soon!</p>
+            {!contest.qfReady && (
+              <p className="text-sm text-amber-600">QF matchups are being set up. Check back soon!</p>
             )}
+            <p className="text-sm text-gray-600">
+              Predict winners and scores for all 7 knockout matches.
+            </p>
             <p className="text-sm font-medium text-[var(--fifa-gold)]">
               Perfect run = 100 points added to your leaderboard total
             </p>
@@ -76,7 +79,7 @@ export default function FifaBracketLanding() {
         )}
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          {contest?.entryOpen && contest?.r16Ready ? (
+          {contest?.entryOpen && contest?.qfReady ? (
             <Link to="/fifa/bracket/play" className="fifa-btn-primary px-8 py-3 text-base">
               Enter Road to the Final ⚽
             </Link>

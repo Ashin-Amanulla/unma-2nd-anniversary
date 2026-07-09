@@ -27,7 +27,7 @@ const contestSchema = new mongoose.Schema(
     },
     publishedRound: {
       type: String,
-      enum: ["r16", "qf", "sf", "final", null],
+      enum: ["qf", "sf", "final", null],
       default: null,
     },
     isPublished: {
@@ -52,7 +52,7 @@ const matchSchema = new mongoose.Schema(
     },
     stage: {
       type: String,
-      enum: ["r16", "qf", "sf", "final"],
+      enum: ["qf", "sf", "final"],
       required: true,
     },
     bracketKey: {
@@ -78,6 +78,14 @@ const matchSchema = new mongoose.Schema(
     winner: {
       type: String,
       trim: true,
+      default: null,
+    },
+    scoreA: {
+      type: Number,
+      default: null,
+    },
+    scoreB: {
+      type: Number,
       default: null,
     },
     parentMatchKey: {
@@ -123,6 +131,11 @@ const entrySchema = new mongoose.Schema(
       of: String,
       required: true,
     },
+    scores: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: () => new Map(),
+    },
     status: {
       type: String,
       enum: ["active", "knocked_out", "champion"],
@@ -130,8 +143,12 @@ const entrySchema = new mongoose.Schema(
     },
     knockedOutRound: {
       type: String,
-      enum: ["r16", "qf", "sf", "final", null],
+      enum: ["qf", "sf", "final", null],
       default: null,
+    },
+    scoreAccuracyPoints: {
+      type: Number,
+      default: 0,
     },
     bracketPoints: {
       type: Number,

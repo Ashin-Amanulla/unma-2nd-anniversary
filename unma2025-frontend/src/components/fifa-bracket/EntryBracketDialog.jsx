@@ -32,6 +32,7 @@ function BracketDialogBody({ entry, matches }) {
     <KnockoutBracket
       matches={matches}
       predictions={entry.predictions}
+      scores={entry.scores || {}}
       disabled
       mode="view"
       showHeader={false}
@@ -119,6 +120,11 @@ export function EntryBracketDialog({
                 )}
                 {entry.bracketPoints > 0 && (
                   <span className="text-xs font-bold text-[#e0a431]">+{entry.bracketPoints} pts</span>
+                )}
+                {(entry.scoreAccuracyPoints ?? 0) > 0 && (
+                  <span className="text-xs text-white/75">
+                    Score tiebreak: {entry.scoreAccuracyPoints} pts
+                  </span>
                 )}
               </div>
             </div>

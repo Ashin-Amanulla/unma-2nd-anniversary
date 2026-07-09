@@ -11,6 +11,7 @@ import {
   BRACKET_SLOTS,
   ROUND_ORDER,
   validatePredictions,
+  validateScores,
 } from "../utils/bracketTree.js";
 import {
   advanceWinnerToParent,
@@ -19,7 +20,9 @@ import {
   awardBracketPoints,
   getLastRoundSurvived,
   predictionsToObject,
-  buildR16Fixtures,
+  scoresToObject,
+  buildQfFixtures,
+  compareEntriesForBoard,
 } from "../utils/bracketGrading.js";
 
 async function resolveActiveCampaign() {
@@ -53,6 +56,8 @@ async function seedMatchesForContest(contestId) {
     teamA: "",
     teamB: "",
     winner: null,
+    scoreA: null,
+    scoreB: null,
   }));
 
   await FifaBracketMatch.insertMany(docs);
@@ -73,6 +78,8 @@ function formatMatch(m) {
     teamA: m.teamA || null,
     teamB: m.teamB || null,
     winner: m.winner || null,
+    scoreA: m.scoreA ?? null,
+    scoreB: m.scoreB ?? null,
     order: m.order,
     parentMatchKey: m.parentMatchKey,
     feedsSlot: m.feedsSlot,
@@ -89,8 +96,8 @@ function formatContest(contest, matches, extra = {}) {
     publishedRound: contest.publishedRound,
     isPublished: contest.isPublished,
     entryOpen: isEntryOpen(contest),
-    r16Ready: matches
-      .filter((m) => m.stage === "r16")
+    qfReady: matches
+      .filter((m) => m.stage === "qf")
       .every((m) => m.teamA && m.teamB),
     matches: matches.map(formatMatch),
     ...extra,
@@ -106,6 +113,7 @@ function formatEntry(entry, participant, contest) {
     status: entry.status,
     knockedOutRound: entry.knockedOutRound,
     lastRoundSurvived: getLastRoundSurvived(entry, contest?.publishedRound),
+    scoreAccuracyPoints: entry.scoreAccuracyPoints ?? 0,
     bracketPoints: entry.bracketPoints ?? 0,
     submittedAt: entry.submittedAt,
   };
@@ -234,7 +242,7 @@ export const submitEntry = async (req, res, next) => {
     if (!contest) return next(new AppError("No active Road to the Final contest", 404));
     if (!isEntryOpen(contest)) return next(new AppError("Entry period has closed", 403));
 
-    const { email, code, predictions } = req.body;
+    const { email, code, predictions, scores } = req.body;
     const participant = await resolveParticipant(campaign, email, code);
 
     if (!participant) {
@@ -253,15 +261,20 @@ export const submitEntry = async (req, res, next) => {
     }
 
     const matches = await FifaBracketMatch.find({ contest: contest._id });
-    const r16Ready = matches
-      .filter((m) => m.stage === "r16")
+    const qfReady = matches
+      .filter((m) => m.stage === "qf")
       .every((m) => m.teamA && m.teamB);
-    if (!r16Ready) return next(new AppError("R16 matchups are not ready yet", 400));
+    if (!qfReady) return next(new AppError("QF matchups are not ready yet", 400));
 
-    const r16Fixtures = buildR16Fixtures(matches);
-    const validationErrors = validatePredictions(predictions, r16Fixtures);
-    if (validationErrors.length) {
-      return next(new AppError(validationErrors[0], 400));
+    const qfFixtures = buildQfFixtures(matches);
+    const predictionErrors = validatePredictions(predictions, qfFixtures);
+    if (predictionErrors.length) {
+      return next(new AppError(predictionErrors[0], 400));
+    }
+
+    const scoreErrors = validateScores(scores, predictions, qfFixtures);
+    if (scoreErrors.length) {
+      return next(new AppError(scoreErrors[0], 400));
     }
 
     const entry = await FifaBracketEntry.create({
@@ -269,7 +282,9 @@ export const submitEntry = async (req, res, next) => {
       campaign: campaign._id,
       participant: participant._id,
       predictions,
+      scores,
       status: "active",
+      scoreAccuracyPoints: 0,
       bracketPoints: 0,
       submittedAt: new Date(),
     });
@@ -299,7 +314,6 @@ export const getBoard = async (req, res, next) => {
 
     const page = parseInt(req.query.page, 10) || 1;
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
-    const skip = (page - 1) * limit;
 
     const filter = { contest: contest._id };
     if (req.query.status && req.query.status !== "all") {
@@ -315,14 +329,10 @@ export const getBoard = async (req, res, next) => {
       filter.participant = { $in: schoolParticipants.map((p) => p._id) };
     }
 
-    const [entries, total, summaryAgg, resultMatches] = await Promise.all([
+    const [allEntries, summaryAgg, resultMatches] = await Promise.all([
       FifaBracketEntry.find(filter)
         .populate("participant", "name jnvSchool email")
-        .sort({ status: 1, submittedAt: 1 })
-        .skip(skip)
-        .limit(limit)
         .lean(),
-      FifaBracketEntry.countDocuments(filter),
       FifaBracketEntry.aggregate([
         { $match: { contest: contest._id } },
         { $group: { _id: "$status", count: { $sum: 1 } } },
@@ -347,10 +357,16 @@ export const getBoard = async (req, res, next) => {
       summary.total += row.count;
     }
 
-    let formatted = entries.map((e) => ({
+    let formatted = allEntries.map((e) => ({
       ...formatEntry(e, e.participant, contest),
       ...computePickStats(e, resultsByKey),
     }));
+
+    formatted.sort(compareEntriesForBoard);
+
+    const total = formatted.length;
+    const skip = (page - 1) * limit;
+    formatted = formatted.slice(skip, skip + limit);
 
     res.status(200).json({
       status: "success",
@@ -403,6 +419,7 @@ export const getEntry = async (req, res, next) => {
         entry: {
           ...formatEntry(entry, entry.participant, contest),
           predictions: predictionsToObject(entry.predictions),
+          scores: scoresToObject(entry.scores),
         },
         matches: matches.map(formatMatch),
       },
@@ -492,12 +509,12 @@ export const updateContest = async (req, res, next) => {
   }
 };
 
-export const setupR16 = async (req, res, next) => {
+export const setupQF = async (req, res, next) => {
   try {
     const contest = await resolveContestById(req.body.contestId);
 
     if (contest.publishedRound) {
-      return next(new AppError("Cannot change R16 after results have been published", 400));
+      return next(new AppError("Cannot change QF after results have been published", 400));
     }
 
     for (const m of req.body.matches) {
@@ -515,17 +532,21 @@ export const setupR16 = async (req, res, next) => {
       match.teamA = m.teamA.trim();
       match.teamB = m.teamB.trim();
       match.winner = null;
+      match.scoreA = null;
+      match.scoreB = null;
       await match.save();
     }
 
     const laterMatches = await FifaBracketMatch.find({
       contest: contest._id,
-      stage: { $in: ["qf", "sf", "final"] },
+      stage: { $in: ["sf", "final"] },
     });
     for (const m of laterMatches) {
       m.teamA = "";
       m.teamB = "";
       m.winner = null;
+      m.scoreA = null;
+      m.scoreB = null;
       await m.save();
     }
 
@@ -533,7 +554,7 @@ export const setupR16 = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      message: "R16 matchups saved",
+      message: "QF matchups saved",
       data: { contest: formatContest(contest, matches) },
     });
   } catch (error) {
@@ -547,7 +568,7 @@ export const enterMatchResult = async (req, res, next) => {
     if (!match) return next(new AppError("Match not found", 404));
 
     const contest = await resolveContestById(match.contest);
-    const { winner } = req.body;
+    const { winner, scoreA, scoreB } = req.body;
 
     const teamA = match.teamA?.trim();
     const teamB = match.teamB?.trim();
@@ -561,6 +582,8 @@ export const enterMatchResult = async (req, res, next) => {
     }
 
     match.winner = winner.trim();
+    if (scoreA !== undefined && scoreA !== null) match.scoreA = scoreA;
+    if (scoreB !== undefined && scoreB !== null) match.scoreB = scoreB;
     await match.save();
 
     await advanceWinnerToParent(match);
@@ -590,7 +613,7 @@ export const publishRound = async (req, res, next) => {
       return next(new AppError(`Must publish ${expectedPrev} before publishing ${stage}`, 400));
     }
     if (stageIdx === 0 && contest.publishedRound) {
-      return next(new AppError("R16 has already been published", 400));
+      return next(new AppError("QF has already been published", 400));
     }
 
     const stageMatches = await FifaBracketMatch.find({ contest: contestId, stage });
@@ -651,6 +674,7 @@ export const adminListEntries = async (req, res, next) => {
     const formatted = entries.map((e) => ({
       ...formatEntry(e, e.participant, contest),
       predictions: predictionsToObject(e.predictions),
+      scores: scoresToObject(e.scores),
     }));
 
     res.status(200).json({

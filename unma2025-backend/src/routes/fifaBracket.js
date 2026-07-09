@@ -8,7 +8,7 @@ import {
   adminGetContest,
   createContest,
   updateContest,
-  setupR16,
+  setupQF,
   enterMatchResult,
   publishRound,
   adminListEntries,
@@ -22,7 +22,7 @@ import {
   enterSchema,
   contestSchema,
   updateContestSchema,
-  r16SetupSchema,
+  qfSetupSchema,
   matchResultSchema,
   publishRoundSchema,
 } from "../validators/fifaBracket.validator.js";
@@ -40,7 +40,7 @@ const admin = [verifyToken, verifyFifaAdmin, logUserActivity()];
 router.get("/admin/contest", ...admin, adminGetContest);
 router.post("/admin/contest", ...admin, validateFifaBracket(contestSchema), createContest);
 router.put("/admin/contest/:id", ...admin, validateFifaBracket(updateContestSchema), updateContest);
-router.put("/admin/r16", ...admin, validateFifaBracket(r16SetupSchema), setupR16);
+router.put("/admin/qf", ...admin, validateFifaBracket(qfSetupSchema), setupQF);
 router.put("/admin/matches/:id/result", ...admin, validateFifaBracket(matchResultSchema), enterMatchResult);
 router.post("/admin/publish", ...admin, validateFifaBracket(publishRoundSchema), publishRound);
 router.get("/admin/entries", ...admin, adminListEntries);

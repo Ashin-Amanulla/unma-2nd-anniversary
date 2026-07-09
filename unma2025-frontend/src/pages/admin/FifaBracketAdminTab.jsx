@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import adminFifaBracketApi from "../../api/adminFifaBracketApi";
@@ -10,7 +10,7 @@ import FifaBracketBoard from "../fifa-bracket/FifaBracketBoard";
 import { FIFA_TEAMS } from "../../utils/fifaTeams";
 import { ROUND_LABELS, ROUND_ORDER } from "../../utils/fifaBracketTree";
 
-const R16_KEYS = ["r16-l1", "r16-l2", "r16-l3", "r16-l4", "r16-r1", "r16-r2", "r16-r3", "r16-r4"];
+const QF_KEYS = ["qf-l1", "qf-l2", "qf-r1", "qf-r2"];
 
 function toDatetimeLocalValue(value) {
   if (!value) return "";
@@ -54,7 +54,7 @@ function TeamSelect({ value, onChange, label }) {
 function BracketSubTabs({ active, onChange, contest }) {
   const tabs = [
     { value: "contest", label: "Contest" },
-    { value: "r16", label: "R16 Setup", disabled: !contest },
+    { value: "qf", label: "QF Setup", disabled: !contest },
     { value: "results", label: "Results", disabled: !contest },
     { value: "entries", label: `Entries (${contest?.entryCount || 0})`, disabled: !contest },
     { value: "board", label: "Board", disabled: !contest },
@@ -85,7 +85,8 @@ export default function FifaBracketAdminTab() {
   const queryClient = useQueryClient();
   const [subTab, setSubTab] = useState("contest");
   const [contestForm, setContestForm] = useState(null);
-  const [r16Form, setR16Form] = useState({});
+  const [qfForm, setQfForm] = useState({});
+  const [adminScores, setAdminScores] = useState({});
   const [selectedEntry, setSelectedEntry] = useState(null);
 
   const { data, isLoading } = useQuery({
@@ -121,17 +122,18 @@ export default function FifaBracketAdminTab() {
     onError: (err) => toast.error(err?.response?.data?.message || "Failed to update"),
   });
 
-  const r16Mutation = useMutation({
-    mutationFn: (payload) => adminFifaBracketApi.setupR16(payload),
+  const qfMutation = useMutation({
+    mutationFn: (payload) => adminFifaBracketApi.setupQF(payload),
     onSuccess: () => {
-      toast.success("R16 matchups saved");
+      toast.success("QF matchups saved");
       invalidate();
     },
-    onError: (err) => toast.error(err?.response?.data?.message || "Failed to save R16"),
+    onError: (err) => toast.error(err?.response?.data?.message || "Failed to save QF"),
   });
 
   const resultMutation = useMutation({
-    mutationFn: ({ matchId, winner }) => adminFifaBracketApi.enterResult(matchId, { winner }),
+    mutationFn: ({ matchId, winner, scoreA, scoreB }) =>
+      adminFifaBracketApi.enterResult(matchId, { winner, scoreA, scoreB }),
     onSuccess: () => {
       toast.success("Result saved");
       invalidate();
@@ -183,7 +185,8 @@ export default function FifaBracketAdminTab() {
     } else {
       setContestForm({
         name: "Road to the Final 2026",
-        description: "Predict the knockout path from Round of 16 to the Final. A perfect run earns 100 bonus leaderboard points.",
+        description:
+          "Predict winners and scores from the Quarter-finals to the Final. Survive each round — score accuracy breaks ties.",
         status: "active",
         entryClosesAt: toDatetimeLocalValue(
           new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -193,13 +196,13 @@ export default function FifaBracketAdminTab() {
     }
   };
 
-  const initR16Form = () => {
+  const initQfForm = () => {
     const form = {};
-    for (const key of R16_KEYS) {
+    for (const key of QF_KEYS) {
       const match = contest?.matches?.find((m) => m.bracketKey === key);
       form[key] = { teamA: match?.teamA || "", teamB: match?.teamB || "" };
     }
-    setR16Form(form);
+    setQfForm(form);
   };
 
   const handleSaveContest = () => {
@@ -215,25 +218,43 @@ export default function FifaBracketAdminTab() {
     }
   };
 
-  const handleSaveR16 = () => {
-    const matches = R16_KEYS.map((key) => ({
+  const handleSaveQF = () => {
+    const matches = QF_KEYS.map((key) => ({
       bracketKey: key,
-      teamA: r16Form[key]?.teamA,
-      teamB: r16Form[key]?.teamB,
+      teamA: qfForm[key]?.teamA,
+      teamB: qfForm[key]?.teamB,
     }));
-    r16Mutation.mutate({ contestId: contest._id, matches });
+    qfMutation.mutate({ contestId: contest._id, matches });
   };
 
   const handleAdminResultPick = (matchKey, team) => {
     const match = contest.matches.find((m) => m.bracketKey === matchKey);
     if (!match) return;
-    resultMutation.mutate({ matchId: match._id, winner: team });
+    const score = adminScores[matchKey];
+    resultMutation.mutate({
+      matchId: match._id,
+      winner: team,
+      scoreA: score?.a !== "" && score?.a !== undefined ? score.a : undefined,
+      scoreB: score?.b !== "" && score?.b !== undefined ? score.b : undefined,
+    });
   };
 
   const adminPredictions = {};
   for (const m of contest?.matches || []) {
     if (m.winner) adminPredictions[m.bracketKey] = m.winner;
   }
+
+  useEffect(() => {
+    if (!contest?.matches?.length) return;
+    const next = {};
+    for (const m of contest.matches) {
+      next[m.bracketKey] = { a: m.scoreA ?? "", b: m.scoreB ?? "" };
+    }
+    setAdminScores(next);
+  }, [
+    contest?._id,
+    contest?.matches?.map((m) => `${m.bracketKey}:${m.scoreA}:${m.scoreB}:${m.winner}`).join("|"),
+  ]);
 
   const stageComplete = (stage) => {
     const stageMatches = contest?.matches?.filter((m) => m.stage === stage) || [];
@@ -257,7 +278,7 @@ export default function FifaBracketAdminTab() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900">Road to the Final</h2>
         <p className="text-sm text-gray-500">
-          15 knockout matches · 100 pts for a perfect run (added to main leaderboard after final publish)
+          7 knockout matches (QF → Final) · score accuracy tiebreaker · 100 pts for a perfect run
         </p>
       </div>
 
@@ -329,30 +350,30 @@ export default function FifaBracketAdminTab() {
         </div>
       )}
 
-      {subTab === "r16" && (
+      {subTab === "qf" && (
         <div className="space-y-6">
-          {!Object.keys(r16Form).length ? (
-            <button type="button" onClick={initR16Form} className="fifa-btn-primary px-4 py-2 text-sm">
-              Load R16 Matchups
+          {!Object.keys(qfForm).length ? (
+            <button type="button" onClick={initQfForm} className="fifa-btn-primary px-4 py-2 text-sm">
+              Load QF Matchups
             </button>
           ) : (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
-                {R16_KEYS.map((key) => (
+                {QF_KEYS.map((key) => (
                   <div key={key} className="rounded-lg border border-gray-200 p-4 space-y-3 bg-white">
                     <p className="font-semibold text-sm uppercase text-gray-700">{key}</p>
                     <TeamSelect
                       label="Team A"
-                      value={r16Form[key]?.teamA || ""}
+                      value={qfForm[key]?.teamA || ""}
                       onChange={(v) =>
-                        setR16Form({ ...r16Form, [key]: { ...r16Form[key], teamA: v } })
+                        setQfForm({ ...qfForm, [key]: { ...qfForm[key], teamA: v } })
                       }
                     />
                     <TeamSelect
                       label="Team B"
-                      value={r16Form[key]?.teamB || ""}
+                      value={qfForm[key]?.teamB || ""}
                       onChange={(v) =>
-                        setR16Form({ ...r16Form, [key]: { ...r16Form[key], teamB: v } })
+                        setQfForm({ ...qfForm, [key]: { ...qfForm[key], teamB: v } })
                       }
                     />
                   </div>
@@ -360,14 +381,14 @@ export default function FifaBracketAdminTab() {
               </div>
               <button
                 type="button"
-                onClick={handleSaveR16}
-                disabled={r16Mutation.isPending || !!contest?.publishedRound}
+                onClick={handleSaveQF}
+                disabled={qfMutation.isPending || !!contest?.publishedRound}
                 className="fifa-btn-primary px-4 py-2 text-sm disabled:opacity-50"
               >
-                Save R16 Matchups
+                Save QF Matchups
               </button>
               {contest?.publishedRound && (
-                <p className="text-sm text-amber-600">R16 is locked after results are published.</p>
+                <p className="text-sm text-amber-600">QF is locked after results are published.</p>
               )}
             </>
           )}
@@ -405,14 +426,16 @@ export default function FifaBracketAdminTab() {
             ))}
           </div>
           <p className="text-sm text-gray-500">
-            Click teams to set match winners, then publish each round when all
-            matches in that stage have results.
+            Enter scores beside each flag, then click the winning team to save. Publish each round
+            when all matches in that stage have results.
           </p>
           {contest && (
             <KnockoutBracket
               matches={contest.matches}
               predictions={adminPredictions}
               onPredictionsChange={handleAdminResultPick}
+              scores={adminScores}
+              onScoresChange={setAdminScores}
               mode="admin"
             />
           )}
@@ -430,6 +453,7 @@ export default function FifaBracketAdminTab() {
                   <th className="px-4 py-3 text-left font-semibold">School</th>
                   <th className="px-4 py-3 text-left font-semibold">Email</th>
                   <th className="px-4 py-3 text-left font-semibold">Status</th>
+                  <th className="px-4 py-3 text-right font-semibold">Score pts</th>
                   <th className="px-4 py-3 text-right font-semibold">Pts</th>
                   <th className="px-4 py-3" />
                 </tr>
@@ -437,7 +461,7 @@ export default function FifaBracketAdminTab() {
               <tbody>
                 {entries.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                       No entries yet.
                     </td>
                   </tr>
@@ -452,6 +476,9 @@ export default function FifaBracketAdminTab() {
                     <td className="px-4 py-3 text-gray-600">{entry.jnvSchool}</td>
                     <td className="px-4 py-3 text-gray-600">{entry.email}</td>
                     <td className="px-4 py-3">{entry.status}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {entry.scoreAccuracyPoints || "—"}
+                    </td>
                     <td className="px-4 py-3 text-right tabular-nums">{entry.bracketPoints || "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <button
