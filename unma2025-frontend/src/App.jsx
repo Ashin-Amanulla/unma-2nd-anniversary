@@ -92,6 +92,8 @@ const FifaBracketLanding = lazy(() => import("./pages/fifa-bracket/FifaBracketLa
 const FifaBracketPlay = lazy(() => import("./pages/fifa-bracket/FifaBracketPlay"));
 const FifaBracketBoard = lazy(() => import("./pages/fifa-bracket/FifaBracketBoard"));
 const FifaAdmin = lazy(() => import("./pages/admin/FifaAdmin"));
+const DemoHub = lazy(() => import("./pages/DemoHub"));
+const IdCardManagement = lazy(() => import("./pages/admin/IdCardManagement"));
 
 
 function App() {
@@ -109,24 +111,25 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<BasicLayout />}>
                 <Route path="/" element={<Home />} />
-                {/* <Route path="/registration" element={<Registration />} />
-                <Route path="/register" element={<Registration />} /> */}
-                {/* <Route
+                <Route path="/registration" element={<Registration />} />
+                <Route path="/register" element={<Registration />} />
+                <Route
                   path="/quick-registration"
                   element={<QuickRegistration />}
-                /> */}
+                />
+                <Route path="/demo" element={<DemoHub />} />
                 <Route path="/gallery" element={<GalleryLanding />} />
                 <Route path="/gallery/:folder" element={<Gallery />} />
                 <Route path="/program" element={<Program />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
-                {/* <Route
+                <Route
                   path="/registration-success"
                   element={<RegistrationSuccess />}
                 />
                 <Route
-                  path="/registration-pending-success?type=:type"
+                  path="/registration-pending-success"
                   element={<RegistrationPendingSuccess />}
-                /> */}
+                />
                 <Route
                   path="/registration-pending"
                   element={<RegistrationPending />}
@@ -196,6 +199,7 @@ function App() {
                       path="transportation"
                       element={<TransportationManagement />}
                     />
+                    <Route path="id-cards" element={<IdCardManagement />} />
                   </>
                 )}
 

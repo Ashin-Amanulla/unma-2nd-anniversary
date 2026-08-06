@@ -2,12 +2,15 @@ import Admin from "../models/Admin.js";
 
 const loginSeedData = async () => {
   try {
-    let admin = await Admin.findOne({ email: "admin@unma.in" });
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || "securePassword123";
+
+    let admin = await Admin.findOne({ email: adminEmail });
 
     if (!admin) {
-      let admin = {
-        email: process.env.ADMIN_EMAIL || "admin@example.com",
-        password: process.env.ADMIN_PASSWORD || "securePassword123",
+      admin = {
+        email: adminEmail,
+        password: adminPassword,
         role: "super_admin",
         name: "UNMA Admin",
         assignedSchools: [],
@@ -33,4 +36,3 @@ const loginSeedData = async () => {
 };
 
 export default loginSeedData;
-

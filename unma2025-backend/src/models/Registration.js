@@ -247,6 +247,9 @@ const RegistrationSchema = new mongoose.Schema({
   markedEntered: { type: Boolean, default: false },
   enteredAt: { type: Date },
   enteredBy: { type: String }, // Admin who marked as entered
+
+  // Demo / seed data marker
+  isDemoData: { type: Boolean, default: false, index: true },
 });
 
 // Create a compound index to allow uniqueness checks on email or contactNumber

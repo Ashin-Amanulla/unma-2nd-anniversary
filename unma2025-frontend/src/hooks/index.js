@@ -7,3 +7,4 @@ export * from "./useContactMessages";
 export * from "./useIssues";
 export * from "./useUserLogs";
 export * from "./useFeedback";
+export * from "./useIdCard";

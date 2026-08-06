@@ -40,6 +40,11 @@ const paymentSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
+        isDemoData: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
     },
     {
         timestamps: true,

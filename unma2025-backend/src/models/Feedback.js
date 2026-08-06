@@ -165,6 +165,11 @@ const feedbackSchema = new mongoose.Schema(
     ipAddress: {
       type: String,
     },
+    isDemoData: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,

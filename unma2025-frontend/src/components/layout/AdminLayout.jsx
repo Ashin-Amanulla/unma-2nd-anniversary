@@ -18,6 +18,14 @@ import {
   WrenchScrewdriverIcon,
   SparklesIcon,
   TrophyIcon,
+  ChartBarIcon,
+  HomeModernIcon,
+  TruckIcon,
+  IdentificationIcon,
+  QrCodeIcon,
+  CreditCardIcon,
+  Squares2X2Icon,
+  UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../../store/authStore";
 import { useAdminStore } from "../../store";
@@ -141,6 +149,67 @@ const AdminLayout = () => {
 
   const menuGroups = useMemo(() => {
     const groups = [
+      isSuperAdmin && {
+        id: "event-ops",
+        label: "Event operations",
+        icon: Squares2X2Icon,
+        items: [
+          {
+            key: "summit_dashboard",
+            label: "Summit dashboard",
+            to: "/admin/dashboard",
+            icon: ChartBarIcon,
+          },
+          {
+            key: "summit_registrations",
+            label: "Registrations",
+            to: "/admin/registrations",
+            icon: UserGroupIcon,
+          },
+          {
+            key: "create_registration",
+            label: "Create registration",
+            to: "/admin/create-registration",
+            icon: UserPlusIcon,
+          },
+          {
+            key: "accommodation",
+            label: "Accommodation",
+            to: "/admin/accommodation",
+            icon: HomeModernIcon,
+          },
+          {
+            key: "transportation",
+            label: "Transportation",
+            to: "/admin/transportation",
+            icon: TruckIcon,
+          },
+          {
+            key: "id_cards",
+            label: "ID cards",
+            to: "/admin/id-cards",
+            icon: IdentificationIcon,
+          },
+          {
+            key: "registration_desk",
+            label: "Registration desk",
+            to: "/admin/entry",
+            icon: QrCodeIcon,
+          },
+          {
+            key: "payment_history",
+            label: "Payments",
+            to: "/admin/payment-history",
+            icon: CreditCardIcon,
+          },
+          {
+            key: "summit_analytics",
+            label: "Analytics",
+            to: "/admin/analytics",
+            icon: ChartBarIcon,
+          },
+        ],
+      },
       {
         id: "live-events",
         label: "Live events",
@@ -269,7 +338,7 @@ const AdminLayout = () => {
       },
     ];
 
-    return groups.filter((group) => group.items.length > 0);
+    return groups.filter(Boolean).filter((group) => group.items.length > 0);
   }, [user, isSuperAdmin, isCareerAdmin, isFifaAdmin, canManageSettings]);
 
   useEffect(() => {
