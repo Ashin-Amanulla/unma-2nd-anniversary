@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { FIFA_PUBLIC_ENABLED } from "./config/features";
 import { Toaster } from "react-hot-toast";
 import Loading from "./components/ui/Loading";
 import AdminLayout from "./components/layout/AdminLayout";
@@ -163,13 +164,19 @@ function App() {
                 <Route path="/news-updates" element={<NewsUpdates />} />
                 <Route path="/webinars" element={<Webinars />} />
 
-                <Route path="/fifa" element={<FifaLanding />} />
-                <Route path="/fifa/play" element={<FifaPlay />} />
-                <Route path="/fifa/leaderboard" element={<FifaLeaderboard />} />
-                <Route path="/fifa/chat" element={<FifaChat />} />
-                <Route path="/fifa/bracket" element={<FifaBracketLanding />} />
-                <Route path="/fifa/bracket/play" element={<FifaBracketPlay />} />
-                <Route path="/fifa/bracket/board" element={<FifaBracketBoard />} />
+                {FIFA_PUBLIC_ENABLED ? (
+                  <>
+                    <Route path="/fifa" element={<FifaLanding />} />
+                    <Route path="/fifa/play" element={<FifaPlay />} />
+                    <Route path="/fifa/leaderboard" element={<FifaLeaderboard />} />
+                    <Route path="/fifa/chat" element={<FifaChat />} />
+                    <Route path="/fifa/bracket" element={<FifaBracketLanding />} />
+                    <Route path="/fifa/bracket/play" element={<FifaBracketPlay />} />
+                    <Route path="/fifa/bracket/board" element={<FifaBracketBoard />} />
+                  </>
+                ) : (
+                  <Route path="/fifa/*" element={<Navigate to="/webinars" replace />} />
+                )}
               </Route>
               {/* Registration Entry Route (Protected but accessible via QR) */}
               {/* Registration Entry Route (Protected for Registration Desk) */}

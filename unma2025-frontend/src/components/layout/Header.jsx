@@ -8,7 +8,6 @@ const DISCOVER_GROUP_LABEL = "What's On";
 const discoverChildren = [
   { to: "/events", label: "Events" },
   { to: "/news-updates", label: "News & Updates" },
-  { to: "/webinars", label: "Webinars" },
 ];
 
 const Header = () => {
@@ -79,20 +78,24 @@ const Header = () => {
   const navItems = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
-    { to: "/fifa", label: "FIFA ⚽" },
+    { to: "/webinars", label: "Webinars", featured: true },
     { to: "/gallery", label: "Gallery" },
     { to: "/careers", label: "Careers" },
     { to: "/contact", label: "Contact" },
   ];
 
-  const NavItem = ({ to, label }) => (
+  const NavItem = ({ to, label, featured = false }) => (
     <NavLink
       to={to}
       className={({ isActive }) =>
         `px-3 py-2 my-1 rounded-lg transition-all duration-200 relative text-sm ${
           isActive
-            ? "text-primary font-medium"
-            : "text-gray-600 hover:text-primary hover:bg-gray-50"
+            ? featured
+              ? "text-white font-semibold bg-primary shadow-sm"
+              : "text-primary font-medium"
+            : featured
+              ? "text-primary font-semibold bg-primary/10 hover:bg-primary/15 ring-1 ring-primary/20"
+              : "text-gray-600 hover:text-primary hover:bg-gray-50"
         }`
       }
     >
@@ -137,7 +140,7 @@ const Header = () => {
           <nav className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-1">
               {navItems.slice(0, 2).map((item) => (
-                <NavItem key={item.to} to={item.to} label={item.label} />
+                <NavItem key={item.to} to={item.to} label={item.label} featured={item.featured} />
               ))}
 
               <div className="relative" ref={discoverRef}>
@@ -188,7 +191,7 @@ const Header = () => {
               </div>
 
               {navItems.slice(2).map((item) => (
-                <NavItem key={item.to} to={item.to} label={item.label} />
+                <NavItem key={item.to} to={item.to} label={item.label} featured={item.featured} />
               ))}
             </div>
           </nav>
@@ -275,9 +278,13 @@ const Header = () => {
                 onClick={closeMenu}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-md text-base ${
-                    isActive
-                      ? "text-primary font-medium bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-primary"
+                    item.featured
+                      ? isActive
+                        ? "text-white font-semibold bg-primary"
+                        : "text-primary font-semibold bg-primary/10"
+                      : isActive
+                        ? "text-primary font-medium bg-blue-50"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-primary"
                   }`
                 }
               >
