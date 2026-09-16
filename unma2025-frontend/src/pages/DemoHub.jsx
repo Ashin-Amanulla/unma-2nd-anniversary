@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FIFA_PUBLIC_ENABLED } from "../config/features";
 import {
   ClipboardDocumentListIcon,
   BoltIcon,
@@ -253,6 +254,10 @@ const DemoHub = () => {
       <div className="space-y-10">
         {sections.map((section) => {
           const SectionIcon = sectionIcons[section.id] || CalendarDaysIcon;
+          const items = FIFA_PUBLIC_ENABLED
+            ? section.items
+            : section.items.filter((item) => !item.to.startsWith("/fifa"));
+          if (items.length === 0) return null;
           return (
             <section key={section.id}>
               <div className="mb-4 flex items-center gap-2">
@@ -265,7 +270,7 @@ const DemoHub = () => {
                 </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {section.items.map((item) => (
+                {items.map((item) => (
                   <DemoCard key={item.to + item.label} item={item} />
                 ))}
               </div>
