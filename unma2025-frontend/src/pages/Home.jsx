@@ -11,14 +11,11 @@ import {
   AcademicCapIcon,
   NewspaperIcon,
 } from "@heroicons/react/24/outline";
-import WebinarAnnouncementModal from "../components/WebinarAnnouncementModal";
 import webinarApi from "../api/webinarApi";
 import { SITE_CONTENT } from "../data/siteContent";
 import { MEMBER_ASSOCIATIONS, getActiveAssociationsCount } from "../data/memberAssociations";
 import { ACTIVITIES, getUpcomingActivities } from "../data/activities";
 import { getRecentUpdates, getNews } from "../data/updates";
-import FifaAnnouncementModal from "../components/fifa/FifaAnnouncementModal";
-
 // Lazy load the Globe component for better performance
 const GlobalVolunteerGlobe = lazy(() => import("../components/home/GlobalVolunteerGlobe"));
 
@@ -54,8 +51,6 @@ const Home = () => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <WebinarAnnouncementModal />
-      <FifaAnnouncementModal />
       {/* Hero Section */}
       <section className="relative min-h-[80vh] pt-24 pb-16 overflow-hidden">
         {/* Background Image */}
@@ -118,8 +113,15 @@ const Home = () => {
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
               <Link
+                to="/webinars"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 text-indigo-950 px-6 py-3 rounded-xl font-semibold hover:from-amber-500 hover:to-orange-600 transition-all duration-300 shadow-lg shadow-amber-500/25"
+              >
+                UNMA Webinars
+                <AcademicCapIcon className="w-5 h-5" />
+              </Link>
+              <Link
                 to="/events"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-pink-500 text-indigo-950 px-6 py-3 rounded-xl font-semibold hover:from-yellow-500 hover:to-pink-600 transition-all duration-300"
+                className="inline-flex items-center gap-2 border-2 border-white/40 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300"
               >
                 Upcoming Events
                 <CalendarDaysIcon className="w-5 h-5" />
@@ -408,106 +410,122 @@ const Home = () => {
         </div>
       </section>
 
-      {/* UNMA Webinars */}
-      <section className="py-16 bg-white">
-        <div className="container max-w-4xl">
+      {/* UNMA Webinars — featured spotlight */}
+      <section className="py-20 bg-gradient-to-b from-indigo-50/80 via-white to-white relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 10% 20%, rgb(99 102 241 / 0.12), transparent 50%), radial-gradient(circle at 90% 80%, rgb(59 130 246 / 0.1), transparent 45%)",
+          }}
+        />
+        <div className="container max-w-6xl relative">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="mb-8"
+            className="mb-10 text-center max-w-2xl mx-auto"
           >
-            <h2 className="text-lg font-medium text-gray-900 tracking-tight">Webinars</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Recordings and live sessions for students and alumni.
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-xs font-bold uppercase tracking-wide mb-4">
+              <SparklesIcon className="w-4 h-4" />
+              UNMA Webinar Series
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              Learn together. Grow together.
+            </h2>
+            <p className="mt-3 text-base text-gray-600">
+              Expert-led live sessions and on-demand recordings — built for Navodayan students and
+              alumni across Kerala.
             </p>
           </motion.div>
 
           <motion.div
-            initial={{ y: 16, opacity: 0 }}
+            initial={{ y: 24, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.55 }}
             viewport={{ once: true }}
-            className="overflow-hidden rounded-xl border border-gray-200 bg-white md:flex"
+            className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-xl shadow-indigo-100/50 md:flex"
           >
             {featuredWebinar?.posterUrl ? (
               <>
-                <div className="md:w-2/5 shrink-0 border-b md:border-b-0 md:border-r border-gray-100">
+                <div className="md:w-1/2 shrink-0 border-b md:border-b-0 md:border-r border-gray-100">
                   <img
                     src={featuredWebinar.posterUrl}
                     alt={featuredWebinar.posterAlt || featuredWebinar.title}
-                    className="w-full h-full object-cover min-h-[180px] md:min-h-[240px]"
+                    className="w-full h-full object-cover min-h-[220px] md:min-h-[360px]"
                     loading="lazy"
                   />
                 </div>
-                <div className="p-5 md:p-6 flex flex-col justify-center flex-1 text-left">
-                  <h3 className="text-base font-medium text-gray-900 mb-1">
+                <div className="p-6 md:p-10 flex flex-col justify-center flex-1 text-left">
+                  {featuredWebinar.dateLabel ? (
+                    <p className="text-xs font-bold uppercase tracking-wide text-primary mb-2">
+                      {featuredWebinar.dateLabel}
+                    </p>
+                  ) : null}
+                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-snug">
                     {featuredWebinar.title}
                   </h3>
                   {featuredWebinar.speaker ? (
-                    <p className="text-sm text-gray-600">{featuredWebinar.speaker}</p>
+                    <p className="text-lg text-gray-700 font-medium">{featuredWebinar.speaker}</p>
                   ) : null}
                   {featuredWebinar.speakerRole ? (
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
                       {featuredWebinar.speakerRole}
                     </p>
                   ) : null}
-                  {featuredWebinar.dateLabel ? (
-                    <p className="text-xs text-gray-400 mt-2 mb-4">{featuredWebinar.dateLabel}</p>
+                  {featuredWebinar.description ? (
+                    <p className="text-sm text-gray-600 mt-4 line-clamp-3">
+                      {featuredWebinar.description}
+                    </p>
                   ) : (
-                    <div className="mb-4" />
+                    <div className="mt-2" />
                   )}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                    {featuredWebinar.recordingUrl ? (
-                      <a
-                        href={featuredWebinar.recordingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-700 hover:text-primary transition-colors"
-                      >
-                        Watch recording
-                      </a>
-                    ) : null}
-                    {featuredWebinar.recordingUrl && featuredWebinar.registrationUrl ? (
-                      <span className="text-gray-300" aria-hidden="true">
-                        ·
-                      </span>
-                    ) : null}
+                  <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3">
                     {featuredWebinar.registrationUrl ? (
                       <a
                         href={featuredWebinar.registrationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-700 hover:text-primary transition-colors"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-dark transition-all shadow-md shadow-primary/20"
                       >
-                        Register / join link
+                        Register & join
+                        <ArrowRightIcon className="w-4 h-4" />
                       </a>
                     ) : null}
-                    {(featuredWebinar.recordingUrl || featuredWebinar.registrationUrl) ? (
-                      <span className="text-gray-300" aria-hidden="true">
-                        ·
-                      </span>
+                    {featuredWebinar.recordingUrl ? (
+                      <a
+                        href={featuredWebinar.recordingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 px-6 py-3 text-sm font-semibold text-gray-800 hover:border-primary/30 hover:bg-primary/5 transition-colors"
+                      >
+                        Watch recording
+                      </a>
                     ) : null}
                     <Link
                       to="/webinars"
-                      className="text-gray-500 hover:text-primary transition-colors"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
                     >
-                      All webinars
+                      Browse all webinars
+                      <ArrowRightIcon className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="p-6 md:p-8 w-full">
-                <p className="text-sm text-gray-500 mb-4">
-                  Featured webinar details will appear here once published.
+              <div className="p-10 md:p-14 w-full text-center">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Webinars coming up</h3>
+                <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                  Our next session will be listed here soon. Check back or explore the full catalog.
                 </p>
                 <Link
                   to="/webinars"
-                  className="text-sm text-gray-600 hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-dark transition-colors"
                 >
-                  All webinars
+                  View webinars
+                  <ArrowRightIcon className="w-4 h-4" />
                 </Link>
               </div>
             )}
